@@ -1,0 +1,8 @@
+POST http://localhost:5000/api/stkpush
+Content-Type: application/json
+
+{
+  "customerPhone": "0743250900",
+  "orderId": "1001",
+  "amount": 10
+}

@@ -1,0 +1,173 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model cashTransaction {
+  id          Int      @id @default(autoincrement())
+  type        String
+  category    String
+  amount      Float
+  reference   String?
+  description String?
+  paymentId   Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+  payment     payment? @relation(fields: [paymentId], references: [id], map: "CashTransaction_paymentId_fkey")
+
+  @@index([paymentId], map: "CashTransaction_paymentId_fkey")
+}
+
+model customer {
+  id            Int             @id @default(autoincrement())
+  fullName      String
+  phoneNumber   String          @unique(map: "Customer_phoneNumber_key")
+  email         String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @default(now())
+  order         order[]
+  payment       payment[]
+  productReview productReview[]
+}
+
+model inventorytransaction {
+  id            Int      @id @default(autoincrement())
+  productId     Int
+  type          String
+  quantity      Int
+  previousStock Int
+  newStock      Int
+  reference     String?
+  note          String?
+  createdAt     DateTime @default(now())
+  product       product  @relation(fields: [productId], references: [id], map: "InventoryTransaction_productId_fkey")
+
+  @@index([productId], map: "InventoryTransaction_productId_fkey")
+}
+
+model order {
+  id            Int         @id @default(autoincrement())
+  orderNumber   String      @unique(map: "Order_orderNumber_key")
+  customerId    Int
+  totalAmount   Float
+  paymentStatus String      @default("Pending")
+  createdAt     DateTime    @default(now())
+  orderStatus   String      @default("Pending")
+  updatedAt     DateTime    @default(now())
+  customer      customer    @relation(fields: [customerId], references: [id], map: "Order_customerId_fkey")
+  orderitem     orderitem[]
+  payment       payment[]
+
+  @@index([customerId], map: "Order_customerId_fkey")
+}
+
+model orderitem {
+  id         Int     @id @default(autoincrement())
+  orderId    Int
+  productId  Int
+  quantity   Int
+  unitPrice  Float
+  totalPrice Float
+  order      order   @relation(fields: [orderId], references: [id], map: "OrderItem_orderId_fkey")
+  product    product @relation(fields: [productId], references: [id], map: "OrderItem_productId_fkey")
+
+  @@index([orderId], map: "OrderItem_orderId_fkey")
+  @@index([productId], map: "OrderItem_productId_fkey")
+}
+
+model payment {
+  id                 Int               @id @default(autoincrement())
+  mpesaReceiptNumber String?           @unique(map: "Payment_mpesaReceiptNumber_key")
+  merchantRequestId  String?           @unique(map: "Payment_merchantRequestId_key")
+  checkoutRequestId  String?           @unique(map: "Payment_checkoutRequestId_key")
+  amountPaid         Float
+  phoneNumber        String?
+  accountReference   String?
+  resultCode         Int?
+  resultDescription  String?
+  paymentMethod      String            @default("MPESA")
+  status             String            @default("PENDING")
+  customerId         Int?
+  orderId            Int?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @default(now())
+  kcbPaymentCode     String?           @unique(map: "Payment_kcbPaymentCode_key")
+  reconciled         Boolean           @default(false)
+  reconciledAt       DateTime?
+  reconciliationNote String?
+  cashtransaction    cashtransaction[]
+  customer           customer?         @relation(fields: [customerId], references: [id], map: "Payment_customerId_fkey")
+  order              order?            @relation(fields: [orderId], references: [id], map: "Payment_orderId_fkey")
+
+  @@index([customerId], map: "Payment_customerId_fkey")
+  @@index([orderId], map: "Payment_orderId_fkey")
+}
+
+model product {
+  id                   Int                    @id @default(autoincrement())
+  name                 String                 @unique(map: "Product_name_key")
+  price                Float
+  stock                Int                    @default(0)
+  category             String?
+  createdAt            DateTime               @default(now())
+  barcode              String?                @unique(map: "Product_barcode_key")
+  batchNumber          String?
+  brand                String?
+  costPrice            Float?
+  description          String?
+  discountPrice        Float?
+  expiryDate           DateTime?
+  featured             Boolean                @default(false)
+  height               Float?
+  image                String?
+  length               Float?
+  manufacturedDate     DateTime?
+  minimumStock         Int                    @default(5)
+  rating               Float                  @default(0)
+  reviewCount          Int                    @default(0)
+  shelfLife            Int?
+  shortDescription     String?
+  sku                  String?                @unique(map: "Product_sku_key")
+  status               String                 @default("ACTIVE")
+  updatedAt            DateTime               @default(now())
+  weight               Float?
+  width                Float?
+  inventorytransaction inventorytransaction[]
+  orderitem            orderitem[]
+  productReview        productReview[]
+}
+
+model productReview {
+  id         Int      @id @default(autoincrement())
+  productId  Int
+  customerId Int
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now())
+  customer   customer @relation(fields: [customerId], references: [id], map: "ProductReview_customerId_fkey")
+  product    product  @relation(fields: [productId], references: [id], map: "ProductReview_productId_fkey")
+
+  @@unique([productId, customerId], map: "ProductReview_productId_customerId_key")
+  @@index([customerId], map: "ProductReview_customerId_fkey")
+}
+
+model user {
+  id                Int       @id @default(autoincrement())
+  fullName          String
+  email             String    @unique(map: "User_email_key")
+  password          String
+  role              String    @default("USER")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @default(now())
+  adminApproved     Boolean   @default(false)
+  approvedAt        DateTime?
+  approvedBy        Int?
+  emailVerified     Boolean   @default(false)
+  emailVerifiedAt   DateTime?
+  loginOtpAttempts  Int       @default(0)
+  loginOtpExpiresAt DateTime?
+  loginOtpHash      String?
+}

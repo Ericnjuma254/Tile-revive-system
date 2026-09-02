@@ -1,0 +1,53 @@
+Tile-revive-Frontend/
+│
+├── src/
+│   ├── assets/
+│   │   ├── images/
+│   │   └── logo/
+│   │
+│   ├── components/
+│   │   ├── layout/
+│   │   │   ├── AnnouncementBar.jsx
+│   │   │   ├── Navbar.jsx
+│   │   │   └── Footer.jsx
+│   │   │
+│   │   ├── products/
+│   │   │   ├── ProductCard.jsx
+│   │   │   ├── ProductGrid.jsx
+│   │   │   ├── ProductFilters.jsx
+│   │   │   └── ProductBadge.jsx
+│   │   │
+│   │   ├── cart/
+│   │   ├── checkout/
+│   │   └── ui/
+│   │
+│   ├── pages/
+│   │   ├── Home.jsx
+│   │   ├── Shop.jsx
+│   │   ├── ProductDetails.jsx
+│   │   ├── Cart.jsx
+│   │   ├── Checkout.jsx
+│   │   ├── Login.jsx
+│   │   ├── Register.jsx
+│   │   └── admin/
+│   │       ├── Dashboard.jsx
+│   │       ├── Orders.jsx
+│   │       ├── Products.jsx
+│   │       ├── Customers.jsx
+│   │       └── Users.jsx
+│   │
+│   ├── context/
+│   │   ├── AuthContext.jsx
+│   │   └── CartContext.jsx
+│   │
+│   ├── services/
+│   │   └── api.js
+│   │
+│   ├── routes/
+│   │   └── AppRoutes.jsx
+│   │
+│   ├── App.jsx
+│   ├── main.jsx
+│   └── index.css
+│
+└── package.json

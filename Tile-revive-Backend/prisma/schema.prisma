@@ -1,0 +1,328 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model customer {
+  id                  Int             @id @default(autoincrement())
+  fullName            String
+  phoneNumber         String?         @unique(map: "Customer_phoneNumber_key")
+  email               String?
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  cleaningTips        Boolean         @default(false)
+  emailMarketingOptIn Boolean         @default(false)
+  flashSaleAlerts     Boolean         @default(true)
+  offerUpdates        Boolean         @default(true)
+  productUpdates      Boolean         @default(true)
+  order               order[]
+  payment             payment[]
+  productreview       productreview[]
+}
+
+model customerotp {
+  id         Int      @id @default(autoincrement())
+  customerId Int
+  codeHash   String
+  expiresAt  DateTime
+  attempts   Int      @default(0)
+  used       Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([customerId])
+}
+
+model product {
+  id                   Int                    @id @default(autoincrement())
+  name                 String                 @unique(map: "Product_name_key")
+  price                Float
+  stock                Int                    @default(0)
+  category             String?
+  createdAt            DateTime               @default(now())
+  barcode              String?                @unique(map: "Product_barcode_key")
+  batchNumber          String?
+  brand                String?
+  costPrice            Float?
+  description          String?
+  discountPrice        Float?
+  expiryDate           DateTime?
+  featured             Boolean                @default(false)
+  height               Float?
+  image                String?
+  length               Float?
+  manufacturedDate     DateTime?
+  minimumStock         Int                    @default(5)
+  rating               Float                  @default(0)
+  reviewCount          Int                    @default(0)
+  shelfLife            Int?
+  shortDescription     String?
+  sku                  String?                @unique(map: "Product_sku_key")
+  status               String                 @default("ACTIVE")
+  updatedAt            DateTime               @default(now()) @updatedAt
+  weight               Float?
+  width                Float?
+  inventorytransaction inventorytransaction[]
+  orderitem            orderitem[]
+  productreview        productreview[]
+}
+
+model inventorytransaction {
+  id            Int      @id @default(autoincrement())
+  productId     Int
+  type          String
+  quantity      Int
+  previousStock Int
+  newStock      Int
+  reference     String?
+  note          String?
+  createdAt     DateTime @default(now())
+  product       product  @relation(fields: [productId], references: [id], map: "InventoryTransaction_productId_fkey")
+
+  @@index([productId], map: "InventoryTransaction_productId_fkey")
+}
+
+model order {
+  id              Int                  @id @default(autoincrement())
+  orderNumber     String               @unique(map: "Order_orderNumber_key")
+  customerId      Int
+  totalAmount     Float
+  paymentStatus   String               @default("PENDING")
+  createdAt       DateTime             @default(now())
+  orderStatus     String               @default("PENDING")
+  updatedAt       DateTime             @default(now()) @updatedAt
+  county          String?              @db.VarChar(100)
+  location        String?              @db.VarChar(255)
+  latitude        Float?
+  longitude       Float?
+  resolvedAddress String?              @db.VarChar(500)
+  customer        customer             @relation(fields: [customerId], references: [id], map: "Order_customerId_fkey")
+  orderitem       orderitem[]
+  statusHistory   orderstatushistory[]
+  payment         payment[]
+
+  @@index([customerId], map: "Order_customerId_fkey")
+}
+
+model orderstatushistory {
+  id         Int      @id @default(autoincrement())
+  orderId    Int
+  fromStatus String?
+  toStatus   String
+  createdAt  DateTime @default(now())
+  order      order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+}
+
+model orderitem {
+  id         Int     @id @default(autoincrement())
+  orderId    Int
+  productId  Int
+  quantity   Int
+  unitPrice  Float
+  totalPrice Float
+  order      order   @relation(fields: [orderId], references: [id], map: "OrderItem_orderId_fkey")
+  product    product @relation(fields: [productId], references: [id], map: "OrderItem_productId_fkey")
+
+  @@index([orderId], map: "OrderItem_orderId_fkey")
+  @@index([productId], map: "OrderItem_productId_fkey")
+}
+
+model payment {
+  id                 Int               @id @default(autoincrement())
+  mpesaReceiptNumber String?           @unique(map: "Payment_mpesaReceiptNumber_key")
+  merchantRequestId  String?           @unique(map: "Payment_merchantRequestId_key")
+  checkoutRequestId  String?           @unique(map: "Payment_checkoutRequestId_key")
+  amountPaid         Float
+  phoneNumber        String?
+  accountReference   String?
+  resultCode         Int?
+  resultDescription  String?
+  paymentMethod      String            @default("MPESA")
+  status             String            @default("PENDING")
+  customerId         Int?
+  orderId            Int?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @default(now()) @updatedAt
+  kcbPaymentCode     String?           @unique(map: "Payment_kcbPaymentCode_key")
+  reconciled         Boolean           @default(false)
+  reconciledAt       DateTime?
+  reconciliationNote String?
+  cashtransaction    cashtransaction[]
+  customer           customer?         @relation(fields: [customerId], references: [id], map: "Payment_customerId_fkey")
+  order              order?            @relation(fields: [orderId], references: [id], map: "Payment_orderId_fkey")
+
+  @@index([customerId], map: "Payment_customerId_fkey")
+  @@index([orderId], map: "Payment_orderId_fkey")
+}
+
+model user {
+  id                Int            @id @default(autoincrement())
+  fullName          String
+  email             String         @unique(map: "User_email_key")
+  password          String
+  role              String         @default("USER")
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @default(now()) @updatedAt
+  adminApproved     Boolean        @default(false)
+  approvedAt        DateTime?
+  approvedBy        Int?
+  emailVerified     Boolean        @default(false)
+  emailVerifiedAt   DateTime?
+  loginOtpAttempts  Int            @default(0)
+  loginOtpExpiresAt DateTime?
+  loginOtpHash      String?
+  adminsession      adminsession[]
+  auditlog          auditlog[]
+  refreshtoken      refreshtoken[]
+}
+
+model adminsession {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  loginAt   DateTime  @default(now())
+  logoutAt  DateTime?
+  ipAddress String?
+  userAgent String?
+  isActive  Boolean   @default(true)
+  user      user      @relation(fields: [userId], references: [id], onDelete: Cascade, map: "adminSession_userId_fkey")
+
+  @@index([isActive], map: "adminSession_isActive_idx")
+  @@index([userId], map: "adminSession_userId_idx")
+}
+
+model auditlog {
+  id        Int      @id @default(autoincrement())
+  userId    Int?
+  action    String
+  entity    String?
+  entityId  Int?
+  method    String?
+  route     String?
+  ipAddress String?
+  userAgent String?
+  metadata  String?  @db.LongText
+  createdAt DateTime @default(now())
+  user      user?    @relation(fields: [userId], references: [id], map: "auditLog_userId_fkey")
+
+  @@index([action], map: "auditLog_action_idx")
+  @@index([createdAt], map: "auditLog_createdAt_idx")
+  @@index([userId], map: "auditLog_userId_idx")
+}
+
+model refreshtoken {
+  id        Int      @id @default(autoincrement())
+  tokenHash String   @unique(map: "refreshToken_tokenHash_key")
+  userId    Int
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "refreshToken_userId_fkey")
+
+  @@index([userId], map: "refreshToken_userId_idx")
+}
+
+model cashtransaction {
+  id          Int      @id @default(autoincrement())
+  type        String
+  category    String
+  amount      Float
+  reference   String?
+  description String?
+  paymentId   Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+  payment     payment? @relation(fields: [paymentId], references: [id], map: "CashTransaction_paymentId_fkey")
+
+  @@index([paymentId], map: "CashTransaction_paymentId_fkey")
+}
+
+model productreview {
+  id         Int      @id @default(autoincrement())
+  productId  Int
+  customerId Int
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now())
+  customer   customer @relation(fields: [customerId], references: [id], map: "ProductReview_customerId_fkey")
+  product    product  @relation(fields: [productId], references: [id], map: "ProductReview_productId_fkey")
+
+  @@unique([productId, customerId], map: "ProductReview_productId_customerId_key")
+  @@index([customerId], map: "ProductReview_customerId_fkey")
+}
+
+model gallery {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?  @db.Text
+  type        String   @default("GENERAL")
+  imageUrl    String
+  beforeImage String?
+  afterImage  String?
+  featured    Boolean  @default(false)
+  isVisible   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+}
+
+model visitorsession {
+  id             Int      @id @default(autoincrement())
+  sessionId      String   @unique
+  currentPage    String?
+  currentProduct String?
+  device         String?
+  browser        String?
+  city           String?
+  country        String?
+  firstSeenAt    DateTime @default(now())
+  lastSeenAt     DateTime @default(now())
+
+  @@index([lastSeenAt])
+}
+
+model visitorevent {
+  id        Int      @id @default(autoincrement())
+  sessionId String
+  eventType String
+  page      String?
+  productId Int?
+  metadata  String?  @db.LongText
+  createdAt DateTime @default(now())
+
+  @@index([sessionId])
+  @@index([eventType])
+  @@index([createdAt])
+}
+
+model expense {
+  id          Int      @id @default(autoincrement())
+  category    String
+  description String?
+  amount      Float
+  expenseDate DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+
+  @@index([expenseDate])
+  @@index([category])
+}
+
+model advertisingmetric {
+  id          Int      @id @default(autoincrement())
+  platform    String
+  campaign    String?
+  spend       Float    @default(0)
+  impressions Int      @default(0)
+  clicks      Int      @default(0)
+  conversions Int      @default(0)
+  revenue     Float    @default(0)
+  metricDate  DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+
+  @@index([platform])
+  @@index([metricDate])
+}

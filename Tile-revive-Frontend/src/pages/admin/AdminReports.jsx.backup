@@ -1,0 +1,968 @@
+import {
+    useCallback,
+    useEffect,
+    useState,
+} from "react";
+
+import { useNavigate } from "react-router-dom";
+
+import {
+    getAdminReports,
+} from "../../services/api";
+
+import "./AdminReports.css";
+
+function AdminReports() {
+
+    const navigate = useNavigate();
+
+    const [reports, setReports] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
+    const [error, setError] = useState("");
+
+    // ======================================================
+    // LOAD REPORTS
+    // ======================================================
+
+    const loadReports = useCallback(
+        async () => {
+
+            try {
+
+                setError("");
+
+                if (reports === null) {
+                    setLoading(true);
+                } else {
+                    setRefreshing(true);
+                }
+
+                const data = await getAdminReports();
+
+                setReports(data || {});
+
+            } catch (error) {
+
+                console.error(
+                    "ADMIN REPORTS ERROR:",
+                    error
+                );
+
+                setError(
+                    error?.message ||
+                    "Unable to load reports."
+                );
+
+            } finally {
+
+                setLoading(false);
+                setRefreshing(false);
+            }
+
+        },
+        []
+    );
+
+    // ======================================================
+    // INITIAL LOAD
+    // ======================================================
+
+    useEffect(() => {
+
+        loadReports();
+
+    }, [loadReports]);
+
+    // ======================================================
+    // FORMATTERS
+    // ======================================================
+
+    const formatCurrency = (amount) => {
+
+        return new Intl.NumberFormat(
+            "en-KE",
+            {
+                style: "currency",
+                currency: "KES",
+                maximumFractionDigits: 0,
+            }
+        ).format(
+            Number(amount || 0)
+        );
+    };
+
+    const formatNumber = (number) => {
+
+        return new Intl.NumberFormat(
+            "en-KE"
+        ).format(
+            Number(number || 0)
+        );
+    };
+
+    // ======================================================
+    // LOADING
+    // ======================================================
+
+    if (loading) {
+
+        return (
+            <div className="admin-reports-loading">
+
+                <div className="reports-loading-orbit">
+                    <span></span>
+                </div>
+
+                <div className="reports-loading-copy">
+                    <strong>
+                        Loading intelligence
+                    </strong>
+
+                    <span>
+                        Preparing your business report...
+                    </span>
+                </div>
+
+            </div>
+        );
+    }
+
+    // ======================================================
+    // SAFE VALUES
+    // ======================================================
+
+    const activeCustomers =
+        Number(
+            reports?.activeCustomers || 0
+        );
+
+    const totalVisitors =
+        Number(
+            reports?.totalVisitors || 0
+        );
+
+    const totalOrders =
+        Number(
+            reports?.totalOrders || 0
+        );
+
+    const totalRevenue =
+        Number(
+            reports?.totalRevenue || 0
+        );
+
+    const totalExpenditure =
+        Number(
+            reports?.totalExpenditure || 0
+        );
+
+    const totalProfit =
+        totalRevenue -
+        totalExpenditure;
+
+    const conversionRate =
+        totalVisitors > 0
+            ? (
+                (totalOrders /
+                    totalVisitors) *
+                100
+            ).toFixed(1)
+            : "0.0";
+
+    const customerJourney =
+        Array.isArray(
+            reports?.customerJourney
+        )
+            ? reports.customerJourney
+            : [];
+
+    // ======================================================
+    // CUSTOMER JOURNEY
+    // ======================================================
+
+    const journeySteps = [
+        {
+            key: "visited",
+            label: "Visited",
+            description: "Entered store",
+        },
+        {
+            key: "browsed",
+            label: "Browsed",
+            description: "Explored products",
+        },
+        {
+            key: "productViewed",
+            label: "Product View",
+            description: "Viewed product",
+        },
+        {
+            key: "addedToCart",
+            label: "Cart",
+            description: "Added product",
+        },
+        {
+            key: "checkout",
+            label: "Checkout",
+            description: "Started checkout",
+        },
+        {
+            key: "ordered",
+            label: "Order",
+            description: "Completed purchase",
+        },
+    ];
+
+    const journeyData = journeySteps.map(
+        (step) => {
+
+            const count =
+                Number(
+                    customerJourney.find(
+                        item =>
+                            item.step ===
+                            step.key
+                    )?.count || 0
+                );
+
+            return {
+                ...step,
+                count,
+            };
+        }
+    );
+
+    const maxJourneyValue =
+        Math.max(
+            ...journeyData.map(
+                item => item.count
+            ),
+            1
+        );
+
+    // ======================================================
+    // FINANCIAL METRICS
+    // ======================================================
+
+    const averageOrderValue =
+        totalOrders > 0
+            ? totalRevenue / totalOrders
+            : 0;
+
+    const profitMargin =
+        totalRevenue > 0
+            ? (
+                (totalProfit /
+                    totalRevenue) *
+                100
+            ).toFixed(1)
+            : "0.0";
+
+    // ======================================================
+    // REPORT STATUS
+    // ======================================================
+    const reportStatus = error
+        ? {
+            label: "Attention required",
+            className: "warning",
+        }
+        : activeCustomers > 0
+            ? {
+                label: "Store is live",
+                className: "live",
+            }
+            : {
+                label: "Monitoring",
+                className: "monitoring",
+            };
+
+    // ======================================================
+    // PAGE
+    // ======================================================
+
+    return (
+        <main className="admin-reports">
+
+            {/* ==================================================
+                TOP BAR
+            ================================================== */}
+
+            <header className="reports-topbar">
+
+                <div className="reports-brand">
+
+                    <div className="reports-brand-mark">
+                        TR
+                    </div>
+
+                    <div>
+                        <span>
+                            TILE REVIVE
+                        </span>
+
+                        <small>
+                            BUSINESS INTELLIGENCE
+                        </small>
+                    </div>
+
+                </div>
+
+                <div className="reports-topbar-actions">
+
+                    <div
+                        className={
+                            `reports-live-status ${reportStatus.className}`
+                        }
+                    >
+
+                        <span className="reports-live-dot"></span>
+
+                        {reportStatus.label}
+
+                    </div>
+
+                    <button
+                        type="button"
+                        className="reports-back-button"
+                        onClick={() =>
+                            navigate("/admin")
+                        }
+                    >
+                        <span>←</span>
+                        Dashboard
+                    </button>
+
+                    <button
+                        type="button"
+                        className="reports-refresh-button"
+                        onClick={loadReports}
+                        disabled={refreshing}
+                    >
+
+                        <span
+                            className={
+                                refreshing
+                                    ? "refresh-icon spinning"
+                                    : "refresh-icon"
+                            }
+                        >
+                            ↻
+                        </span>
+
+                        {refreshing
+                            ? "Refreshing"
+                            : "Refresh"}
+
+                    </button>
+
+                </div>
+
+            </header>
+
+            {/* ==================================================
+                HERO
+            ================================================== */}
+
+            <section className="reports-hero">
+
+                <div className="reports-hero-copy">
+
+                    <div className="reports-kicker">
+                        <span></span>
+                        REAL-TIME STORE INTELLIGENCE
+                    </div>
+
+                    <h1>
+                        Reports
+                        <span>&</span>
+                        Analytics
+                    </h1>
+
+                    <p>
+                        A live view of customer activity,
+                        sales performance and the journey
+                        from visitor to paying customer.
+                    </p>
+
+                </div>
+
+                <div className="reports-hero-meta">
+
+                    <div className="hero-meta-line"></div>
+
+                    <span>
+                        LIVE DATA
+                    </span>
+
+                    <strong>
+                        {formatNumber(totalVisitors)}
+                    </strong>
+
+                    <small>
+                        tracked visitors
+                    </small>
+
+                </div>
+
+            </section>
+
+            {/* ==================================================
+                ERROR
+            ================================================== */}
+
+            {error && (
+
+                <div className="reports-error">
+
+                    <div className="reports-error-icon">
+                        !
+                    </div>
+
+                    <div className="reports-error-copy">
+
+                        <strong>
+                            Reports connection issue
+                        </strong>
+
+                        <span>
+                            {error}
+                        </span>
+
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={loadReports}
+                    >
+                        Try again
+                    </button>
+
+                </div>
+            )}
+
+            {/* ==================================================
+                LIVE ACTIVITY
+            ================================================== */}
+
+            <section className="reports-live-panel">
+
+                <div className="live-panel-heading">
+
+                    <div>
+
+                        <div className="section-index">
+                            01 / LIVE
+                        </div>
+
+                        <h2>
+                            Customer Activity
+                        </h2>
+
+                        <p>
+                            Customers currently interacting
+                            with Tile Revive.
+                        </p>
+
+                    </div>
+
+                    <div
+                        className={
+                            activeCustomers > 0
+                                ? "live-indicator active"
+                                : "live-indicator inactive"
+                        }
+                    >
+
+                        <span className="live-indicator-dot"></span>
+
+                        <div>
+                            <strong>
+                                {activeCustomers > 0
+                                    ? `${activeCustomers} active now`
+                                    : "0 active now"}
+                            </strong>
+
+                            <small>
+                                {activeCustomers > 0
+                                    ? "Customers are browsing"
+                                    : "Waiting for visitors"}
+                            </small>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div className="live-metrics">
+
+                    <div className="live-metric primary">
+
+                        <span>
+                            ACTIVE CUSTOMERS
+                        </span>
+
+                        <strong>
+                            {formatNumber(activeCustomers)}
+                        </strong>
+
+                        <small>
+                            right now
+                        </small>
+
+                    </div>
+
+                    <div className="live-metric">
+
+                        <span>
+                            VISITORS
+                        </span>
+
+                        <strong>
+                            {formatNumber(totalVisitors)}
+                        </strong>
+
+                        <small>
+                            tracked
+                        </small>
+
+                    </div>
+
+                    <div className="live-metric">
+
+                        <span>
+                            CONVERSION
+                        </span>
+
+                        <strong>
+                            {conversionRate}%
+                        </strong>
+
+                        <small>
+                            visitor → order
+                        </small>
+
+                    </div>
+
+                    <div className="live-visual">
+
+                        <div className="live-wave">
+
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+
+                        </div>
+
+                        <small>
+                            LIVE ACTIVITY SIGNAL
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            {/* ==================================================
+                BUSINESS PERFORMANCE
+            ================================================== */}
+
+            <section className="reports-section">
+
+                <div className="section-heading">
+
+                    <div>
+                        <div className="section-index">
+                            02 / PERFORMANCE
+                        </div>
+
+                        <h2>
+                            Business Performance
+                        </h2>
+
+                        <p>
+                            The financial heartbeat of your store.
+                        </p>
+                    </div>
+
+                    <div className="section-heading-note">
+                        CURRENT PERFORMANCE
+                    </div>
+
+                </div>
+
+                <div className="financial-grid">
+
+                    <article className="financial-card orders-card">
+
+                        <div className="financial-card-top">
+
+                            <span>
+                                ORDERS PLACED
+                            </span>
+
+                            <i>
+                                ↗
+                            </i>
+
+                        </div>
+
+                        <strong>
+                            {formatNumber(totalOrders)}
+                        </strong>
+
+                        <div className="financial-card-bottom">
+                            <span>
+                                Completed store orders
+                            </span>
+                        </div>
+
+                    </article>
+
+                    <article className="financial-card revenue-card">
+
+                        <div className="financial-card-top">
+
+                            <span>
+                                REVENUE COLLECTED
+                            </span>
+
+                            <i>
+                                KES
+                            </i>
+
+                        </div>
+
+                        <strong>
+                            {formatCurrency(totalRevenue)}
+                        </strong>
+
+                        <div className="financial-card-bottom">
+                            <span>
+                                Gross collected revenue
+                            </span>
+                        </div>
+
+                    </article>
+
+                    <article className="financial-card expenditure-card">
+
+                        <div className="financial-card-top">
+
+                            <span>
+                                EXPENDITURE
+                            </span>
+
+                            <i>
+                                ↓
+                            </i>
+
+                        </div>
+
+                        <strong>
+                            {formatCurrency(totalExpenditure)}
+                        </strong>
+
+                        <div className="financial-card-bottom">
+                            <span>
+                                Recorded business costs
+                            </span>
+                        </div>
+
+                    </article>
+
+                    <article className="financial-card profit-card">
+
+                        <div className="financial-card-top">
+
+                            <span>
+                                ESTIMATED PROFIT
+                            </span>
+
+                            <i>
+                                +
+                            </i>
+
+                        </div>
+
+                        <strong>
+                            {formatCurrency(totalProfit)}
+                        </strong>
+
+                        <div className="financial-card-bottom">
+
+                            <span>
+                                Margin {profitMargin}%
+                            </span>
+
+                        </div>
+
+                    </article>
+
+                </div>
+
+                <div className="secondary-metrics">
+
+                    <div>
+                        <span>
+                            AVERAGE ORDER VALUE
+                        </span>
+
+                        <strong>
+                            {formatCurrency(
+                                averageOrderValue
+                            )}
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>
+                            PROFIT MARGIN
+                        </span>
+
+                        <strong>
+                            {profitMargin}%
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>
+                            VISITOR → ORDER
+                        </span>
+
+                        <strong>
+                            {conversionRate}%
+                        </strong>
+                    </div>
+
+                </div>
+
+            </section>
+
+            {/* ==================================================
+                CUSTOMER JOURNEY
+            ================================================== */}
+
+            <section className="reports-section journey-section">
+
+                <div className="section-heading">
+
+                    <div>
+
+                        <div className="section-index">
+                            03 / CUSTOMER JOURNEY
+                        </div>
+
+                        <h2>
+                            From Visit to Order
+                        </h2>
+
+                        <p>
+                            Understand where customers move
+                            forward — and where they drop off.
+                        </p>
+
+                    </div>
+
+                    <div className="journey-total">
+                        <span>
+                            ORDERS
+                        </span>
+
+                        <strong>
+                            {formatNumber(totalOrders)}
+                        </strong>
+                    </div>
+
+                </div>
+
+                <div className="journey-chart">
+
+                    {journeyData.map(
+                        (step, index) => {
+
+                            const width =
+                                Math.max(
+                                    5,
+                                    (
+                                        step.count /
+                                        maxJourneyValue
+                                    ) *
+                                    100
+                                );
+
+                            return (
+
+                                <div
+                                    className="journey-row"
+                                    key={step.key}
+                                >
+
+                                    <div className="journey-number">
+                                        0{index + 1}
+                                    </div>
+
+                                    <div className="journey-label">
+
+                                        <strong>
+                                            {step.label}
+                                        </strong>
+
+                                        <span>
+                                            {step.description}
+                                        </span>
+
+                                    </div>
+
+                                    <div className="journey-bar-track">
+
+                                        <div
+                                            className="journey-bar"
+                                            style={{
+                                                width: `${width}%`,
+                                            }}
+                                        ></div>
+
+                                    </div>
+
+                                    <strong className="journey-count">
+                                        {formatNumber(
+                                            step.count
+                                        )}
+                                    </strong>
+
+                                </div>
+                            );
+                        }
+                    )}
+
+                </div>
+
+                <div className="journey-footer">
+
+                    <span>
+                        CUSTOMER FUNNEL
+                    </span>
+
+                    <span>
+                        VISITOR → PRODUCT → CART → CHECKOUT → ORDER
+                    </span>
+
+                </div>
+
+            </section>
+
+            {/* ==================================================
+                ADVERTISING
+            ================================================== */}
+
+            <section className="reports-section ads-section">
+
+                <div className="section-heading">
+
+                    <div>
+
+                        <div className="section-index">
+                            04 / ACQUISITION
+                        </div>
+
+                        <h2>
+                            Advertising Performance
+                        </h2>
+
+                        <p>
+                            Meta campaign intelligence will appear
+                            here when the advertising integration is connected.
+                        </p>
+
+                    </div>
+
+                    <div className="integration-status">
+                        NOT CONNECTED
+                    </div>
+
+                </div>
+
+                <div className="ads-panel">
+
+                    <div className="ads-panel-brand">
+
+                        <div className="meta-mark">
+                            M
+                        </div>
+
+                        <div>
+                            <strong>
+                                Meta Ads
+                            </strong>
+
+                            <span>
+                                Facebook & Instagram acquisition
+                            </span>
+                        </div>
+
+                    </div>
+
+                    <div className="ads-coming">
+
+                        <span className="ads-lock">
+                            ◌
+                        </span>
+
+                        <div>
+                            <strong>
+                                Awaiting integration
+                            </strong>
+
+                            <small>
+                                Spend, impressions, clicks,
+                                ROAS and campaign conversions
+                                will appear here.
+                            </small>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            {/* ==================================================
+                FOOTER
+            ================================================== */}
+
+            <footer className="reports-footer">
+
+                <div>
+                    TILE REVIVE
+                    <span>
+                        / REPORTS
+                    </span>
+                </div>
+
+                <small>
+                    Business intelligence dashboard
+                </small>
+
+            </footer>
+
+        </main>
+    );
+}
+
+export default AdminReports;
+
+
+
+
+

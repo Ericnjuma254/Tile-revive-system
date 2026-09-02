@@ -1,0 +1,136 @@
+/* =========================================================
+   TILE REVIVE
+   FOOTER
+   ========================================================= */
+
+.site-footer {
+    width: 100%;
+    background: #1f2933;
+    color: #ffffff;
+    margin-top: auto;
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 45px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 40px;
+}
+
+/* =========================================================
+   SOCIAL MEDIA
+   ========================================================= */
+
+.footer-social h3 {
+    margin: 0 0 8px;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.footer-social p {
+    margin: 0 0 18px;
+    color: #d5dbe1;
+    font-size: 14px;
+}
+
+.social-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.social-links a {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 14px;
+    padding: 8px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.social-links a:hover {
+    background: #ffffff;
+    color: #1f2933;
+}
+
+/* =========================================================
+   ADMIN
+   ========================================================= */
+
+.footer-admin {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.footer-admin span {
+    color: #d5dbe1;
+    font-size: 14px;
+}
+
+.admin-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 11px 20px;
+    background: #ffffff;
+    color: #1f2933;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 700;
+    transition: all 0.2s ease;
+}
+
+.admin-button:hover {
+    background: #e3f2fd;
+    transform: translateY(-1px);
+}
+
+/* =========================================================
+   COPYRIGHT
+   ========================================================= */
+
+.footer-bottom {
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    text-align: center;
+    padding: 18px 20px;
+}
+
+.footer-bottom p {
+    margin: 0;
+    color: #aeb7c1;
+    font-size: 13px;
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 768px) {
+    .footer-container {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 35px 20px;
+        gap: 30px;
+    }
+
+    .footer-admin {
+        width: 100%;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .admin-button {
+        width: 100%;
+    }
+
+    .social-links {
+        gap: 8px;
+    }
+}

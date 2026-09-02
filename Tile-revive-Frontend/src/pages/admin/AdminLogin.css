@@ -1,0 +1,369 @@
+/* =========================================================
+   TILE REVIVE
+   ADMIN LOGIN
+   ========================================================= */
+
+.admin-login-page {
+    min-height: calc(100vh - 120px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    background: #f4f7f9;
+}
+
+.admin-login-card {
+    width: 100%;
+    max-width: 430px;
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 14px;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+}
+
+.admin-login-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.admin-logo {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #1f2933;
+    color: #ffffff;
+    border-radius: 12px;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.admin-login-header h1 {
+    margin: 0 0 8px;
+    color: #1f2933;
+    font-size: 28px;
+}
+
+.admin-login-header p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.admin-login-error {
+    margin-bottom: 20px;
+    padding: 12px 14px;
+    background: #fff1f2;
+    border: 1px solid #fecdd3;
+    border-radius: 8px;
+    color: #be123c;
+    font-size: 14px;
+}
+
+.admin-form-group {
+    margin-bottom: 20px;
+}
+
+.admin-form-group label {
+    display: block;
+    margin-bottom: 7px;
+    color: #374151;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.admin-form-group input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 13px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    outline: none;
+    font-size: 15px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-form-group input:focus {
+    border-color: #6b7280;
+    box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.12);
+}
+
+.admin-login-button {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    background: #1f2933;
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.admin-login-button:hover:not(:disabled) {
+    background: #111827;
+    transform: translateY(-1px);
+}
+
+.admin-login-button:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+.back-to-store {
+    display: block;
+    width: 100%;
+    margin-top: 20px;
+    padding: 10px;
+    border: none;
+    background: transparent;
+    color: #6b7280;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.back-to-store:hover {
+    color: #1f2933;
+}
+
+@media (max-width: 480px) {
+    .admin-login-card {
+        padding: 30px 22px;
+    }
+
+    .admin-login-header h1 {
+        font-size: 24px;
+    }
+}
+/* =========================================================
+   LOGIN LOADING
+   ========================================================= */
+
+.login-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-right: 9px;
+
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: #ffffff;
+
+    border-radius: 50%;
+
+    vertical-align: -3px;
+
+    animation: loginSpin 0.7s linear infinite;
+}
+
+@keyframes loginSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* =========================================================
+   LOGIN SUCCESS
+   ========================================================= */
+
+.admin-login-button.login-success {
+    background: #16a34a;
+    color: #ffffff;
+
+    box-shadow:
+        0 8px 25px rgba(22, 163, 74, 0.30);
+
+    animation: successButton 0.45s ease-out;
+}
+
+.success-check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 21px;
+    height: 21px;
+
+    margin-right: 8px;
+
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+
+    font-size: 13px;
+    font-weight: 800;
+
+    animation: checkPop 0.4s ease-out;
+}
+
+@keyframes successButton {
+
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.025);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes checkPop {
+
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    70% {
+        transform: scale(1.15);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* =========================================================
+   SUCCESS CARD
+   ========================================================= */
+
+.login-card-success {
+    animation: cardSuccess 0.6s ease-out;
+}
+
+@keyframes cardSuccess {
+
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.015);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* =========================================================
+   PASSWORD VISIBILITY CONTROL
+   ========================================================= */
+
+.password-input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+/* Password input */
+
+.password-input-wrapper input {
+    width: 100%;
+    box-sizing: border-box;
+
+    padding: 13px 52px 13px 14px;
+
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+
+    outline: none;
+
+    font-size: 15px;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.password-input-wrapper input:focus {
+    border-color: #6b7280;
+
+    box-shadow:
+        0 0 0 3px rgba(107, 114, 128, 0.12);
+}
+
+/* =========================================================
+   EYE BUTTON
+   ========================================================= */
+
+.password-toggle {
+    position: absolute;
+
+    top: 50%;
+    right: 8px;
+
+    transform: translateY(-50%);
+
+    width: 38px;
+    height: 38px;
+
+    margin: 0;
+    padding: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    border-radius: 6px;
+
+    background: transparent;
+
+    color: #6b7280;
+
+    cursor: pointer;
+
+    z-index: 10;
+
+    transition:
+        color 0.2s ease,
+        background-color 0.2s ease,
+        transform 0.15s ease;
+}
+
+/* SVG icon */
+
+.password-toggle svg {
+    display: block;
+
+    width: 21px;
+    height: 21px;
+
+    min-width: 21px;
+    min-height: 21px;
+
+    color: currentColor;
+}
+
+/* Hover */
+
+.password-toggle:hover {
+    color: #1f2933;
+    background-color: #f3f4f6;
+}
+
+/* Click */
+
+.password-toggle:active {
+    transform: translateY(-50%) scale(0.92);
+}
+
+/* Keyboard accessibility */
+
+.password-toggle:focus-visible {
+    outline: 2px solid #9ca3af;
+    outline-offset: 2px;
+}
+
+/* Disabled */
+
+.password-toggle:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

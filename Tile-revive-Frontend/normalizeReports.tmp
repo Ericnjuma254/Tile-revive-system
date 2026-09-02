@@ -1,0 +1,167 @@
+const normalizeReports = (raw) => {
+    const data = raw?.data || raw || {};
+
+    const summary =
+        data.summary ||
+        {};
+
+    const liveCustomers =
+        data.liveCustomers ||
+        {};
+
+    const journey =
+        data.customerJourney ||
+        {};
+
+    const advertising =
+        data.advertising ||
+        {};
+
+    const revenue =
+        Number(
+            summary.totalRevenue ??
+            data.revenue ??
+            0
+        );
+
+    const expenditure =
+        Number(
+            summary.totalExpenditure ??
+            data.expenditure ??
+            0
+        );
+
+    const profit =
+        Number(
+            summary.totalProfit ??
+            (revenue - expenditure)
+        );
+
+    const orders =
+        Number(
+            summary.totalOrders ??
+            data.orders ??
+            0
+        );
+
+    const customersCount =
+        Number(
+            summary.totalCustomers ??
+            data.customersCount ??
+            0
+        );
+
+    const activeCustomers =
+        Number(
+            liveCustomers.count ??
+            data.activeCustomers ??
+            0
+        );
+
+    const visitors =
+        Number(
+            journey.pageViews ??
+            data.visitors ??
+            0
+        );
+
+    const conversion =
+        orders > 0 && visitors > 0
+            ? (orders / visitors) * 100
+            : 0;
+
+    const salesTrend =
+        data.salesTrend ||
+        data.revenueTrend ||
+        data.dailySales ||
+        [];
+
+    const customerTrend =
+        data.customerTrend ||
+        data.dailyCustomers ||
+        [];
+
+    const productPerformance =
+        Array.isArray(data.productPerformance)
+            ? data.productPerformance
+            : [];
+
+    const trafficSources =
+        Array.isArray(data.trafficSources)
+            ? data.trafficSources
+            : [];
+
+    const paymentMethods =
+        Array.isArray(data.paymentMethods)
+            ? data.paymentMethods
+            : [];
+
+    return {
+        raw: data,
+
+        revenue,
+        expenditure,
+        profit,
+        orders,
+        customersCount,
+        activeCustomers,
+        visitors,
+        conversion,
+
+        salesTrend,
+        customerTrend,
+
+        productPerformance,
+        trafficSources,
+        paymentMethods,
+
+        summary,
+
+        liveCustomers,
+
+        customerJourney: journey,
+
+        orderStatusBreakdown:
+            Array.isArray(data.orderStatusBreakdown)
+                ? data.orderStatusBreakdown
+                : [],
+
+        paymentStatusBreakdown:
+            Array.isArray(data.paymentStatusBreakdown)
+                ? data.paymentStatusBreakdown
+                : [],
+
+        recentOrders:
+            Array.isArray(data.recentOrders)
+                ? data.recentOrders
+                : [],
+
+        advertising: {
+            spend: Number(advertising.spend || 0),
+            impressions: Number(
+                advertising.impressions || 0
+            ),
+            clicks: Number(
+                advertising.clicks || 0
+            ),
+            conversions: Number(
+                advertising.conversions || 0
+            ),
+            revenue: Number(
+                advertising.revenue || 0
+            ),
+            ctr: Number(
+                advertising.ctr || 0
+            ),
+            cpc: Number(
+                advertising.cpc || 0
+            ),
+            cpm: Number(
+                advertising.cpm || 0
+            ),
+            roas: Number(
+                advertising.roas || 0
+            ),
+        },
+    };
+};

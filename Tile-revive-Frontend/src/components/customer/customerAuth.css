@@ -1,0 +1,308 @@
+.customer-auth-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    background: rgba(15, 23, 42, 0.62);
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+
+.customer-auth-card {
+    position: relative;
+
+    width: 100%;
+    max-width: 460px;
+
+    padding: 42px 36px;
+
+    background: #ffffff;
+
+    border-radius: 24px;
+
+    box-shadow:
+        0 30px 80px rgba(0, 0, 0, 0.22);
+
+    animation:
+        customerAuthAppear
+        0.25s ease;
+}
+
+
+@keyframes customerAuthAppear {
+
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+
+.customer-auth-close {
+    position: absolute;
+
+    top: 16px;
+    right: 18px;
+
+    width: 38px;
+    height: 38px;
+
+    border: none;
+    border-radius: 50%;
+
+    background: #f1f5f9;
+
+    color: #475569;
+
+    font-size: 24px;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+
+.customer-auth-close:hover {
+    background: #e2e8f0;
+    transform: rotate(90deg);
+}
+
+
+.customer-auth-icon {
+    width: 64px;
+    height: 64px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin: 0 auto 20px;
+
+    border-radius: 18px;
+
+    background: #e3f2fd;
+
+    font-size: 28px;
+}
+
+
+.customer-auth-card h2 {
+    margin: 0;
+
+    text-align: center;
+
+    color: #0f172a;
+
+    font-size: 28px;
+    font-weight: 700;
+}
+
+
+.customer-auth-subtitle {
+    margin: 10px 0 24px;
+
+    text-align: center;
+
+    color: #64748b;
+
+    line-height: 1.6;
+}
+
+
+.customer-auth-email {
+    display: block;
+
+    margin-top: -14px;
+    margin-bottom: 24px;
+
+    text-align: center;
+
+    color: #0284c7;
+
+    word-break: break-word;
+}
+
+
+.customer-auth-card label {
+    display: block;
+
+    margin: 17px 0 7px;
+
+    color: #334155;
+
+    font-size: 14px;
+    font-weight: 600;
+}
+
+
+.customer-auth-card input {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 14px 15px;
+
+    border: 1px solid #dbe3ea;
+
+    border-radius: 12px;
+
+    outline: none;
+
+    color: #0f172a;
+
+    font-size: 15px;
+
+    background: #ffffff;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.customer-auth-card input:focus {
+    border-color: #38bdf8;
+
+    box-shadow:
+        0 0 0 4px rgba(56, 189, 248, 0.12);
+}
+
+
+.customer-auth-otp {
+    text-align: center;
+
+    font-size: 28px !important;
+    font-weight: 700;
+
+    letter-spacing: 8px;
+}
+
+
+.customer-auth-primary {
+    width: 100%;
+
+    margin-top: 24px;
+
+    padding: 15px;
+
+    border: none;
+    border-radius: 12px;
+
+    background: #0284c7;
+
+    color: #ffffff;
+
+    font-size: 16px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.customer-auth-primary:hover:not(:disabled) {
+    background: #0369a1;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 8px 20px rgba(2, 132, 199, 0.25);
+}
+
+
+.customer-auth-primary:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+
+.customer-auth-error {
+    margin-top: 15px;
+
+    padding: 11px 13px;
+
+    border-radius: 10px;
+
+    background: #fef2f2;
+
+    color: #dc2626;
+
+    font-size: 14px;
+
+    line-height: 1.5;
+}
+
+
+.customer-auth-success {
+    margin-top: 15px;
+
+    padding: 11px 13px;
+
+    border-radius: 10px;
+
+    background: #f0fdf4;
+
+    color: #15803d;
+
+    font-size: 14px;
+}
+
+
+.customer-auth-back {
+    display: block;
+
+    margin: 18px auto 0;
+
+    border: none;
+
+    background: transparent;
+
+    color: #0284c7;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+
+.customer-auth-back:hover {
+    text-decoration: underline;
+}
+
+
+@media (max-width: 520px) {
+
+    .customer-auth-card {
+        padding: 36px 22px;
+
+        border-radius: 20px;
+    }
+
+    .customer-auth-card h2 {
+        font-size: 24px;
+    }
+
+    .customer-auth-otp {
+        font-size: 24px !important;
+        letter-spacing: 5px;
+    }
+}

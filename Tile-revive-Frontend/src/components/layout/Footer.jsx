@@ -43,10 +43,18 @@ const Footer = () => {
             </div>
 
             <div className="footer-bottom">
+
+                <div className="footer-legal">
+                    <Link to="/privacy-policy" className="privacy-policy-link">
+                        Privacy Policy
+                    </Link>
+                </div>
+
                 <p>
                     © {new Date().getFullYear()} Tile Revive Solutions.
                     All rights reserved.
                 </p>
+
             </div>
         </footer>
     );

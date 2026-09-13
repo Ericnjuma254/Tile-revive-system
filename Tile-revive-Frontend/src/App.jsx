@@ -1,3 +1,4 @@
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 
 import { CartProvider } from "./context/CartContext";
@@ -246,6 +247,7 @@ function App() {
 }
 
 export default App;
+
 
 
 

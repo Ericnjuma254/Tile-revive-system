@@ -1,4 +1,10 @@
 const express = require("express");
+
+const {
+    authLimiter,
+    loginLimiter,
+    refreshLimiter
+} = require("../middleware/authRateLimit");
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 
@@ -65,7 +71,7 @@ const normalizePhone = (phone) => {
 // POST /api/auth/register
 // ======================================================
 
-router.post("/register", async (req, res) => {
+router.post("/register", authLimiter, async (req, res) => {
     try {
         const {
             fullName,
@@ -374,7 +380,7 @@ router.post("/register", async (req, res) => {
 // POST /api/auth/verify-email
 // ======================================================
 
-router.post("/verify-email", async (req, res) => {
+router.post("/verify-email", authLimiter, async (req, res) => {
     try {
 
         const {
@@ -529,7 +535,7 @@ router.post("/verify-email", async (req, res) => {
 // POST /api/auth/login
 // ======================================================
 
-router.post("/login", async (req, res) => {
+router.post("/login", loginLimiter, async (req, res) => {
     try {
 
         const {
@@ -695,7 +701,7 @@ router.post("/login", async (req, res) => {
 // REFRESH TOKEN
 // ======================================================
 
-router.post("/refresh", async (req, res) => {
+router.post("/refresh", refreshLimiter, async (req, res) => {
     try {
 
         const {

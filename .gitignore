@@ -39,3 +39,9 @@ Thumbs.db
 .idea/
 .vercel
 .env*
+
+uploads/
+**/uploads/
+*.sql
+*.tmp
+whatsapp-original.txt

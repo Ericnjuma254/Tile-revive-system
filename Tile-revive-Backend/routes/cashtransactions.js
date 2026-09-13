@@ -1,4 +1,5 @@
 const express = require("express");
+const { authenticateToken, requireAdmin } = require("../middleware/auth");
 const router = express.Router();
 const prisma = require("../db");
 
@@ -108,7 +109,7 @@ router.get("/summary", async (req, res) => {
 // POST /api/cash-transactions/in
 // ======================================================
 
-router.post("/in", async (req, res) => {
+router.post("/in", authenticateToken, requireAdmin, async (req, res) => {
     try {
 
         const {
@@ -236,7 +237,7 @@ router.post("/in", async (req, res) => {
 // POST /api/cash-transactions/out
 // ======================================================
 
-router.post("/out", async (req, res) => {
+router.post("/out", authenticateToken, requireAdmin, async (req, res) => {
     try {
 
         const {
@@ -386,7 +387,7 @@ router.get("/:id", async (req, res) => {
 // DELETE /api/cash-transactions/:id
 // ======================================================
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authenticateToken, requireAdmin, async (req, res) => {
     try {
 
         const id = Number(req.params.id);
@@ -446,3 +447,6 @@ router.delete("/:id", async (req, res) => {
 
 
 module.exports = router;
+
+
+

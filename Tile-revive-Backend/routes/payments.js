@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const prisma = require("../db");
-const { authenticateToken } = require("../middleware/auth");
+const { authenticateToken, requireAdmin } = require("../middleware/auth");
 
 // ======================================================
 // PAYMENT METHODS
@@ -188,6 +188,7 @@ router.get("/", authenticateToken, async (req, res) => {
 router.post(
     "/manual",
     authenticateToken,
+    requireAdmin,
     async (req, res) => {
 
     try {
@@ -444,6 +445,7 @@ router.post(
 router.put(
     "/:id/reconcile",
     authenticateToken,
+    requireAdmin,
     async (req, res) => {
 
     try {
@@ -817,3 +819,6 @@ router.get(
 // ======================================================
 
 module.exports = router;
+
+
+

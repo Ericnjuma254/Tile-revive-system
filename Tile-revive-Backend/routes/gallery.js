@@ -1,4 +1,5 @@
 const express = require("express");
+const { authenticateToken, requireAdmin } = require("../middleware/auth");
 const prisma = require("../db");
 
 const router = express.Router();
@@ -121,7 +122,7 @@ router.get("/:id", async (req, res) => {
 // POST /api/gallery
 // ======================================================
 
-router.post("/", async (req, res) => {
+router.post("/", authenticateToken, requireAdmin, async (req, res) => {
     try {
         const {
             title,
@@ -214,7 +215,7 @@ router.post("/", async (req, res) => {
 // PUT /api/gallery/:id
 // ======================================================
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", authenticateToken, requireAdmin, async (req, res) => {
     try {
         const id = Number(req.params.id);
 
@@ -312,7 +313,7 @@ router.put("/:id", async (req, res) => {
 // DELETE /api/gallery/:id
 // ======================================================
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authenticateToken, requireAdmin, async (req, res) => {
     try {
         const id = Number(req.params.id);
 
@@ -352,3 +353,4 @@ router.delete("/:id", async (req, res) => {
 
 
 module.exports = router;
+

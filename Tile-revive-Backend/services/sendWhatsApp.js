@@ -1,11 +1,15 @@
-const makeWASocket = require("@whiskeysockets/baileys").default;
+const fs = require("fs");
+const path = require("path");
+
+const makeWASocket =
+    require("@whiskeysockets/baileys").default;
+
 const {
     useMultiFileAuthState,
     DisconnectReason
 } = require("@whiskeysockets/baileys");
 
 const qrcode = require("qrcode-terminal");
-const path = require("path");
 
 let sock = null;
 let connecting = false;
@@ -16,7 +20,7 @@ let reconnectTimer = null;
 // ======================================================
 
 const AUTH_DIR = path.join(
-    __dirname,
+    process.cwd(),
     "auth_info_baileys"
 );
 
@@ -97,7 +101,7 @@ async function connectToWhatsApp() {
                 if (qr) {
 
                     console.log(
-                        "\n📱 WhatsApp QR Code"
+                        "\nWhatsApp QR Code"
                     );
 
                     console.log(
@@ -121,7 +125,7 @@ async function connectToWhatsApp() {
                     connecting = false;
 
                     console.log(
-                        "✅ WhatsApp successfully connected!"
+                        "WhatsApp successfully connected."
                     );
                 }
 
@@ -138,7 +142,7 @@ async function connectToWhatsApp() {
                         lastDisconnect?.error?.output?.statusCode;
 
                     console.log(
-                        "⚠️ WhatsApp connection closed."
+                        "WhatsApp connection closed."
                     );
 
                     console.log(
@@ -156,7 +160,7 @@ async function connectToWhatsApp() {
                     ) {
 
                         console.error(
-                            "❌ WhatsApp session was logged out."
+                            "WhatsApp session was logged out."
                         );
 
                         console.error(
@@ -176,7 +180,7 @@ async function connectToWhatsApp() {
                     ) {
 
                         console.error(
-                            "❌ WhatsApp authentication session is invalid."
+                            "WhatsApp authentication session is invalid."
                         );
 
                         console.error(
@@ -191,7 +195,7 @@ async function connectToWhatsApp() {
                     // ======================================
 
                     console.log(
-                        "🔄 Reconnecting to WhatsApp in 5 seconds..."
+                        "Reconnecting to WhatsApp in 5 seconds..."
                     );
 
                     clearTimeout(
@@ -224,7 +228,7 @@ async function connectToWhatsApp() {
         sock = null;
 
         console.error(
-            "❌ WhatsApp connection error:",
+            "WhatsApp connection error:",
             error.message
         );
 
@@ -233,7 +237,7 @@ async function connectToWhatsApp() {
 }
 
 // ======================================================
-// SEND WHATSAPP PAYMENT RECEIPT
+// SEND PRIVATE WHATSAPP PAYMENT RECEIPT
 // ======================================================
 
 async function sendWhatsAppReceipt({
@@ -241,7 +245,7 @@ async function sendWhatsAppReceipt({
     tenantName,
     amountPaid,
     mpesaReceiptNumber,
-    pdfUrl
+    pdfPath
 }) {
 
     try {
@@ -252,10 +256,24 @@ async function sendWhatsAppReceipt({
         if (!client) {
 
             console.error(
-                "❌ WhatsApp is not connected. Receipt was not sent."
+                "WhatsApp is not connected. Receipt was not sent."
             );
 
             return;
+        }
+
+        // ==============================================
+        // VERIFY PRIVATE PDF EXISTS
+        // ==============================================
+
+        if (
+            !pdfPath ||
+            !fs.existsSync(pdfPath)
+        ) {
+
+            throw new Error(
+                "Receipt PDF file was not found."
+            );
         }
 
         // ==============================================
@@ -268,7 +286,9 @@ async function sendWhatsAppReceipt({
                 .trim()
                 .replace(/[^0-9]/g, "");
 
-        if (formattedPhone.startsWith("0")) {
+        if (
+            formattedPhone.startsWith("0")
+        ) {
 
             formattedPhone =
                 "254" +
@@ -295,53 +315,52 @@ async function sendWhatsAppReceipt({
         const messageBody =
             `*TILE REVIVE PAYMENT CONFIRMATION*\n` +
             `-----------------------------------\n` +
-            `Hello *${tenantName}*,\n\n` +
+            `Hello *${tenantName || "Customer"}*,\n\n` +
             `We have received your payment of *KES ${Number(
-                amountPaid
+                amountPaid || 0
             ).toLocaleString()}*.\n\n` +
-            `📌 *Receipt No:* ${mpesaReceiptNumber}\n` +
-            `📄 *Download PDF Receipt:* ${pdfUrl}\n\n` +
+            `Receipt No: ${mpesaReceiptNumber}\n\n` +
             `Thank you for choosing Tile Revive Solutions.`;
 
         // ==============================================
-        // SEND
+        // SEND PDF DIRECTLY THROUGH WHATSAPP
         // ==============================================
 
         await client.sendMessage(
             jid,
             {
-                text: messageBody
+                document:
+                    fs.readFileSync(pdfPath),
+
+                mimetype:
+                    "application/pdf",
+
+                fileName:
+                    `Tile-Revive-Receipt-${mpesaReceiptNumber}.pdf`,
+
+                caption:
+                    messageBody
             }
         );
 
         console.log(
-            `📲 WhatsApp receipt sent to ${formattedPhone}`
+            `WhatsApp receipt sent to ${formattedPhone}`
         );
 
     } catch (error) {
 
         console.error(
-            "❌ WhatsApp dispatch error:",
+            "WhatsApp dispatch error:",
             error.message
         );
     }
 }
 
 // ======================================================
-// START WHATSAPP
+// LAZY WHATSAPP CONNECTION
 // ======================================================
-
-connectToWhatsApp().catch(
-    (error) => {
-        console.error(
-            "❌ Initial WhatsApp connection error:",
-            error.message
-        );
-    }
-);
-
-// ======================================================
-// EXPORT
+// WhatsApp is intentionally NOT started when the backend
+// module is imported. It connects when a receipt is sent.
 // ======================================================
 
 module.exports =

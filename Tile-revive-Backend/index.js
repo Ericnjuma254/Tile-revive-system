@@ -1,5 +1,7 @@
 const express = require("express");
 const cors = require("cors");
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
 require("dotenv").config();
 
 const {
@@ -56,7 +58,58 @@ const PORT = process.env.PORT || 5000;
 // MIDDLEWARE
 // ======================================================
 
-app.use(cors());
+app.disable("x-powered-by");
+
+const allowedOrigins = [
+    process.env.FRONTEND_URL,
+    process.env.FRONTEND_URL_2,
+    "http://localhost:5173",
+    "http://127.0.0.1:5173"
+].filter(Boolean);
+
+app.use(
+    helmet({
+        crossOriginResourcePolicy: {
+            policy: "cross-origin"
+        }
+    })
+);
+
+app.use(
+    cors({
+        origin: (origin, callback) => {
+            if (!origin) {
+                return callback(null, true);
+            }
+
+            if (allowedOrigins.includes(origin)) {
+                return callback(null, true);
+            }
+
+            return callback(new Error("CORS origin not allowed"));
+        },
+        credentials: true,
+        methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allowedHeaders: [
+            "Content-Type",
+            "Authorization",
+            "Accept"
+        ]
+    })
+);
+
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 300,
+    standardHeaders: "draft-8",
+    legacyHeaders: false,
+    message: {
+        success: false,
+        message: "Too many requests. Please try again later."
+    }
+});
+
+app.use("/api", apiLimiter);
 /* ======================================================
    UPLOADED PRODUCT IMAGES
    Images uploaded through Admin Products are served
@@ -71,7 +124,18 @@ app.use(
 );
 
 
-app.use(express.json());
+app.use(
+    express.json({
+        limit: "1mb"
+    })
+);
+
+app.use(
+    express.urlencoded({
+        extended: true,
+        limit: "1mb"
+    })
+);
 
 // ======================================================
 // AUTH ROUTES
@@ -85,11 +149,6 @@ app.use(
 // ======================================================
 // SERVE GENERATED RECEIPTS
 // ======================================================
-
-app.use(
-    "/receipts",
-    express.static("receipts")
-);
 
 // ======================================================
 // ROOT ROUTE
@@ -224,13 +283,7 @@ app.post(
             "======================================"
         );
 
-        console.log(
-            JSON.stringify(
-                req.body,
-                null,
-                2
-            )
-        );
+        console.log("M-Pesa callback received.");
 
         try {
 
@@ -271,25 +324,14 @@ app.post(
             const merchantRequestId =
                 callback.MerchantRequestID;
 
-            console.log(
-                "CheckoutRequestID:",
-                checkoutRequestId
-            );
-
-            console.log(
-                "MerchantRequestID:",
-                merchantRequestId
-            );
+            console.log("M-Pesa request identifiers received.");
 
             console.log(
                 "ResultCode:",
                 resultCode
             );
 
-            console.log(
-                "ResultDesc:",
-                callback.ResultDesc
-            );
+            console.log("ResultDesc received.");
 
             // ==================================================
             // VALIDATE CHECKOUT REQUEST ID
@@ -494,25 +536,7 @@ if (!order) {
                             "TransactionDate"
                     )?.Value;
 
-                console.log(
-                    "💰 Amount:",
-                    amount
-                );
-
-                console.log(
-                    "🧾 M-Pesa Receipt:",
-                    receipt
-                );
-
-                console.log(
-                    "📱 Phone:",
-                    phone
-                );
-
-                console.log(
-                    "📅 Transaction Date:",
-                    transactionDate
-                );
+                console.log("M-Pesa payment metadata received.");
 
                 // ==================================================
                 // EXPECTED ORDER AMOUNT
@@ -523,15 +547,7 @@ if (!order) {
                         order.totalAmount
                     );
 
-                console.log(
-                    "💵 Expected Amount:",
-                    expectedAmount
-                );
-
-                console.log(
-                    "💵 Received Amount:",
-                    amount
-                );
+                console.log("Payment amount received for validation.");
 
                 // ==================================================
                 // VALIDATE AMOUNT
@@ -1492,117 +1508,6 @@ if (!order) {
                     )
                 );
 
-                try {
-
-                    console.log(
-                        "======================================"
-                    );
-
-                    receiptPath =
-                        await generatePdfReceipt(
-                            receiptData
-                        );
-
-                    console.log(
-                        "✅ PDF RECEIPT GENERATED SUCCESSFULLY"
-                    );
-
-                    console.log(
-                        "📄 Receipt file path:",
-                        receiptPath
-                    );
-
-                    console.log(
-                        "======================================"
-                    );
-
-                } catch (receiptError) {
-
-                    console.error(
-                        "======================================"
-                    );
-
-                    console.error(
-                        "❌ RECEIPT GENERATION ERROR"
-                    );
-
-                    console.error(
-                        receiptError.message
-                    );
-
-                    console.error(
-                        receiptError.stack
-                    );
-
-                    console.error(
-                        "======================================"
-                    );
-                }
-
-                // ==================================================
-                // SEND WHATSAPP RECEIPT
-                // ==================================================
-
-                try {
-
-                    if (!receipt) {
-
-                        console.log(
-                            "⚠️ No M-Pesa receipt number. Skipping WhatsApp receipt."
-                        );
-
-                    } else {
-
-                        const serverUrl =
-                            process.env.SERVER_URL;
-
-                        if (!serverUrl) {
-
-                            console.log(
-                                "⚠️ SERVER_URL is not configured. Skipping WhatsApp receipt."
-                            );
-
-                        } else {
-
-                            const pdfUrl =
-                                `${serverUrl}/receipts/receipt_${receipt}.pdf`;
-
-                            console.log(
-                                "======================================"
-                            );
-
-                            console.log(
-                                "📲 SENDING WHATSAPP RECEIPT"
-                            );
-
-                            console.log(
-                                "PDF URL:",
-                                pdfUrl
-                            );
-
-                            console.log(
-                                "======================================"
-                            );
-
-                            await sendWhatsAppReceipt(
-                                customerPhone,
-                                pdfUrl
-                            );
-
-                            console.log(
-                                "✅ WhatsApp receipt sent."
-                            );
-                        }
-                    }
-
-                } catch (whatsappError) {
-
-                    console.error(
-                        "❌ WhatsApp Error:",
-                        whatsappError.message
-                    );
-                }
-
                 // ==================================================
                 // SEND PAYMENT CONFIRMATION EMAIL
                 // ==================================================
@@ -1773,10 +1678,7 @@ if (!order) {
                     resultCode
                 );
 
-                console.log(
-                    "ResultDesc:",
-                    callback.ResultDesc
-                );
+                console.log("ResultDesc received.");
 
                 // ==================================================
                 // DUPLICATE FAILED CALLBACK
@@ -1888,14 +1790,7 @@ if (!order) {
                 "======================================"
             );
 
-            console.error(
-                error.response?.data ||
-                error.message
-            );
-
-            console.error(
-                error.stack
-            );
+            console.error("M-Pesa callback processing failed.");
 
             console.error(
                 "======================================"
@@ -2043,4 +1938,24 @@ app.listen(
         );
     }
 );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

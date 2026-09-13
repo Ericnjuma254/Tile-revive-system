@@ -1,4 +1,5 @@
 const express = require("express");
+const { authenticateToken, requireAdmin } = require("../middleware/auth");
 const prisma = require("../db");
 
 const {
@@ -574,7 +575,7 @@ try {
 // GET /api/orders
 // ======================================================
 
-router.get("/", async (req, res) => {
+router.get("/", authenticateToken, requireAdmin, async (req, res) => {
 
     try {
 
@@ -634,7 +635,7 @@ router.get("/", async (req, res) => {
 // GET /api/orders/:id
 // ======================================================
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", authenticateToken, requireAdmin, async (req, res) => {
 
     try {
 
@@ -715,7 +716,7 @@ router.get("/:id", async (req, res) => {
 // GET /api/orders/history/:phone
 // ======================================================
 
-router.get("/history/:phone", async (req, res) => {
+router.get("/history/:phone", authenticateToken, requireAdmin, async (req, res) => {
 
     try {
 
@@ -827,7 +828,7 @@ router.get("/history/:phone", async (req, res) => {
 // GET /api/orders/status/:status
 // ======================================================
 
-router.get("/status/:status", async (req, res) => {
+router.get("/status/:status", authenticateToken, requireAdmin, async (req, res) => {
 
     try {
 
@@ -895,3 +896,4 @@ router.get("/status/:status", async (req, res) => {
 
 
 module.exports = router;
+

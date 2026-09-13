@@ -4,8 +4,11 @@ const jwt = require("jsonwebtoken");
 // JWT CONFIGURATION
 // ======================================================
 
-const ACCESS_TOKEN_SECRET = process.env.JWT_ACCESS_SECRET;
-const REFRESH_TOKEN_SECRET = process.env.JWT_REFRESH_SECRET;
+const ACCESS_TOKEN_SECRET =
+    process.env.JWT_ACCESS_SECRET;
+
+const REFRESH_TOKEN_SECRET =
+    process.env.JWT_REFRESH_SECRET;
 
 const ACCESS_TOKEN_EXPIRES_IN =
     process.env.JWT_ACCESS_EXPIRES_IN || "15m";
@@ -13,19 +16,35 @@ const ACCESS_TOKEN_EXPIRES_IN =
 const REFRESH_TOKEN_EXPIRES_IN =
     process.env.JWT_REFRESH_EXPIRES_IN || "7d";
 
+const JWT_ALGORITHM = "HS256";
+
 // ======================================================
 // VALIDATE JWT CONFIGURATION
 // ======================================================
 
-if (!ACCESS_TOKEN_SECRET) {
+if (
+    !ACCESS_TOKEN_SECRET ||
+    ACCESS_TOKEN_SECRET.length < 32
+) {
     throw new Error(
-        "JWT_ACCESS_SECRET is missing from .env"
+        "JWT_ACCESS_SECRET must be at least 32 characters long."
     );
 }
 
-if (!REFRESH_TOKEN_SECRET) {
+if (
+    !REFRESH_TOKEN_SECRET ||
+    REFRESH_TOKEN_SECRET.length < 32
+) {
     throw new Error(
-        "JWT_REFRESH_SECRET is missing from .env"
+        "JWT_REFRESH_SECRET must be at least 32 characters long."
+    );
+}
+
+if (
+    ACCESS_TOKEN_SECRET === REFRESH_TOKEN_SECRET
+) {
+    throw new Error(
+        "JWT access and refresh secrets must be different."
     );
 }
 
@@ -34,6 +53,7 @@ if (!REFRESH_TOKEN_SECRET) {
 // ======================================================
 
 function generateAccessToken(user) {
+
     return jwt.sign(
         {
             userId: user.id,
@@ -42,6 +62,7 @@ function generateAccessToken(user) {
         },
         ACCESS_TOKEN_SECRET,
         {
+            algorithm: JWT_ALGORITHM,
             expiresIn: ACCESS_TOKEN_EXPIRES_IN
         }
     );
@@ -52,6 +73,7 @@ function generateAccessToken(user) {
 // ======================================================
 
 function generateRefreshToken(user) {
+
     return jwt.sign(
         {
             userId: user.id,
@@ -60,6 +82,7 @@ function generateRefreshToken(user) {
         },
         REFRESH_TOKEN_SECRET,
         {
+            algorithm: JWT_ALGORITHM,
             expiresIn: REFRESH_TOKEN_EXPIRES_IN
         }
     );
@@ -70,9 +93,13 @@ function generateRefreshToken(user) {
 // ======================================================
 
 function verifyAccessToken(token) {
+
     return jwt.verify(
         token,
-        ACCESS_TOKEN_SECRET
+        ACCESS_TOKEN_SECRET,
+        {
+            algorithms: [JWT_ALGORITHM]
+        }
     );
 }
 
@@ -81,9 +108,13 @@ function verifyAccessToken(token) {
 // ======================================================
 
 function verifyRefreshToken(token) {
+
     return jwt.verify(
         token,
-        REFRESH_TOKEN_SECRET
+        REFRESH_TOKEN_SECRET,
+        {
+            algorithms: [JWT_ALGORITHM]
+        }
     );
 }
 

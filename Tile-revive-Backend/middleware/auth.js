@@ -10,24 +10,7 @@ function authenticateToken(req, res, next) {
 
     try {
 
-        const authHeader =
-            req.headers.authorization;
-
-        console.log(
-            "[AUTH DEBUG]",
-            req.method,
-            req.originalUrl,
-            "Authorization present:",
-            Boolean(authHeader),
-            "Header format:",
-            authHeader
-                ? authHeader.split(" ")[0]
-                : "NONE",
-            "Token length:",
-            authHeader
-                ? authHeader.split(" ")[1]?.length || 0
-                : 0
-        );
+        const authHeader = req.headers.authorization;
 
         if (!authHeader) {
             return res.status(401).json({
@@ -36,8 +19,7 @@ function authenticateToken(req, res, next) {
             });
         }
 
-        const parts =
-            authHeader.split(" ");
+        const parts = authHeader.trim().split(/\s+/);
 
         if (
             parts.length !== 2 ||
@@ -50,24 +32,7 @@ function authenticateToken(req, res, next) {
             });
         }
 
-        const token =
-            parts[1];
-
-        const decoded =
-            verifyAccessToken(token);
-
-        console.log(
-            "[AUTH DEBUG] Token verified:",
-            {
-                userId: decoded.userId,
-                role: decoded.role,
-                expiresAt: decoded.exp
-                    ? new Date(
-                        decoded.exp * 1000
-                    ).toISOString()
-                    : null
-            }
-        );
+        const decoded = verifyAccessToken(parts[1]);
 
         req.user = decoded;
 
@@ -75,12 +40,7 @@ function authenticateToken(req, res, next) {
 
     } catch (error) {
 
-        console.error(
-            "[AUTH DEBUG] TOKEN VERIFICATION FAILED:",
-            error.name,
-            error.message
-        );
-
+        // Never expose JWT verification details to clients.
         return res.status(401).json({
             success: false,
             message: "Invalid or expired access token."
@@ -103,11 +63,6 @@ function requireAdmin(req, res, next) {
     }
 
     if (req.user.role !== "ADMIN") {
-        console.warn(
-            "[AUTH DEBUG] ADMIN CHECK FAILED:",
-            req.user.role
-        );
-
         return res.status(403).json({
             success: false,
             message: "Administrator access required."
@@ -123,7 +78,9 @@ function requireAdmin(req, res, next) {
 // ======================================================
 
 function debugAuth(req, res) {
+
     try {
+
         const authHeader =
             req.headers.authorization || "";
 
@@ -136,7 +93,7 @@ function debugAuth(req, res) {
         }
 
         const parts =
-            authHeader.split(" ");
+            authHeader.trim().split(/\s+/);
 
         if (
             parts.length !== 2 ||
@@ -173,8 +130,7 @@ function debugAuth(req, res) {
 
         return res.status(401).json({
             success: false,
-            message: "Token verification failed",
-            error: error.message
+            message: "Token verification failed"
         });
     }
 }

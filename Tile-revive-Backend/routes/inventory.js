@@ -1,4 +1,5 @@
 const express = require("express");
+const { authenticateToken, requireAdmin } = require("../middleware/auth");
 const prisma = require("../db");
 
 const router = express.Router();
@@ -251,7 +252,7 @@ router.get("/:productId", async (req, res) => {
 // POST /api/inventory/:productId/add
 // ======================================================
 
-router.post("/:productId/add", async (req, res) => {
+router.post("/:productId/add", authenticateToken, requireAdmin, async (req, res) => {
     try {
         const productId = Number(req.params.productId);
 
@@ -355,7 +356,7 @@ router.post("/:productId/add", async (req, res) => {
 // POST /api/inventory/:productId/remove
 // ======================================================
 
-router.post("/:productId/remove", async (req, res) => {
+router.post("/:productId/remove", authenticateToken, requireAdmin, async (req, res) => {
     try {
         const productId = Number(req.params.productId);
 
@@ -467,7 +468,7 @@ router.post("/:productId/remove", async (req, res) => {
 // PUT /api/inventory/:productId
 // ======================================================
 
-router.put("/:productId", async (req, res) => {
+router.put("/:productId", authenticateToken, requireAdmin, async (req, res) => {
     try {
         const productId = Number(req.params.productId);
 
@@ -587,3 +588,4 @@ router.put("/:productId", async (req, res) => {
 // ======================================================
 
 module.exports = router;
+

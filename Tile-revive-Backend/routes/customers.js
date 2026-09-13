@@ -772,7 +772,7 @@ router.get("/:id", async (req, res) => {
 // PUT /api/customers/:id
 // ======================================================
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", authenticateToken, requireAdmin, async (req, res) => {
     try {
         const id = Number(req.params.id);
 
@@ -850,7 +850,7 @@ router.put("/:id", async (req, res) => {
 // DELETE /api/customers/:id
 // ======================================================
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authenticateToken, requireAdmin, async (req, res) => {
     try {
         const id = Number(req.params.id);
 
@@ -919,6 +919,7 @@ router.delete("/:id", async (req, res) => {
 // ======================================================
 
 module.exports = router;
+
 
 
 

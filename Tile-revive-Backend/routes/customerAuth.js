@@ -1,4 +1,8 @@
 const express = require("express");
+
+const {
+    otpLimiter
+} = require("../middleware/authRateLimit");
 const crypto = require("crypto");
 const prisma = require("../db");
 
@@ -102,7 +106,7 @@ function hashOtp(code) {
 // REQUEST EMAIL OTP
 // ======================================================
 
-router.post("/request-email-otp", async (req, res) => {
+router.post("/request-email-otp", otpLimiter, async (req, res) => {
     try {
         const email = normalizeEmail(req.body.email);
         const fullName = String(req.body.fullName || "").trim();
@@ -191,7 +195,7 @@ router.post("/request-email-otp", async (req, res) => {
 // VERIFY EMAIL OTP
 // ======================================================
 
-router.post("/verify-email-otp", async (req, res) => {
+router.post("/verify-email-otp", otpLimiter, async (req, res) => {
     try {
         const email = normalizeEmail(req.body.email);
         const code = String(req.body.code || "").trim();

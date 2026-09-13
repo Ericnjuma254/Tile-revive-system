@@ -68,10 +68,10 @@ model product {
   weight               Float?
   width                Float?
   inventorytransaction inventorytransaction[]
+  offers               offer[]
   orderitem            orderitem[]
   productimage         productimage[]
   productreview        productreview[]
-  offers               offer[]
 }
 
 model inventorytransaction {
@@ -384,21 +384,19 @@ model productimage {
 }
 
 model offer {
-  id             Int      @id @default(autoincrement())
-  name           String
-  description    String?  @db.Text
-  type           String
-  productId      Int?
-  quantity       Int      @default(1)
-  discountValue  Float    @default(0)
-  status         String   @default("ACTIVE")
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @default(now()) @updatedAt
-
-  product        product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  id            Int      @id @default(autoincrement())
+  name          String
+  description   String?  @db.Text
+  type          String
+  productId     Int?
+  quantity      Int      @default(1)
+  discountValue Float    @default(0)
+  status        String   @default("ACTIVE")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  product       product? @relation(fields: [productId], references: [id])
 
   @@index([productId])
   @@index([status])
   @@index([type])
 }
-

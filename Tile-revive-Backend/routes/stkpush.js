@@ -307,6 +307,26 @@ router.post(
                 );
 
             // ==================================================
+            // VERIFY CUSTOMER PHONE BELONGS TO ORDER
+            // ==================================================
+
+            const submittedPhone =
+                formatPhoneNumber(customerPhone);
+
+            const orderPhone =
+                formatPhoneNumber(
+                    order.customer?.phoneNumber
+                );
+
+            if (submittedPhone !== orderPhone) {
+                return res.status(403).json({
+                    success: false,
+                    message:
+                        "The payment phone number does not match the order."
+                });
+            }
+
+            // ==================================================
             // GET PAYMENT
             // ==================================================
 
@@ -731,11 +751,6 @@ router.post(
             );
 
             console.log(
-                "Phone:",
-                phone
-            );
-
-            console.log(
                 "Amount:",
                 totalAmount
             );
@@ -818,8 +833,13 @@ router.post(
             } = stkResponse.data || {};
 
             console.log(
-                "M-Pesa Response:",
-                stkResponse.data
+                "M-Pesa STK response received:",
+                {
+                    orderId: order.id,
+                    paymentId: payment.id,
+                    responseCode: ResponseCode,
+                    checkoutRequestId: CheckoutRequestID ? "present" : "missing"
+                }
             );
 
             // ==================================================
@@ -868,8 +888,7 @@ router.post(
                     success: false,
 
                     message:
-                        ResponseDescription ||
-                        "STK Push failed.",
+                        "Unable to initiate the M-Pesa payment. Please try again.",
 
                     orderNumber:
                         order.orderNumber
@@ -1061,10 +1080,13 @@ router.post(
             console.error(
                 "❌ STK PUSH ERROR"
             );
-
             console.error(
-                error.response?.data ||
-                error.message
+                "STK Push failure:",
+                {
+                    status: error.response?.status || null,
+                    code: error.code || null,
+                    message: error.message || "Unknown payment error"
+                }
             );
 
             console.error(
@@ -1078,9 +1100,6 @@ router.post(
                 message:
                     "Unable to process payment.",
 
-                error:
-                    error.response?.data ||
-                    error.message
             });
         }
     }
@@ -1091,3 +1110,7 @@ router.post(
 // ======================================================
 
 module.exports = router;
+
+
+
+

@@ -72,7 +72,7 @@ router.post("/validation", async (req, res) => {
     console.log("======================================");
     console.log("📥 C2B VALIDATION");
     console.log("======================================");
-    console.log(JSON.stringify(req.body, null, 2));
+    console.log("C2B request received.");
     console.log("======================================");
 
     return res.status(200).json({
@@ -93,9 +93,9 @@ router.post("/confirmation", async (req, res) => {
         console.log("💰 C2B PAYMENT CONFIRMATION");
         console.log("======================================");
 
-        console.log(
-            JSON.stringify(req.body, null, 2)
-        );
+        console.log("C2B confirmation received.");
+
+
 
         console.log("======================================");
 
@@ -478,3 +478,5 @@ router.post("/confirmation", async (req, res) => {
 });
 
 module.exports = router;
+
+

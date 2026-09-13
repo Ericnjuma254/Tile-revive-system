@@ -4,6 +4,8 @@ const prisma = require("..\/db");
 const fs = require("fs");
 const path = require("path");
 const multer = require("multer");
+const { fileTypeFromFile } = require("file-type");
+const { authenticateToken, requireAdmin } = require("../middleware/auth");
 
 // ======================================================
 // PRODUCT IMAGE UPLOAD CONFIGURATION
@@ -78,6 +80,20 @@ const uploadProductImage = multer({
 
 // ======================================================
 // PRODUCT IMAGE GALLERY HELPERS
+async function validateProductImageFile(filePath) {
+    const detected = await fileTypeFromFile(filePath);
+
+    if (!detected) {
+        return false;
+    }
+
+    return [
+        "image/jpeg",
+        "image/png",
+        "image/webp"
+    ].includes(detected.mime);
+}
+
 // ======================================================
 
 const MAX_PRODUCT_IMAGES = 10;
@@ -154,7 +170,7 @@ function normaliseProductImages(product) {
 // POST /api/products
 // ======================================================
 
-router.post("/", async (req, res) => {
+router.post("/", authenticateToken, requireAdmin, async (req, res) => {
     try {
         const {
             name,
@@ -388,7 +404,7 @@ router.get("/:id", async (req, res) => {
 // PUT /api/products/:id
 // ======================================================
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", authenticateToken, requireAdmin, async (req, res) => {
     try {
         const id = Number(req.params.id);
 
@@ -566,7 +582,7 @@ router.put("/:id", async (req, res) => {
 // POST /api/products/:id/stock/in
 // ======================================================
 
-router.post("/:id/stock/in", async (req, res) => {
+router.post("/:id/stock/in", authenticateToken, requireAdmin, async (req, res) => {
     try {
         const id = Number(req.params.id);
         const quantity = Number(req.body.quantity);
@@ -651,7 +667,7 @@ router.post("/:id/stock/in", async (req, res) => {
 // POST /api/products/:id/stock/out
 // ======================================================
 
-router.post("/:id/stock/out", async (req, res) => {
+router.post("/:id/stock/out", authenticateToken, requireAdmin, async (req, res) => {
     try {
         const id = Number(req.params.id);
         const quantity = Number(req.body.quantity);
@@ -743,7 +759,7 @@ router.post("/:id/stock/out", async (req, res) => {
 // POST /api/products/:id/stock/adjust
 // ======================================================
 
-router.post("/:id/stock/adjust", async (req, res) => {
+router.post("/:id/stock/adjust", authenticateToken, requireAdmin, async (req, res) => {
     try {
         const id = Number(req.params.id);
         const newStock = Number(req.body.newStock);
@@ -885,6 +901,8 @@ function deleteLocalProductImage(image) {
 
 router.post(
     "/:id/image",
+    authenticateToken,
+    requireAdmin,
     uploadProductImage.single("image"),
     async (req, res) => {
         try {
@@ -901,6 +919,17 @@ router.post(
                 return res.status(400).json({
                     success: false,
                     message: "Please select a product image."
+                });
+            }
+
+            const validImage = await validateProductImageFile(req.file.path);
+
+            if (!validImage) {
+                deleteLocalProductImage(`/uploads/products/${req.file.filename}`);
+
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid image file."
                 });
             }
 
@@ -970,6 +999,8 @@ router.post(
 
 router.delete(
     "/:id/image",
+    authenticateToken,
+    requireAdmin,
     async (req, res) => {
         try {
             const id = Number(req.params.id);
@@ -1044,6 +1075,8 @@ router.delete(
 
 router.post(
     "/:id/images",
+    authenticateToken,
+    requireAdmin,
     uploadProductImage.single("image"),
     async (req, res) => {
 
@@ -1075,6 +1108,17 @@ router.post(
                 return res.status(400).json({
                     success: false,
                     message: "Please select an image."
+                });
+            }
+
+            const validImage = await validateProductImageFile(req.file.path);
+
+            if (!validImage) {
+                deleteLocalProductGalleryImage(`/uploads/products/${req.file.filename}`);
+
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid image file."
                 });
             }
 
@@ -1226,6 +1270,8 @@ router.post(
 
 router.delete(
     "/:id/images/:slot",
+    authenticateToken,
+    requireAdmin,
     async (req, res) => {
 
         try {
@@ -1396,5 +1442,33 @@ router.get(
         }
     }
 );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

@@ -209,7 +209,11 @@ function AppContent() {
                     path="/admin/gallery/mobile"
                     element={<MobileGallery />}
                 />
-
+                {/* Privacy Policy */}
+                <Route
+                    path="/privacy-policy"
+                    element={<PrivacyPolicy />}
+                />
             </Routes>
 
 
@@ -242,6 +246,8 @@ function App() {
 }
 
 export default App;
+
+
 
 
 

@@ -44,24 +44,32 @@ const Footer = () => {
 
             <div className="footer-bottom">
 
-                <div className="footer-legal">
-                    <Link to="/privacy-policy" className="privacy-policy-link">
-                        Privacy Policy
-                    </Link>
-                    <Link to="/terms-of-service" className="terms-of-service-link">
-                        Terms of Service
-                    </Link>
-                </div>
+    <div className="footer-legal">
+        <Link
+            to="/privacy-policy"
+            className="privacy-policy-link"
+        >
+            Privacy Policy
+        </Link>
 
-                <p>
-                    © {new Date().getFullYear()} Tile Revive Solutions.
-                    All rights reserved.
-                </p>
+        <Link
+            to="/terms-of-service"
+            className="terms-of-service-link"
+        >
+            Terms of Service
+        </Link>
+    </div>
 
-            </div>
-        </footer>
+    <p>
+        © {new Date().getFullYear()} Tile Revive Solutions.
+        All rights reserved.
+    </p>
+
+</div>
+</footer>
     );
 };
 
 export default Footer;
+
 

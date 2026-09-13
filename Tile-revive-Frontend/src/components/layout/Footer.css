@@ -1,74 +1,54 @@
-/* =========================================================
-   TILE REVIVE
-   FOOTER
-   ========================================================= */
-
 .site-footer {
-    width: 100%;
-    background: #1f2933;
+    background: #050505;
     color: #ffffff;
-    margin-top: auto;
+    padding: 55px 20px 25px;
 }
 
 .footer-container {
-    max-width: 1200px;
+    width: min(1200px, 100%);
     margin: 0 auto;
-    padding: 45px 30px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 40px;
 }
 
-/* =========================================================
-   SOCIAL MEDIA
-   ========================================================= */
-
 .footer-social h3 {
-    margin: 0 0 8px;
-    font-size: 24px;
-    font-weight: 700;
+    margin: 0 0 10px;
+    font-size: 25px;
 }
 
 .footer-social p {
-    margin: 0 0 18px;
-    color: #d5dbe1;
-    font-size: 14px;
+    margin: 0 0 22px;
+    color: #9b9b9b;
 }
 
 .social-links {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 12px;
 }
 
 .social-links a {
-    color: #ffffff;
+    color: #d7d7d7;
     text-decoration: none;
-    font-size: 14px;
-    padding: 8px 14px;
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    border-radius: 6px;
-    transition: all 0.2s ease;
+    transition:
+        color 0.25s ease,
+        transform 0.25s ease;
 }
 
 .social-links a:hover {
-    background: #ffffff;
-    color: #1f2933;
+    color: #32e875;
+    transform: translateY(-2px);
 }
-
-/* =========================================================
-   ADMIN
-   ========================================================= */
 
 .footer-admin {
     display: flex;
     align-items: center;
-    gap: 18px;
+    gap: 15px;
+    margin-top: 35px;
+    padding-top: 28px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .footer-admin span {
-    color: #d5dbe1;
+    color: #8f8f8f;
     font-size: 14px;
 }
 
@@ -76,61 +56,131 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 11px 20px;
-    background: #ffffff;
-    color: #1f2933;
+    min-height: 40px;
+    padding: 0 18px;
+    border: 1px solid rgba(50, 232, 117, 0.35);
+    border-radius: 9px;
+    color: #32e875;
     text-decoration: none;
-    border-radius: 6px;
     font-size: 14px;
-    font-weight: 700;
-    transition: all 0.2s ease;
+    font-weight: 600;
+    transition:
+        background 0.25s ease,
+        color 0.25s ease,
+        border-color 0.25s ease,
+        transform 0.25s ease,
+        box-shadow 0.25s ease;
 }
 
 .admin-button:hover {
-    background: #e3f2fd;
-    transform: translateY(-1px);
+    background: #32e875;
+    color: #050505;
+    border-color: #32e875;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(50, 232, 117, 0.18);
 }
-
-/* =========================================================
-   COPYRIGHT
-   ========================================================= */
 
 .footer-bottom {
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
-    text-align: center;
-    padding: 18px 20px;
+    width: min(1200px, 100%);
+    margin: 45px auto 0;
+    padding-top: 28px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.footer-bottom p {
+/* Legal links */
+.footer-legal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    margin-bottom: 28px;
+}
+
+.privacy-policy-link,
+.terms-of-service-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 145px;
+    padding: 12px 20px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.025);
+    color: #bdbdbd;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.1px;
+    transition:
+        color 0.3s ease,
+        background 0.3s ease,
+        border-color 0.3s ease,
+        transform 0.3s ease,
+        box-shadow 0.3s ease;
+}
+
+/* Animated green line */
+.privacy-policy-link::after,
+.terms-of-service-link::after {
+    content: "";
+    position: absolute;
+    left: 18px;
+    right: 18px;
+    bottom: 7px;
+    height: 2px;
+    border-radius: 10px;
+    background: #32e875;
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 0.3s ease;
+}
+
+/* Hover effect */
+.privacy-policy-link:hover,
+.terms-of-service-link:hover {
+    color: #32e875;
+    background: rgba(50, 232, 117, 0.06);
+    border-color: rgba(50, 232, 117, 0.45);
+    transform: translateY(-4px);
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.3),
+        0 0 18px rgba(50, 232, 117, 0.08);
+}
+
+.privacy-policy-link:hover::after,
+.terms-of-service-link:hover::after {
+    transform: scaleX(1);
+}
+
+.footer-bottom > p {
     margin: 0;
-    color: #aeb7c1;
+    text-align: center;
+    color: #666;
     font-size: 13px;
 }
 
-/* =========================================================
-   MOBILE
-   ========================================================= */
-
-@media (max-width: 768px) {
-    .footer-container {
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 35px 20px;
-        gap: 30px;
+/* Mobile */
+@media (max-width: 600px) {
+    .site-footer {
+        padding: 45px 18px 22px;
     }
 
     .footer-admin {
-        width: 100%;
-        flex-direction: column;
         align-items: flex-start;
+        flex-direction: column;
         gap: 12px;
     }
 
-    .admin-button {
-        width: 100%;
+    .footer-legal {
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 25px;
     }
 
-    .social-links {
-        gap: 8px;
+    .privacy-policy-link,
+    .terms-of-service-link {
+        width: min(100%, 280px);
+        min-width: 0;
     }
 }

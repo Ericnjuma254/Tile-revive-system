@@ -48,6 +48,9 @@ const Footer = () => {
                     <Link to="/privacy-policy" className="privacy-policy-link">
                         Privacy Policy
                     </Link>
+                    <Link to="/terms-of-service" className="terms-of-service-link">
+                        Terms of Service
+                    </Link>
                 </div>
 
                 <p>
@@ -61,3 +64,4 @@ const Footer = () => {
 };
 
 export default Footer;
+

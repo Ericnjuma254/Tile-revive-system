@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "test": "echo \"No tests specified\""
+    "test": "echo \"No tests specified\"",
+    "postinstall": "prisma generate"
   },
   "keywords": [],
   "author": "",

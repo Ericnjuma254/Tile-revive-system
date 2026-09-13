@@ -7,6 +7,14 @@
 .footer-container {
     width: min(1200px, 100%);
     margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+}
+
+.footer-social {
+    text-align: left;
 }
 
 .footer-social h3 {
@@ -22,7 +30,7 @@
 .social-links {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 18px;
 }
 
 .social-links a {
@@ -38,13 +46,14 @@
     transform: translateY(-2px);
 }
 
+/* ADMIN - RIGHT SIDE */
 .footer-admin {
     display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-top: 35px;
-    padding-top: 28px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 14px;
+    text-align: right;
 }
 
 .footer-admin span {
@@ -56,8 +65,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 40px;
-    padding: 0 18px;
+    min-height: 42px;
+    padding: 0 20px;
     border: 1px solid rgba(50, 232, 117, 0.35);
     border-radius: 9px;
     color: #32e875;
@@ -80,19 +89,19 @@
     box-shadow: 0 8px 25px rgba(50, 232, 117, 0.18);
 }
 
+/* LEGAL LINKS */
 .footer-bottom {
     width: min(1200px, 100%);
-    margin: 45px auto 0;
+    margin: 50px auto 0;
     padding-top: 28px;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* Legal links */
 .footer-legal {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 18px;
+    gap: 20px;
     margin-bottom: 28px;
 }
 
@@ -102,7 +111,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 145px;
+    min-width: 150px;
     padding: 12px 20px;
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 10px;
@@ -111,7 +120,6 @@
     text-decoration: none;
     font-size: 14px;
     font-weight: 600;
-    letter-spacing: 0.1px;
     transition:
         color 0.3s ease,
         background 0.3s ease,
@@ -120,7 +128,6 @@
         box-shadow 0.3s ease;
 }
 
-/* Animated green line */
 .privacy-policy-link::after,
 .terms-of-service-link::after {
     content: "";
@@ -136,7 +143,6 @@
     transition: transform 0.3s ease;
 }
 
-/* Hover effect */
 .privacy-policy-link:hover,
 .terms-of-service-link:hover {
     color: #32e875;
@@ -160,22 +166,37 @@
     font-size: 13px;
 }
 
-/* Mobile */
-@media (max-width: 600px) {
+/* MOBILE */
+@media (max-width: 700px) {
     .site-footer {
         padding: 45px 18px 22px;
     }
 
+    .footer-container {
+        grid-template-columns: 1fr;
+        gap: 35px;
+    }
+
+    .footer-social {
+        text-align: center;
+    }
+
+    .social-links {
+        justify-content: center;
+    }
+
     .footer-admin {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 12px;
+        align-items: center;
+        text-align: center;
+    }
+
+    .footer-bottom {
+        margin-top: 40px;
     }
 
     .footer-legal {
         flex-direction: column;
         gap: 12px;
-        margin-bottom: 25px;
     }
 
     .privacy-policy-link,

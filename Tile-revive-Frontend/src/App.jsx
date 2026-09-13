@@ -1,3 +1,4 @@
+import TermsOfService from "./pages/TermsOfService";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 
@@ -215,6 +216,10 @@ function AppContent() {
                     path="/privacy-policy"
                     element={<PrivacyPolicy />}
                 />
+                    <Route
+                        path="/terms-of-service"
+                        element={<TermsOfService />}
+                    />
             </Routes>
 
 
@@ -247,6 +252,7 @@ function App() {
 }
 
 export default App;
+
 
 
 

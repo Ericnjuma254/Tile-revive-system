@@ -452,68 +452,289 @@ async function sendOrderConfirmation({
 }) {
 
     if (!customerEmail) {
-
         console.log(
             "⚠️ No customer email. Skipping customer order confirmation."
         );
-
         return;
     }
 
-    // ==================================================
-    // BUILD PRODUCT TABLE
-    // ==================================================
+    const escapeHtml = (value) =>
+        String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+
+    const formatKES = (value) =>
+        `KES ${Number(value || 0).toLocaleString("en-KE")}`;
+
+    const attachments = [];
+    let attachmentIndex = 0;
+
+    let subtotal = 0;
+    let totalSavings = 0;
 
     const productRows =
-        Array.isArray(items)
+        Array.isArray(items) && items.length
             ? items.map(item => {
 
+                const product =
+                    item.product || {};
+
                 const productName =
-                    item.product?.name ||
+                    product.name ||
                     item.productName ||
                     "Product";
 
                 const quantity =
                     Number(item.quantity || 0);
 
-                const unitPrice =
+                const chargedPrice =
                     Number(item.unitPrice || 0);
 
-                const itemTotal =
-                    quantity * unitPrice;
+                const lineTotal =
+                    Number(
+                        item.totalPrice ??
+                        quantity * chargedPrice
+                    );
+
+                /*
+                 * Product.price is treated as the normal/current
+                 * catalogue price. The order's unitPrice is the
+                 * actual amount charged.
+                 */
+                const originalPrice =
+                    Number(product.price || chargedPrice);
+
+                const unitSaving =
+                    originalPrice > chargedPrice
+                        ? originalPrice - chargedPrice
+                        : 0;
+
+                const lineSaving =
+                    unitSaving * quantity;
+
+                subtotal += originalPrice * quantity;
+                totalSavings += lineSaving;
+
+                const isFree =
+                    chargedPrice === 0;
+
+                let imageHtml = `
+                    <div style="
+                        width:64px;
+                        height:64px;
+                        border-radius:10px;
+                        background:#f3f4f6;
+                        display:flex;
+                        align-items:center;
+                        justify-content:center;
+                        color:#9ca3af;
+                        font-size:24px;
+                    ">
+                        🧽
+                    </div>
+                `;
+
+                const firstImage =
+                    Array.isArray(product.productimage)
+                        ? product.productimage[0]
+                        : null;
+
+                if (firstImage?.image) {
+
+                    const imageValue =
+                        String(firstImage.image);
+
+                    if (
+                        imageValue.startsWith(
+                            "/uploads/products/"
+                        )
+                    ) {
+
+                        const filename =
+                            path.basename(imageValue);
+
+                        const imagePath =
+                            path.join(
+                                process.cwd(),
+                                "uploads",
+                                "products",
+                                filename
+                            );
+
+                        if (fs.existsSync(imagePath)) {
+
+                            const cid =
+                                `product-${orderNumber}-${attachmentIndex++}`;
+
+                            attachments.push({
+                                filename,
+                                path: imagePath,
+                                cid,
+                                contentType: "image/*"
+                            });
+
+                            imageHtml = `
+                                <img
+                                    src="cid:${cid}"
+                                    width="64"
+                                    height="64"
+                                    alt="${escapeHtml(productName)}"
+                                    style="
+                                        width:64px;
+                                        height:64px;
+                                        object-fit:cover;
+                                        border-radius:10px;
+                                        display:block;
+                                        border:1px solid #e5e7eb;
+                                    "
+                                />
+                            `;
+                        }
+                    }
+                }
+
+                let priceHtml = "";
+
+                if (isFree) {
+
+                    priceHtml = `
+                        <div style="
+                            margin-top:5px;
+                        ">
+                            <span style="
+                                color:#9ca3af;
+                                text-decoration:line-through;
+                                font-size:12px;
+                            ">
+                                ${formatKES(originalPrice)}
+                            </span>
+
+                            <span style="
+                                display:inline-block;
+                                margin-left:7px;
+                                color:#15803d;
+                                font-weight:800;
+                                font-size:14px;
+                            ">
+                                FREE
+                            </span>
+                        </div>
+
+                        <div style="
+                            margin-top:4px;
+                            display:inline-block;
+                            background:#dcfce7;
+                            color:#166534;
+                            padding:4px 8px;
+                            border-radius:999px;
+                            font-size:11px;
+                            font-weight:800;
+                        ">
+                            🎁 FREE PRODUCT
+                        </div>
+                    `;
+
+                } else if (unitSaving > 0) {
+
+                    priceHtml = `
+                        <div style="margin-top:5px;">
+                            <span style="
+                                color:#9ca3af;
+                                text-decoration:line-through;
+                                font-size:12px;
+                            ">
+                                ${formatKES(originalPrice)}
+                            </span>
+
+                            <span style="
+                                margin-left:7px;
+                                color:#111827;
+                                font-weight:800;
+                                font-size:14px;
+                            ">
+                                ${formatKES(chargedPrice)}
+                            </span>
+                        </div>
+
+                        <div style="
+                            margin-top:4px;
+                            color:#15803d;
+                            font-size:11px;
+                            font-weight:700;
+                        ">
+                            💚 You saved ${formatKES(unitSaving)}
+                        </div>
+                    `;
+
+                } else {
+
+                    priceHtml = `
+                        <div style="
+                            margin-top:5px;
+                            color:#111827;
+                            font-weight:700;
+                        ">
+                            ${formatKES(chargedPrice)}
+                        </div>
+                    `;
+                }
 
                 return `
                     <tr>
 
                         <td style="
-                            padding:10px;
-                            border-bottom:1px solid #ddd;
+                            padding:14px 8px;
+                            border-bottom:1px solid #e5e7eb;
+                            vertical-align:top;
                         ">
-                            ${productName}
+
+                            <div style="
+                                display:flex;
+                                align-items:center;
+                                gap:10px;
+                            ">
+
+                                ${imageHtml}
+
+                                <div>
+                                    <div style="
+                                        color:#111827;
+                                        font-weight:800;
+                                        font-size:14px;
+                                    ">
+                                        ${escapeHtml(productName)}
+                                    </div>
+
+                                    ${priceHtml}
+                                </div>
+
+                            </div>
+
                         </td>
 
                         <td style="
-                            padding:10px;
+                            padding:14px 5px;
                             text-align:center;
-                            border-bottom:1px solid #ddd;
+                            border-bottom:1px solid #e5e7eb;
+                            vertical-align:top;
+                            color:#374151;
+                            font-weight:700;
                         ">
                             ${quantity}
                         </td>
 
                         <td style="
-                            padding:10px;
+                            padding:14px 5px;
                             text-align:right;
-                            border-bottom:1px solid #ddd;
+                            border-bottom:1px solid #e5e7eb;
+                            vertical-align:top;
+                            color:#111827;
+                            font-weight:800;
                         ">
-                            KES ${unitPrice.toLocaleString()}
-                        </td>
-
-                        <td style="
-                            padding:10px;
-                            text-align:right;
-                            border-bottom:1px solid #ddd;
-                        ">
-                            KES ${itemTotal.toLocaleString()}
+                            ${formatKES(lineTotal)}
                         </td>
 
                     </tr>
@@ -522,15 +743,47 @@ async function sendOrderConfirmation({
             }).join("")
             : `
                 <tr>
-                    <td colspan="4">
-                        No products found
+                    <td colspan="3" style="
+                        padding:20px;
+                        text-align:center;
+                        color:#6b7280;
+                    ">
+                        No products found.
                     </td>
                 </tr>
             `;
 
-    // ==================================================
-    // EMAIL
-    // ==================================================
+    const finalTotal =
+        Number(totalAmount || 0);
+
+    const savingsHtml =
+        totalSavings > 0
+            ? `
+                <div style="
+                    background:#ecfdf5;
+                    border:1px solid #bbf7d0;
+                    border-radius:12px;
+                    padding:14px 16px;
+                    margin:18px 0;
+                ">
+                    <div style="
+                        color:#166534;
+                        font-weight:800;
+                        font-size:15px;
+                    ">
+                        🎉 You saved ${formatKES(totalSavings)}
+                    </div>
+
+                    <div style="
+                        color:#4b5563;
+                        font-size:12px;
+                        margin-top:4px;
+                    ">
+                        Your order includes discounted products or free items.
+                    </div>
+                </div>
+            `
+            : "";
 
     const mailOptions = {
 
@@ -544,6 +797,8 @@ async function sendOrderConfirmation({
         subject:
             `Order Received - ${orderNumber}`,
 
+        attachments,
+
         html: `
 
 <!DOCTYPE html>
@@ -554,201 +809,269 @@ async function sendOrderConfirmation({
 
 <meta charset="UTF-8">
 
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
 <title>
-Order Received - ${orderNumber}
+Order Received - ${escapeHtml(orderNumber)}
 </title>
 
 </head>
 
 <body style="
     margin:0;
-    padding:30px;
-    background:#f5f5f5;
-    font-family:Arial,sans-serif;
+    padding:0;
+    background:#f3f4f6;
+    font-family:Arial,Helvetica,sans-serif;
+    color:#111827;
+">
+
+<div style="
+    width:100%;
+    padding:25px 10px;
+    box-sizing:border-box;
 ">
 
 <div style="
     max-width:700px;
-    margin:auto;
-    background:white;
-    padding:30px;
-    border-radius:10px;
+    margin:0 auto;
+    background:#ffffff;
+    border-radius:16px;
+    overflow:hidden;
+    box-shadow:0 4px 20px rgba(0,0,0,0.06);
 ">
 
-    <h2 style="
-        color:#273244;
-        margin-top:0;
-    ">
-        🛒 ORDER RECEIVED
-    </h2>
-
-    <p>
-        Hello
-        <strong>${customerName || "Customer"}</strong>,
-    </p>
-
-    <p>
-        Thank you for shopping with
-        <strong>Tile Revive Solutions</strong>.
-    </p>
-
-    <p>
-        We have successfully received your order.
-        Your order is now being processed.
-    </p>
-
     <div style="
-        background:#f0fdf4;
-        border-left:5px solid #00a878;
-        padding:15px;
-        margin:20px 0;
+        background:#050505;
+        padding:25px 22px;
+        color:white;
     ">
 
-        <strong>
-            Order Number:
-        </strong>
+        <div style="
+            font-size:12px;
+            color:#32e875;
+            font-weight:800;
+            letter-spacing:1px;
+        ">
+            TILE REVIVE SOLUTIONS
+        </div>
 
-        ${orderNumber}
+        <h1 style="
+            margin:8px 0 5px;
+            font-size:25px;
+        ">
+            🛒 Order Received
+        </h1>
 
-        <br>
-
-        <strong>
-            Order Status:
-        </strong>
-
-        ${orderStatus || "PENDING"}
-
-        <br>
-
-        <strong>
-            Payment Status:
-        </strong>
-
-        ${paymentStatus || "PENDING"}
+        <div style="
+            color:#d1d5db;
+            font-size:13px;
+        ">
+            Order #${escapeHtml(orderNumber)}
+        </div>
 
     </div>
 
-    <hr>
+    <div style="padding:24px 20px;">
 
-    <h3>
-        ORDER DETAILS
-    </h3>
+        <p>
+            Hello
+            <strong>${escapeHtml(customerName || "Customer")}</strong>,
+        </p>
 
-    <table style="
-        width:100%;
-        border-collapse:collapse;
-    ">
+        <p style="
+            color:#4b5563;
+            line-height:1.6;
+        ">
+            Thank you for shopping with
+            <strong>Tile Revive Solutions</strong>.
+            We have successfully received your order and it is now being processed.
+        </p>
 
-        <thead>
+        <div style="
+            background:#f0fdf4;
+            border:1px solid #bbf7d0;
+            border-radius:12px;
+            padding:15px;
+            margin:20px 0;
+        ">
 
-            <tr style="
-                background:#374151;
-                color:white;
+            <strong>Order Status:</strong>
+            ${escapeHtml(orderStatus || "PENDING")}
+
+            <br>
+
+            <strong>Payment Status:</strong>
+            ${escapeHtml(paymentStatus || "PENDING")}
+
+        </div>
+
+        ${savingsHtml}
+
+        <h3 style="
+            margin-top:25px;
+            color:#111827;
+        ">
+            YOUR ORDER
+        </h3>
+
+        <div style="overflow-x:auto;">
+
+            <table style="
+                width:100%;
+                min-width:500px;
+                border-collapse:collapse;
             ">
 
-                <th style="
-                    padding:10px;
-                    text-align:left;
-                ">
-                    Product
-                </th>
+                <thead>
 
-                <th style="
-                    padding:10px;
-                    text-align:center;
-                ">
-                    Qty
-                </th>
+                    <tr style="
+                        background:#111827;
+                        color:white;
+                    ">
 
-                <th style="
-                    padding:10px;
-                    text-align:right;
-                ">
-                    Unit Price
-                </th>
+                        <th style="
+                            padding:11px 8px;
+                            text-align:left;
+                        ">
+                            Product
+                        </th>
 
-                <th style="
-                    padding:10px;
-                    text-align:right;
-                ">
-                    Total
-                </th>
+                        <th style="
+                            padding:11px 5px;
+                            text-align:center;
+                        ">
+                            Qty
+                        </th>
 
-            </tr>
+                        <th style="
+                            padding:11px 5px;
+                            text-align:right;
+                        ">
+                            Total
+                        </th>
 
-        </thead>
+                    </tr>
 
-        <tbody>
+                </thead>
 
-            ${productRows}
+                <tbody>
+                    ${productRows}
+                </tbody>
 
-        </tbody>
+            </table>
 
-    </table>
+        </div>
 
-    <hr>
+        <div style="
+            margin-top:20px;
+            padding:18px;
+            background:#f9fafb;
+            border-radius:12px;
+        ">
 
-    <div style="
-        text-align:right;
-        font-size:18px;
-        font-weight:bold;
-    ">
+            <div style="
+                display:flex;
+                justify-content:space-between;
+                margin-bottom:8px;
+                color:#6b7280;
+            ">
+                <span>Estimated value</span>
+                <strong>${formatKES(subtotal)}</strong>
+            </div>
 
-        TOTAL:
+            <div style="
+                display:flex;
+                justify-content:space-between;
+                margin-bottom:12px;
+                color:#15803d;
+            ">
+                <span>Your savings</span>
+                <strong>${formatKES(totalSavings)}</strong>
+            </div>
 
-        <span style="color:#00a878;">
-            KES ${Number(totalAmount || 0).toLocaleString()}
-        </span>
+            <div style="
+                border-top:1px solid #d1d5db;
+                padding-top:12px;
+                display:flex;
+                justify-content:space-between;
+                font-size:19px;
+                font-weight:900;
+            ">
+                <span>TOTAL</span>
+
+                <span style="color:#00a878;">
+                    ${formatKES(finalTotal)}
+                </span>
+            </div>
+
+        </div>
+
+        <h3 style="margin-top:28px;">
+            DELIVERY INFORMATION
+        </h3>
+
+        <p>
+            <strong>Phone:</strong>
+            ${escapeHtml(customerPhone || "N/A")}
+        </p>
+
+        <p>
+            <strong>County:</strong>
+            ${escapeHtml(county || "N/A")}
+        </p>
+
+        <p>
+            <strong>Delivery Location:</strong>
+            ${escapeHtml(location || "N/A")}
+        </p>
+
+        <hr style="
+            border:0;
+            border-top:1px solid #e5e7eb;
+            margin:25px 0;
+        ">
+
+        <p>
+            <strong>Payment Method:</strong>
+            ${escapeHtml(paymentMethod || "N/A")}
+        </p>
+
+        <p style="
+            color:#6b7280;
+            font-size:13px;
+            line-height:1.5;
+        ">
+            Your payment receipt will be sent to this email after successful payment.
+        </p>
+
+        <div style="
+            margin-top:25px;
+            padding-top:20px;
+            border-top:1px solid #e5e7eb;
+            color:#6b7280;
+            font-size:13px;
+        ">
+
+            Thank you for choosing
+            <strong style="color:#111827;">
+                Tile Revive Solutions
+            </strong>.
+
+            <br><br>
+
+            Regards,<br>
+            <strong style="color:#111827;">
+                Tile Revive Solutions
+            </strong>
+
+        </div>
 
     </div>
 
-    <hr>
-
-    <h3>
-        DELIVERY INFORMATION
-    </h3>
-
-    <p>
-        <strong>Phone:</strong>
-        ${customerPhone || "N/A"}
-    </p>
-
-    <p>
-        <strong>County:</strong>
-        ${county || "N/A"}
-    </p>
-
-    <p>
-        <strong>Delivery Location:</strong>
-        ${location || "N/A"}
-    </p>
-
-    <hr>
-
-    <p>
-        <strong>Payment Method:</strong>
-        ${paymentMethod || "N/A"}
-    </p>
-
-    <p style="
-        color:#6b7280;
-        font-size:13px;
-    ">
-
-        Your payment receipt will be sent to this
-        email after successful payment.
-
-    </p>
-
-    <p>
-        Thank you for choosing
-        <strong>Tile Revive Solutions</strong>.
-    </p>
-
-    <p>
-        Regards,<br>
-        <strong>Tile Revive Solutions</strong>
-    </p>
+</div>
 
 </div>
 
@@ -792,7 +1115,6 @@ Order Received - ${orderNumber}
 
     return info;
 }
-
 // ======================================================
 // SEND PAYMENT CONFIRMATION
 // CUSTOMER EMAIL
@@ -1689,6 +2011,10 @@ module.exports = {
 
     sendOrderConfirmation,
 
-    sendCustomerOtpEmail
+    sendCustomerOtpEmail,
+
+    sendOrderStatusUpdate,
+
+    sendPaymentStatusUpdate
 
 };

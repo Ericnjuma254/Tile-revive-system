@@ -6,6 +6,10 @@ const {
     sendOrderConfirmation
 } = require("../utils/sendEmail");
 
+const {
+    logCommunication
+} = require("../utils/logCommunication");
+
 const router = express.Router();
 
 // ======================================================
@@ -207,7 +211,15 @@ router.post("/", async (req, res) => {
 
                 orderitem: {
                     include: {
-                        product: true
+                        product: {
+                            include: {
+                                productimage: {
+                                    orderBy: {
+                                        sortOrder: "asc"
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -339,41 +351,79 @@ try {
         "======================================"
     );
 
-    await sendOrderConfirmation({
+    const emailInfo =
+        await sendOrderConfirmation({
 
-        customerEmail:
-            order.customer?.email,
+            customerEmail:
+                order.customer?.email,
 
-        customerName:
-            order.customer?.fullName,
+            customerName:
+                order.customer?.fullName,
 
-        orderNumber:
-            order.orderNumber,
+            orderNumber:
+                order.orderNumber,
 
-        customerPhone:
-            order.customer?.phoneNumber,
+            customerPhone:
+                order.customer?.phoneNumber,
 
-        county:
-            order.county || "N/A",
+            county:
+                order.county || "N/A",
 
-        location:
-            order.location || "N/A",
+            location:
+                order.location || "N/A",
 
-        items:
-            order.orderitem,
+            items:
+                order.orderitem,
 
-        totalAmount:
-            Number(order.totalAmount || 0),
+            totalAmount:
+                Number(order.totalAmount || 0),
 
-        paymentMethod:
-            payment.paymentMethod,
+            paymentMethod:
+                payment.paymentMethod,
 
-        paymentStatus:
-            payment.status,
+            paymentStatus:
+                payment.status,
 
-        orderStatus:
-            order.orderStatus
-    });
+            orderStatus:
+                order.orderStatus
+        });
+
+    // ==================================================
+    // CUSTOMER 360 COMMUNICATION LOG
+    // WEBSITE ORDER CONFIRMATION
+    // ==================================================
+
+    if (
+        emailInfo &&
+        order.customer?.id &&
+        order.customer?.email
+    ) {
+        await logCommunication({
+            customerId:
+                order.customer.id,
+
+            orderId:
+                order.id,
+
+            userId:
+                null,
+
+            type:
+                "ORDER_CONFIRMATION",
+
+            recipient:
+                order.customer.email,
+
+            subject:
+                "Your Tile Revive order confirmation",
+
+            status:
+                "SENT",
+
+            messageId:
+                emailInfo.messageId || null,
+        });
+    }
 
     console.log(
         "✅ CUSTOMER ORDER CONFIRMATION SENT"
@@ -388,6 +438,42 @@ try {
     console.error(
         customerEmailError.message
     );
+
+    // ==================================================
+    // CUSTOMER 360 COMMUNICATION LOG
+    // FAILED WEBSITE ORDER CONFIRMATION
+    // ==================================================
+
+    if (
+        order?.customer?.id &&
+        order?.customer?.email
+    ) {
+        await logCommunication({
+            customerId:
+                order.customer.id,
+
+            orderId:
+                order.id,
+
+            userId:
+                null,
+
+            type:
+                "ORDER_CONFIRMATION",
+
+            recipient:
+                order.customer.email,
+
+            subject:
+                "Your Tile Revive order confirmation",
+
+            status:
+                "FAILED",
+
+            errorMessage:
+                customerEmailError.message,
+        });
+    }
 
     // Email failure must NOT cancel the order.
 }

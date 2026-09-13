@@ -1,0 +1,612 @@
+/* ==========================================================
+   TILE REVIVE — ADMIN OFFERS
+   Premium dark admin workspace
+   ========================================================== */
+
+.admin-offers-page {
+    min-height: 100%;
+    padding: 32px;
+    color: #fff;
+    background:
+        radial-gradient(
+            circle at 85% 0%,
+            rgba(50, 232, 117, 0.055),
+            transparent 32%
+        ),
+        #050505;
+}
+
+/* ==========================================================
+   HEADER
+   ========================================================== */
+
+.admin-offers-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.admin-offers-header h1 {
+    margin: 0;
+    font-size: 32px;
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: -0.7px;
+}
+
+.admin-offers-header p {
+    margin: 9px 0 0;
+    color: #888;
+    font-size: 14px;
+}
+
+/* ==========================================================
+   CREATE BUTTON
+   ========================================================== */
+
+.admin-offers-create-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 18px;
+    border: 1px solid rgba(50, 232, 117, 0.3);
+    border-radius: 11px;
+    background: #32e875;
+    color: #050505;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow:
+        0 8px 24px rgba(50, 232, 117, 0.08),
+        inset 0 1px rgba(255, 255, 255, 0.25);
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        opacity 0.18s ease;
+}
+
+.admin-offers-create-btn:hover {
+    transform: translateY(-1px);
+    box-shadow:
+        0 12px 30px rgba(50, 232, 117, 0.15),
+        inset 0 1px rgba(255, 255, 255, 0.25);
+}
+
+.admin-offers-create-btn:active {
+    transform: translateY(0);
+}
+
+/* ==========================================================
+   ERROR
+   ========================================================== */
+
+.admin-offers-error {
+    margin-bottom: 20px;
+    padding: 13px 16px;
+    border: 1px solid rgba(255, 75, 75, 0.2);
+    border-radius: 12px;
+    background: rgba(255, 70, 70, 0.08);
+    color: #ff7777;
+    font-size: 13px;
+}
+
+/* ==========================================================
+   EMPTY / LOADING
+   ========================================================== */
+
+.admin-offers-empty {
+    min-height: 260px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+    border: 1px dashed #292929;
+    border-radius: 18px;
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,0.025),
+            rgba(255,255,255,0.008)
+        );
+    text-align: center;
+}
+
+.admin-offers-empty h2 {
+    margin: 0 0 8px;
+    font-size: 20px;
+    font-weight: 750;
+}
+
+.admin-offers-empty p {
+    max-width: 420px;
+    margin: 0;
+    color: #777;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* ==========================================================
+   OFFER GRID
+   ========================================================== */
+
+.admin-offers-grid {
+    display: grid;
+    grid-template-columns: repeat(
+        auto-fill,
+        minmax(300px, 1fr)
+    );
+    gap: 18px;
+}
+
+/* ==========================================================
+   OFFER CARD
+   ========================================================== */
+
+.admin-offer-card {
+    position: relative;
+    overflow: hidden;
+    min-height: 235px;
+    padding: 21px;
+    border: 1px solid #202020;
+    border-radius: 18px;
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,0.035),
+            rgba(255,255,255,0.012)
+        ),
+        #0a0a0a;
+    box-shadow:
+        0 10px 35px rgba(0, 0, 0, 0.22);
+    transition:
+        transform 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.admin-offer-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        #32e875,
+        transparent
+    );
+    opacity: 0.45;
+}
+
+.admin-offer-card:hover {
+    transform: translateY(-3px);
+    border-color: #303030;
+    box-shadow:
+        0 18px 45px rgba(0, 0, 0, 0.35),
+        0 0 0 1px rgba(50, 232, 117, 0.035);
+}
+
+.admin-offer-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.admin-offer-card h2 {
+    margin: 0 0 11px;
+    color: #fff;
+    font-size: 18px;
+    line-height: 1.3;
+    font-weight: 750;
+    letter-spacing: -0.2px;
+}
+
+/* ==========================================================
+   STATUS
+   ========================================================== */
+
+.admin-offer-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 9px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.admin-offer-status::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+}
+
+.admin-offer-status.active {
+    background: rgba(50, 232, 117, 0.09);
+    color: #32e875;
+    border: 1px solid rgba(50, 232, 117, 0.14);
+}
+
+.admin-offer-status.active::before {
+    background: #32e875;
+    box-shadow: 0 0 8px rgba(50, 232, 117, 0.6);
+}
+
+.admin-offer-status.inactive {
+    background: rgba(255,255,255,0.05);
+    color: #888;
+    border: 1px solid #252525;
+}
+
+.admin-offer-status.inactive::before {
+    background: #666;
+}
+
+/* ==========================================================
+   OFFER TYPE
+   ========================================================== */
+
+.admin-offer-type {
+    display: inline-flex;
+    align-items: center;
+    min-height: 27px;
+    margin: 18px 0 15px;
+    padding: 0 9px;
+    border: 1px solid rgba(50, 232, 117, 0.12);
+    border-radius: 7px;
+    background: rgba(50, 232, 117, 0.055);
+    color: #32e875 !important;
+    font-size: 10px !important;
+    font-weight: 800;
+    letter-spacing: 0.65px;
+    text-transform: uppercase;
+}
+
+/* ==========================================================
+   OFFER DETAILS
+   ========================================================== */
+
+.admin-offer-card p:not(.admin-offer-type) {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 18px;
+    margin: 9px 0;
+    padding-bottom: 9px;
+    border-bottom: 1px solid rgba(255,255,255,0.055);
+    color: #858585;
+    font-size: 13px;
+}
+
+.admin-offer-card p strong {
+    color: #e8e8e8;
+    font-weight: 650;
+    text-align: right;
+}
+
+.admin-offer-card p:last-of-type {
+    border-bottom: 0;
+}
+
+/* ==========================================================
+   ACTIONS
+   ========================================================== */
+
+.admin-offer-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 9px;
+    margin-top: 19px;
+}
+
+.admin-offer-actions button {
+    min-height: 36px;
+    padding: 8px 12px;
+    border: 1px solid #292929;
+    border-radius: 9px;
+    background: #111;
+    color: #ddd;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+        background 0.18s ease,
+        border-color 0.18s ease,
+        color 0.18s ease;
+}
+
+.admin-offer-actions button:hover {
+    background: #191919;
+    border-color: #383838;
+    color: #fff;
+}
+
+.admin-offer-actions button:last-child:hover {
+    border-color: rgba(255, 75, 75, 0.25);
+    background: rgba(255, 75, 75, 0.06);
+    color: #ff7777;
+}
+
+/* ==========================================================
+   CREATE OFFER MODAL
+   ========================================================== */
+
+.admin-offer-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(0, 0, 0, 0.78);
+    backdrop-filter: blur(10px);
+}
+
+.admin-offer-modal {
+    width: min(570px, 100%);
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    border: 1px solid #2a2a2a;
+    border-radius: 20px;
+    background:
+        radial-gradient(
+            circle at 100% 0%,
+            rgba(50,232,117,0.055),
+            transparent 35%
+        ),
+        #0a0a0a;
+    box-shadow:
+        0 30px 100px rgba(0,0,0,0.72);
+    scrollbar-width: thin;
+}
+
+.admin-offer-modal-header {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 23px 24px 20px;
+    border-bottom: 1px solid #202020;
+    background: rgba(10,10,10,0.94);
+    backdrop-filter: blur(12px);
+}
+
+.admin-offer-modal-header h2 {
+    margin: 0 0 6px;
+    color: #fff;
+    font-size: 23px;
+    letter-spacing: -0.3px;
+}
+
+.admin-offer-modal-header p {
+    margin: 0;
+    color: #777;
+    font-size: 13px;
+}
+
+.admin-offer-modal-close {
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+    border: 1px solid #292929;
+    border-radius: 10px;
+    background: #111;
+    color: #888;
+    font-size: 23px;
+    line-height: 1;
+    cursor: pointer;
+    transition: 0.18s ease;
+}
+
+.admin-offer-modal-close:hover {
+    border-color: #3a3a3a;
+    background: #191919;
+    color: #fff;
+}
+
+.admin-offer-modal form {
+    padding: 22px 24px 24px;
+}
+
+/* ==========================================================
+   FORM
+   ========================================================== */
+
+.admin-offer-form-group {
+    margin-bottom: 18px;
+}
+
+.admin-offer-form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #d6d6d6;
+    font-size: 12px;
+    font-weight: 750;
+    letter-spacing: 0.1px;
+}
+
+.admin-offer-form-group input,
+.admin-offer-form-group select,
+.admin-offer-form-group textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 13px;
+    border: 1px solid #292929;
+    border-radius: 10px;
+    outline: none;
+    background: #101010;
+    color: #fff;
+    font: inherit;
+    font-size: 13px;
+    transition:
+        border-color 0.18s ease,
+        box-shadow 0.18s ease,
+        background 0.18s ease;
+}
+
+.admin-offer-form-group input:hover,
+.admin-offer-form-group select:hover,
+.admin-offer-form-group textarea:hover {
+    border-color: #343434;
+}
+
+.admin-offer-form-group input:focus,
+.admin-offer-form-group select:focus,
+.admin-offer-form-group textarea:focus {
+    border-color: #32e875;
+    background: #111;
+    box-shadow:
+        0 0 0 3px rgba(50, 232, 117, 0.07);
+}
+
+.admin-offer-form-group input::placeholder,
+.admin-offer-form-group textarea::placeholder {
+    color: #555;
+}
+
+.admin-offer-form-group textarea {
+    min-height: 92px;
+    resize: vertical;
+    line-height: 1.5;
+}
+
+.admin-offer-form-group select option {
+    background: #101010;
+    color: #fff;
+}
+
+/* ==========================================================
+   FORM ACTIONS
+   ========================================================== */
+
+.admin-offer-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #202020;
+}
+
+.admin-offer-cancel-btn,
+.admin-offer-save-btn {
+    min-height: 40px;
+    padding: 0 17px;
+    border-radius: 9px;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: 0.18s ease;
+}
+
+.admin-offer-cancel-btn {
+    border: 1px solid #303030;
+    background: #151515;
+    color: #ddd;
+}
+
+.admin-offer-cancel-btn:hover {
+    background: #1d1d1d;
+    color: #fff;
+}
+
+.admin-offer-save-btn {
+    border: 1px solid rgba(50,232,117,0.25);
+    background: #32e875;
+    color: #050505;
+    box-shadow: 0 7px 20px rgba(50,232,117,0.08);
+}
+
+.admin-offer-save-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 25px rgba(50,232,117,0.13);
+}
+
+.admin-offer-cancel-btn:disabled,
+.admin-offer-save-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ==========================================================
+   RESPONSIVE
+   ========================================================== */
+
+@media (max-width: 900px) {
+    .admin-offers-page {
+        padding: 24px;
+    }
+
+    .admin-offers-grid {
+        grid-template-columns: repeat(
+            auto-fill,
+            minmax(270px, 1fr)
+        );
+    }
+}
+
+@media (max-width: 650px) {
+    .admin-offers-page {
+        padding: 17px;
+    }
+
+    .admin-offers-header {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .admin-offers-header h1 {
+        font-size: 27px;
+    }
+
+    .admin-offers-create-btn {
+        width: 100%;
+    }
+
+    .admin-offers-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-offer-modal-backdrop {
+        padding: 10px;
+    }
+
+    .admin-offer-modal {
+        max-height: calc(100vh - 20px);
+        border-radius: 16px;
+    }
+
+    .admin-offer-modal-header {
+        padding: 19px;
+    }
+
+    .admin-offer-modal form {
+        padding: 19px;
+    }
+
+    .admin-offer-form-actions {
+        flex-direction: column-reverse;
+    }
+
+    .admin-offer-cancel-btn,
+    .admin-offer-save-btn {
+        width: 100%;
+    }
+}

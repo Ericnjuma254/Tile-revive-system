@@ -1,6 +1,11 @@
 const express = require("express");
 const prisma = require("../db");
 
+
+const {
+    authenticateToken,
+    requireAdmin,
+} = require("../middleware/auth");
 const router = express.Router();
 
 // ======================================================
@@ -13,7 +18,9 @@ router.post("/", async (req, res) => {
         const {
             fullName,
             phoneNumber,
-            email
+            email,
+            county,
+            location
         } = req.body;
 
         if (!fullName || !phoneNumber) {
@@ -43,7 +50,9 @@ router.post("/", async (req, res) => {
             data: {
                 fullName: fullName.trim(),
                 phoneNumber: phone,
-                email: email?.trim() || null
+                email: email?.trim() || null,
+                county: county?.trim() || null,
+                location: location?.trim() || null
             }
         });
 
@@ -125,6 +134,8 @@ router.get("/", async (req, res) => {
                 fullName: customer.fullName,
                 phoneNumber: customer.phoneNumber,
                 email: customer.email,
+                county: customer.county,
+                location: customer.location,
 
                 totalOrders,
                 totalSpent,
@@ -312,6 +323,371 @@ router.get("/phone/:phone", async (req, res) => {
 // GET /api/customers/:id
 // ======================================================
 
+/* ============================================================
+   CUSTOMER 360
+   ============================================================ */
+
+router.get("/:id/360", authenticateToken, requireAdmin, async (req, res) => {
+    try {
+        const customerId = Number(req.params.id);
+
+        if (!Number.isInteger(customerId) || customerId <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid customer ID",
+            });
+        }
+
+        const customer = await prisma.customer.findUnique({
+            where: { id: customerId },
+            include: {
+                order: {
+                    orderBy: {
+                        createdAt: "desc",
+                    },
+                    include: {
+                        orderitem: {
+                            include: {
+                                product: true,
+                            },
+                        },
+                        payment: true,
+                        statusHistory: {
+                            orderBy: {
+                                createdAt: "desc",
+                            },
+                        },
+                    },
+                },
+                payment: {
+                    orderBy: {
+                        createdAt: "desc",
+                    },
+                },
+                communicationlog: {
+                    orderBy: {
+                        createdAt: "desc",
+                    },
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                fullName: true,
+                                email: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        if (!customer) {
+            return res.status(404).json({
+                success: false,
+                message: "Customer not found",
+            });
+        }
+
+        const orders = customer.order || [];
+        const payments = customer.payment || [];
+
+        const successfulPaymentStatuses = [
+            "SUCCESS",
+            "PAID",
+            "COMPLETED",
+        ];
+
+        const paidPayments = payments.filter((payment) =>
+            successfulPaymentStatuses.includes(
+                String(payment.status || "").toUpperCase()
+            )
+        );
+
+        const lifetimeSpend = paidPayments.reduce(
+            (sum, payment) =>
+                sum + Number(payment.amountPaid || 0),
+            0
+        );
+
+        const paidOrders = orders.filter((order) =>
+            successfulPaymentStatuses.includes(
+                String(order.paymentStatus || "").toUpperCase()
+            )
+        );
+
+        const cancelledOrders = orders.filter(
+            (order) =>
+                String(order.orderStatus || "").toUpperCase() ===
+                "CANCELLED"
+        );
+
+        const nonCancelledOrders = orders.filter(
+            (order) =>
+                String(order.orderStatus || "").toUpperCase() !==
+                "CANCELLED"
+        );
+
+        const outstanding = nonCancelledOrders.reduce(
+            (sum, order) => {
+                const paidForOrder = (order.payment || [])
+                    .filter((payment) =>
+                        successfulPaymentStatuses.includes(
+                            String(payment.status || "").toUpperCase()
+                        )
+                    )
+                    .reduce(
+                        (paymentSum, payment) =>
+                            paymentSum +
+                            Number(payment.amountPaid || 0),
+                        0
+                    );
+
+                return Math.max(
+                    0,
+                    sum +
+                        Number(order.totalAmount || 0) -
+                        paidForOrder
+                );
+            },
+            0
+        );
+
+        const productMap = new Map();
+
+        for (const order of orders) {
+            const orderStatus =
+                String(order.orderStatus || "").toUpperCase();
+
+            if (orderStatus === "CANCELLED") {
+                continue;
+            }
+
+            const orderPaid =
+                (order.payment || []).some((payment) =>
+                    successfulPaymentStatuses.includes(
+                        String(payment.status || "").toUpperCase()
+                    )
+                );
+
+            if (!orderPaid) {
+                continue;
+            }
+
+            for (const item of order.orderitem || []) {
+                if (!item.product) continue;
+
+                const productId = item.productId;
+
+                if (!productMap.has(productId)) {
+                    productMap.set(productId, {
+                        productId,
+                        productName: item.product.name,
+                        quantity: 0,
+                        amountSpent: 0,
+                        lastPurchased: order.createdAt,
+                    });
+                }
+
+                const product = productMap.get(productId);
+
+                product.quantity += Number(item.quantity || 0);
+
+                product.amountSpent += Number(
+                    item.totalPrice ||
+                    Number(item.unitPrice || 0) *
+                        Number(item.quantity || 0)
+                );
+
+                if (
+                    new Date(order.createdAt) >
+                    new Date(product.lastPurchased)
+                ) {
+                    product.lastPurchased = order.createdAt;
+                }
+            }
+        }
+
+        const totalPurchasedQuantity = Array.from(
+            productMap.values()
+        ).reduce(
+            (sum, product) =>
+                sum + Number(product.quantity || 0),
+            0
+        );
+
+        const productPreferences = Array.from(
+            productMap.values()
+        )
+            .map((product) => ({
+                ...product,
+                percentage:
+                    totalPurchasedQuantity > 0
+                        ? Number(
+                              (
+                                  (product.quantity /
+                                      totalPurchasedQuantity) *
+                                  100
+                              ).toFixed(2)
+                          )
+                        : 0,
+            }))
+            .sort(
+                (a, b) =>
+                    b.quantity - a.quantity
+            );
+
+        const mostPurchasedProduct =
+            productPreferences.length > 0
+                ? productPreferences[0]
+                : null;
+
+        let customerStatus = "NEW";
+
+        if (orders.length >= 2) {
+            customerStatus = "RETURNING";
+        }
+
+        if (lifetimeSpend >= 100000) {
+            customerStatus = "VIP";
+        }
+
+        const lastOrder =
+            orders.length > 0
+                ? orders[0]
+                : null;
+
+        const averageOrderValue =
+            paidOrders.length > 0
+                ? lifetimeSpend / paidOrders.length
+                : 0;
+
+        const orderIds = orders.map(
+            (order) => order.id
+        );
+
+        const auditTrail =
+            orderIds.length > 0
+                ? await prisma.auditlog.findMany({
+                      where: {
+                          OR: [
+                              {
+                                  entity: "customer",
+                                  entityId: customerId,
+                              },
+                              {
+                                  entity: "order",
+                                  entityId: {
+                                      in: orderIds,
+                                  },
+                              },
+                          ],
+                      },
+                      orderBy: {
+                          createdAt: "desc",
+                      },
+                      include: {
+                          user: {
+                              select: {
+                                  id: true,
+                                  fullName: true,
+                                  email: true,
+                              },
+                          },
+                      },
+                  })
+                : await prisma.auditlog.findMany({
+                      where: {
+                          entity: "customer",
+                          entityId: customerId,
+                      },
+                      orderBy: {
+                          createdAt: "desc",
+                      },
+                      include: {
+                          user: {
+                              select: {
+                                  id: true,
+                                  fullName: true,
+                                  email: true,
+                              },
+                          },
+                      },
+                  });
+
+        return res.json({
+            success: true,
+
+            customer: {
+                id: customer.id,
+                fullName: customer.fullName,
+                phoneNumber: customer.phoneNumber,
+                email: customer.email,
+                county: customer.county,
+                location: customer.location,
+                createdAt: customer.createdAt,
+                updatedAt: customer.updatedAt,
+
+                preferences: {
+                    cleaningTips: customer.cleaningTips,
+                    emailMarketingOptIn:
+                        customer.emailMarketingOptIn,
+                    flashSaleAlerts:
+                        customer.flashSaleAlerts,
+                    offerUpdates:
+                        customer.offerUpdates,
+                    productUpdates:
+                        customer.productUpdates,
+                },
+            },
+
+            metrics: {
+                lifetimeSpend,
+                totalOrders: orders.length,
+                averageOrderValue,
+                paidOrders: paidOrders.length,
+                cancelledOrders: cancelledOrders.length,
+                outstanding,
+                customerSince: customer.createdAt,
+                lastOrder: lastOrder
+                    ? lastOrder.createdAt
+                    : null,
+                status: customerStatus,
+            },
+
+            mostPurchasedProduct,
+
+            productPreferences,
+
+            orders: orders.map((order) => ({
+                ...order,
+                totalAmount:
+                    Number(order.totalAmount || 0),
+            })),
+
+            payments,
+
+            communications:
+                customer.communicationlog || [],
+
+            auditTrail,
+        });
+    } catch (error) {
+        console.error(
+            "CUSTOMER 360 ERROR:",
+            error
+        );
+
+        return res.status(500).json({
+            success: false,
+            message: "Failed to load customer 360",
+            error:
+                process.env.NODE_ENV === "development"
+                    ? error.message
+                    : undefined,
+        });
+    }
+});
+
 router.get("/:id", async (req, res) => {
     try {
         const id = Number(req.params.id);
@@ -410,7 +786,9 @@ router.put("/:id", async (req, res) => {
         const {
             fullName,
             phoneNumber,
-            email
+            email,
+            county,
+            location
         } = req.body;
 
         if (!fullName || !phoneNumber) {
@@ -444,7 +822,9 @@ router.put("/:id", async (req, res) => {
             data: {
                 fullName: fullName.trim(),
                 phoneNumber: phoneNumber.trim(),
-                email: email?.trim() || null
+                email: email?.trim() || null,
+                county: county?.trim() || null,
+                location: location?.trim() || null
             }
         });
 
@@ -539,3 +919,7 @@ router.delete("/:id", async (req, res) => {
 // ======================================================
 
 module.exports = router;
+
+
+
+

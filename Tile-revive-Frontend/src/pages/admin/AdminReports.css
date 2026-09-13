@@ -2271,3 +2271,546 @@
     }
 }
 
+
+/* ============================================================
+   FINANCIAL ANALYTICS — RESPONSIVE UI LAYER
+   Keeps the existing black Reports aesthetic.
+   ============================================================ */
+
+.financial-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    min-width: 0;
+}
+
+.financial-card {
+    min-width: 0;
+    min-height: 190px;
+    overflow: hidden;
+    transition:
+        transform .2s ease,
+        border-color .2s ease,
+        background .2s ease,
+        box-shadow .2s ease;
+}
+
+.financial-card > strong {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.financial-card.profit-card {
+    box-shadow:
+        inset 0 1px 0 rgba(50,232,117,.04),
+        0 18px 50px rgba(0,0,0,.16);
+}
+
+.financial-card:nth-child(1),
+.financial-card:nth-child(3),
+.financial-card:nth-child(5) {
+    background:
+        linear-gradient(
+            145deg,
+            rgba(50,232,117,.055),
+            rgba(255,255,255,.018) 48%,
+            rgba(255,255,255,.008)
+        );
+}
+
+.financial-card:nth-child(2),
+.financial-card:nth-child(4),
+.financial-card:nth-child(6) {
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,.035),
+            rgba(255,255,255,.012)
+        );
+}
+
+.financial-card-top i {
+    flex: 0 0 auto;
+}
+
+.chart-grid {
+    grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+    min-width: 0;
+}
+
+.chart-card {
+    min-width: 0;
+    overflow: hidden;
+}
+
+.chart-card > *,
+.chart-card-header,
+.chart-area {
+    min-width: 0;
+}
+
+.chart-area {
+    width: 100%;
+    overflow: hidden;
+}
+
+.chart-card-header strong {
+    overflow-wrap: anywhere;
+}
+
+.reports-error {
+    min-width: 0;
+}
+
+.reports-error span {
+    overflow-wrap: anywhere;
+}
+
+/* Financial section spacing */
+
+.reports-section .financial-grid + .chart-grid {
+    margin-top: 18px;
+}
+
+.reports-section .chart-grid + .chart-grid {
+    margin-top: 12px;
+}
+
+.reports-section .chart-grid + .financial-grid {
+    margin-top: 12px;
+}
+
+/* ============================================================
+   TABLET
+   ============================================================ */
+
+@media (max-width: 1100px) {
+
+    .financial-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .chart-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .chart-card.chart-large {
+        min-height: 450px;
+    }
+
+    .chart-large .chart-area {
+        height: 370px;
+    }
+}
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 760px) {
+
+    .financial-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .financial-card {
+        min-height: 155px;
+        padding: 19px;
+    }
+
+    .financial-card > strong {
+        font-size: clamp(27px, 9vw, 38px);
+    }
+
+    .financial-card-top span {
+        font-size: 8px;
+    }
+
+    .financial-card-bottom {
+        margin-top: 13px;
+        padding-top: 11px;
+    }
+
+    .chart-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .chart-card,
+    .chart-card.chart-large {
+        min-height: 340px;
+        padding: 18px;
+    }
+
+    .chart-card-header {
+        min-height: 48px;
+    }
+
+    .chart-card-header span {
+        font-size: 8px;
+    }
+
+    .chart-card-header small {
+        max-width: 92%;
+        line-height: 1.5;
+    }
+
+    .chart-card-header strong {
+        font-size: 23px;
+    }
+
+    .chart-area,
+    .chart-large .chart-area {
+        height: 250px;
+        margin-top: 14px;
+    }
+
+    .reports-section .financial-grid + .chart-grid {
+        margin-top: 12px;
+    }
+
+    .reports-section .chart-grid + .chart-grid {
+        margin-top: 10px;
+    }
+
+    .reports-section .chart-grid + .financial-grid {
+        margin-top: 10px;
+    }
+
+    .reports-error {
+        padding: 15px !important;
+    }
+}
+
+/* ============================================================
+   VERY SMALL PHONES
+   ============================================================ */
+
+@media (max-width: 420px) {
+
+    .financial-card {
+        min-height: 145px;
+        padding: 16px;
+    }
+
+    .financial-card > strong {
+        font-size: 29px;
+    }
+
+    .financial-card-top i {
+        width: 25px;
+        height: 25px;
+        font-size: 9px;
+    }
+
+    .chart-card,
+    .chart-card.chart-large {
+        min-height: 315px;
+        padding: 15px;
+    }
+
+    .chart-card-header strong {
+        font-size: 21px;
+    }
+
+    .chart-area,
+    .chart-large .chart-area {
+        height: 225px;
+    }
+}
+
+/* ============================================================
+   ACTIONABLE PRODUCT COST ALERT
+   ============================================================ */
+
+.financial-cost-alert {
+    position: relative;
+    margin-bottom: 18px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 185, 70, .18);
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 185, 70, .055),
+            rgba(255,255,255,.018) 45%,
+            rgba(255,255,255,.008)
+        );
+    box-shadow: 0 20px 70px rgba(0,0,0,.2);
+}
+
+.financial-cost-alert::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 2px;
+    background: #f2b84b;
+}
+
+.financial-cost-alert-main {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 22px 24px 18px;
+}
+
+.financial-cost-alert-icon {
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(255,185,70,.28);
+    background: rgba(255,185,70,.06);
+    color: #f2b84b;
+    font-size: 15px;
+    font-weight: 900;
+}
+
+.financial-cost-alert-copy {
+    min-width: 0;
+}
+
+.financial-cost-alert-title {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 9px;
+}
+
+.financial-cost-alert-title strong {
+    color: #f3f3f3;
+    font-size: 14px;
+    font-weight: 850;
+    letter-spacing: -.01em;
+}
+
+.financial-cost-count {
+    padding: 4px 8px;
+    border: 1px solid rgba(255,185,70,.18);
+    background: rgba(255,185,70,.05);
+    color: #f2b84b;
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.financial-cost-alert-copy p {
+    max-width: 760px;
+    margin: 7px 0 0;
+    color: var(--reports-dim);
+    font-size: 11px;
+    line-height: 1.65;
+}
+
+.financial-cost-products {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-top: 1px solid rgba(255,255,255,.055);
+}
+
+.financial-cost-product {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 18px;
+    border-bottom: 1px solid rgba(255,255,255,.045);
+}
+
+.financial-cost-product:nth-child(odd) {
+    border-right: 1px solid rgba(255,255,255,.045);
+}
+
+.financial-cost-product-index {
+    color: #333;
+    font-size: 9px;
+    font-weight: 900;
+}
+
+.financial-cost-product-info {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.financial-cost-product-info strong {
+    overflow: hidden;
+    color: #ddd;
+    font-size: 11px;
+    font-weight: 750;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.financial-cost-product-info small {
+    color: #555;
+    font-size: 9px;
+}
+
+.financial-cost-missing {
+    color: #f2b84b;
+    font-size: 7px;
+    font-weight: 900;
+    letter-spacing: .11em;
+    white-space: nowrap;
+}
+
+.financial-cost-more {
+    grid-column: 1 / -1;
+    padding: 11px 18px;
+    border-bottom: 1px solid rgba(255,255,255,.045);
+    color: #666;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.financial-cost-alert-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 17px 20px;
+    border-top: 1px solid rgba(255,255,255,.055);
+    background: rgba(0,0,0,.18);
+}
+
+.financial-cost-alert-footer > div {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.financial-cost-alert-footer > div > span {
+    color: #555;
+    font-size: 7px;
+    font-weight: 900;
+    letter-spacing: .15em;
+}
+
+.financial-cost-alert-footer > div > strong {
+    color: #aaa;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.financial-fix-button {
+    min-height: 42px;
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 0 17px;
+    border: 1px solid rgba(50,232,117,.28);
+    background: rgba(50,232,117,.07);
+    color: var(--reports-green);
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition:
+        background .2s ease,
+        border-color .2s ease,
+        transform .2s ease;
+}
+
+.financial-fix-button span {
+    font-size: 15px;
+    line-height: 1;
+}
+
+.financial-fix-button:hover {
+    transform: translateY(-1px);
+    border-color: rgba(50,232,117,.55);
+    background: rgba(50,232,117,.13);
+}
+
+/* ============================================================
+   ACTIONABLE ALERT — TABLET
+   ============================================================ */
+
+@media (max-width: 900px) {
+
+    .financial-cost-products {
+        grid-template-columns: 1fr;
+    }
+
+    .financial-cost-product:nth-child(odd) {
+        border-right: 0;
+    }
+}
+
+/* ============================================================
+   ACTIONABLE ALERT — MOBILE
+   ============================================================ */
+
+@media (max-width: 760px) {
+
+    .financial-cost-alert-main {
+        padding: 18px 17px 15px;
+        gap: 12px;
+    }
+
+    .financial-cost-alert-icon {
+        width: 32px;
+        height: 32px;
+        flex-basis: 32px;
+        font-size: 13px;
+    }
+
+    .financial-cost-alert-title strong {
+        font-size: 12px;
+    }
+
+    .financial-cost-alert-copy p {
+        font-size: 10px;
+    }
+
+    .financial-cost-product {
+        grid-template-columns: 24px minmax(0, 1fr);
+        padding: 12px 15px;
+    }
+
+    .financial-cost-missing {
+        grid-column: 2;
+        justify-self: start;
+        margin-top: -3px;
+    }
+
+    .financial-cost-alert-footer {
+        align-items: stretch;
+        flex-direction: column;
+        padding: 15px;
+        gap: 13px;
+    }
+
+    .financial-fix-button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 420px) {
+
+    .financial-cost-alert-main {
+        padding: 16px 14px 13px;
+    }
+
+    .financial-cost-alert-footer {
+        padding: 13px;
+    }
+
+    .financial-cost-product {
+        padding: 11px 13px;
+    }
+}
+

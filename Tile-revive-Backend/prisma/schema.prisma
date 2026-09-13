@@ -7,17 +7,20 @@ datasource db {
 }
 
 model customer {
-  id                  Int             @id @default(autoincrement())
+  id                  Int                @id @default(autoincrement())
   fullName            String
-  phoneNumber         String?         @unique(map: "Customer_phoneNumber_key")
+  phoneNumber         String?            @unique(map: "Customer_phoneNumber_key")
   email               String?
-  createdAt           DateTime        @default(now())
-  updatedAt           DateTime        @updatedAt
-  cleaningTips        Boolean         @default(false)
-  emailMarketingOptIn Boolean         @default(false)
-  flashSaleAlerts     Boolean         @default(true)
-  offerUpdates        Boolean         @default(true)
-  productUpdates      Boolean         @default(true)
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  cleaningTips        Boolean            @default(false)
+  emailMarketingOptIn Boolean            @default(false)
+  flashSaleAlerts     Boolean            @default(true)
+  offerUpdates        Boolean            @default(true)
+  productUpdates      Boolean            @default(true)
+  county              String?            @db.VarChar(100)
+  location            String?            @db.VarChar(255)
+  communicationlog    communicationlog[]
   order               order[]
   payment             payment[]
   productreview       productreview[]
@@ -46,7 +49,7 @@ model product {
   batchNumber          String?
   brand                String?
   costPrice            Float?
-  description          String?
+  description          String?                @db.Text
   discountPrice        Float?
   expiryDate           DateTime?
   featured             Boolean                @default(false)
@@ -58,7 +61,7 @@ model product {
   rating               Float                  @default(0)
   reviewCount          Int                    @default(0)
   shelfLife            Int?
-  shortDescription     String?
+  shortDescription     String?                @db.VarChar(500)
   sku                  String?                @unique(map: "Product_sku_key")
   status               String                 @default("ACTIVE")
   updatedAt            DateTime               @default(now()) @updatedAt
@@ -66,7 +69,9 @@ model product {
   width                Float?
   inventorytransaction inventorytransaction[]
   orderitem            orderitem[]
+  productimage         productimage[]
   productreview        productreview[]
+  offers               offer[]
 }
 
 model inventorytransaction {
@@ -85,23 +90,28 @@ model inventorytransaction {
 }
 
 model order {
-  id              Int                  @id @default(autoincrement())
-  orderNumber     String               @unique(map: "Order_orderNumber_key")
-  customerId      Int
-  totalAmount     Float
-  paymentStatus   String               @default("PENDING")
-  createdAt       DateTime             @default(now())
-  orderStatus     String               @default("PENDING")
-  updatedAt       DateTime             @default(now()) @updatedAt
-  county          String?              @db.VarChar(100)
-  location        String?              @db.VarChar(255)
-  latitude        Float?
-  longitude       Float?
-  resolvedAddress String?              @db.VarChar(500)
-  customer        customer             @relation(fields: [customerId], references: [id], map: "Order_customerId_fkey")
-  orderitem       orderitem[]
-  statusHistory   orderstatushistory[]
-  payment         payment[]
+  id               Int                  @id @default(autoincrement())
+  orderNumber      String               @unique(map: "Order_orderNumber_key")
+  customerId       Int
+  totalAmount      Float
+  paymentStatus    String               @default("PENDING")
+  createdAt        DateTime             @default(now())
+  orderStatus      String               @default("PENDING")
+  updatedAt        DateTime             @default(now()) @updatedAt
+  county           String?              @db.VarChar(100)
+  location         String?              @db.VarChar(255)
+  latitude         Float?
+  longitude        Float?
+  resolvedAddress  String?              @db.VarChar(500)
+  offerName        String?
+  offerCode        String?
+  offerDiscount    Decimal?             @db.Decimal(10, 2)
+  offerDescription String?              @db.Text
+  communicationlog communicationlog[]
+  customer         customer             @relation(fields: [customerId], references: [id], map: "Order_customerId_fkey")
+  orderitem        orderitem[]
+  statusHistory    orderstatushistory[]
+  payment          payment[]
 
   @@index([customerId], map: "Order_customerId_fkey")
 }
@@ -160,23 +170,24 @@ model payment {
 }
 
 model user {
-  id                Int            @id @default(autoincrement())
+  id                Int                @id @default(autoincrement())
   fullName          String
-  email             String         @unique(map: "User_email_key")
+  email             String             @unique(map: "User_email_key")
   password          String
-  role              String         @default("USER")
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @default(now()) @updatedAt
-  adminApproved     Boolean        @default(false)
+  role              String             @default("USER")
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @default(now()) @updatedAt
+  adminApproved     Boolean            @default(false)
   approvedAt        DateTime?
   approvedBy        Int?
-  emailVerified     Boolean        @default(false)
+  emailVerified     Boolean            @default(false)
   emailVerifiedAt   DateTime?
-  loginOtpAttempts  Int            @default(0)
+  loginOtpAttempts  Int                @default(0)
   loginOtpExpiresAt DateTime?
   loginOtpHash      String?
   adminsession      adminsession[]
   auditlog          auditlog[]
+  communicationlog  communicationlog[]
   refreshtoken      refreshtoken[]
 }
 
@@ -211,6 +222,31 @@ model auditlog {
   @@index([action], map: "auditLog_action_idx")
   @@index([createdAt], map: "auditLog_createdAt_idx")
   @@index([userId], map: "auditLog_userId_idx")
+}
+
+model communicationlog {
+  id           Int      @id @default(autoincrement())
+  customerId   Int
+  orderId      Int?
+  userId       Int?
+  type         String
+  channel      String   @default("EMAIL")
+  recipient    String
+  subject      String?
+  status       String   @default("SENT")
+  messageId    String?
+  errorMessage String?  @db.LongText
+  createdAt    DateTime @default(now())
+  customer     customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  order        order?   @relation(fields: [orderId], references: [id])
+  user         user?    @relation(fields: [userId], references: [id])
+
+  @@index([customerId])
+  @@index([orderId])
+  @@index([userId])
+  @@index([type])
+  @@index([status])
+  @@index([createdAt])
 }
 
 model refreshtoken {
@@ -298,16 +334,24 @@ model visitorevent {
 }
 
 model expense {
-  id          Int      @id @default(autoincrement())
-  category    String
-  description String?
-  amount      Float
-  expenseDate DateTime @default(now())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now()) @updatedAt
+  id            Int      @id @default(autoincrement())
+  category      String
+  description   String?
+  amount        Float
+  expenseDate   DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now()) @updatedAt
+  notes         String?  @db.Text
+  payee         String?
+  paymentMethod String?  @default("CASH")
+  reference     String?
+  status        String   @default("PAID")
+  title         String   @default("Business Expense")
 
   @@index([expenseDate])
   @@index([category])
+  @@index([status])
+  @@index([paymentMethod])
 }
 
 model advertisingmetric {
@@ -326,3 +370,35 @@ model advertisingmetric {
   @@index([platform])
   @@index([metricDate])
 }
+
+model productimage {
+  id        Int      @id @default(autoincrement())
+  productId Int
+  image     String
+  sortOrder Int      @default(2)
+  createdAt DateTime @default(now())
+  product   product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([productId, sortOrder])
+}
+
+model offer {
+  id             Int      @id @default(autoincrement())
+  name           String
+  description    String?  @db.Text
+  type           String
+  productId      Int?
+  quantity       Int      @default(1)
+  discountValue  Float    @default(0)
+  status         String   @default("ACTIVE")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now()) @updatedAt
+
+  product        product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([productId])
+  @@index([status])
+  @@index([type])
+}
+

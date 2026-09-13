@@ -1768,3 +1768,907 @@
     }
 
 }
+/* =========================================================
+   TILE REVIVE — LUXURY PREMIUM HERO
+   Matches the current Hero.jsx
+   No external hero image required
+   ========================================================= */
+
+.modern-home .premium-hero {
+    position: relative;
+    min-height: 780px;
+    overflow: hidden;
+    background:
+        radial-gradient(
+            circle at 74% 42%,
+            rgba(183, 108, 255, 0.16),
+            transparent 28%
+        ),
+        radial-gradient(
+            circle at 87% 75%,
+            rgba(183, 108, 255, 0.08),
+            transparent 24%
+        ),
+        linear-gradient(
+            135deg,
+            #08070a 0%,
+            #0e0c12 48%,
+            #070609 100%
+        );
+    color: #faf9fc;
+}
+
+/* ---------------------------------------------------------
+   BACKGROUND
+--------------------------------------------------------- */
+
+.modern-home .premium-hero-background {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.modern-home .premium-hero-background::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(
+            115deg,
+            transparent 0%,
+            rgba(255,255,255,0.025) 45%,
+            transparent 46%,
+            transparent 100%
+        );
+    opacity: 0.7;
+}
+
+.modern-home .premium-hero-texture {
+    position: absolute;
+    inset: 0;
+    opacity: 0.18;
+    background-image:
+        linear-gradient(
+            115deg,
+            transparent 0%,
+            rgba(255,255,255,0.035) 1px,
+            transparent 1px
+        );
+    background-size: 90px 90px;
+    transform: rotate(-4deg) scale(1.2);
+}
+
+.modern-home .premium-hero-glow {
+    position: absolute;
+    width: 620px;
+    height: 620px;
+    right: 4%;
+    top: 50%;
+    transform: translateY(-50%);
+    border-radius: 50%;
+    background: rgba(183, 108, 255, 0.13);
+    filter: blur(120px);
+    animation: tileReviveHeroGlow 7s ease-in-out infinite;
+}
+
+.modern-home .premium-hero-purple-glow {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    right: 30%;
+    top: 15%;
+    border-radius: 50%;
+    background: rgba(132, 66, 190, 0.08);
+    filter: blur(100px);
+}
+
+.modern-home .premium-hero-line {
+    position: absolute;
+    width: 900px;
+    height: 900px;
+    right: -280px;
+    top: -250px;
+    border: 1px solid rgba(255,255,255,0.055);
+    border-radius: 50%;
+    transform: rotate(-18deg);
+}
+
+.modern-home .premium-hero-line::before {
+    content: "";
+    position: absolute;
+    inset: 65px;
+    border: 1px solid rgba(183,108,255,0.07);
+    border-radius: 50%;
+}
+
+/* ---------------------------------------------------------
+   MAIN CONTAINER
+--------------------------------------------------------- */
+
+.modern-home .premium-hero-container {
+    position: relative;
+    z-index: 2;
+    width: min(1280px, calc(100% - 72px));
+    min-height: 720px;
+    margin: 0 auto;
+    padding: 130px 0 80px;
+
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(430px, 0.95fr);
+    align-items: center;
+    gap: 50px;
+}
+
+/* ---------------------------------------------------------
+   LEFT CONTENT
+--------------------------------------------------------- */
+
+.modern-home .premium-hero-content {
+    max-width: 690px;
+}
+
+.modern-home .premium-hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+
+    margin-bottom: 25px;
+
+    color: #d19aff;
+
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.20em;
+}
+
+.modern-home .premium-hero-eyebrow span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #d19aff;
+    box-shadow: 0 0 18px rgba(183,108,255,0.9);
+}
+
+.modern-home .premium-hero-content h1 {
+    margin: 0;
+    max-width: 720px;
+
+    color: #faf9fc;
+
+    font-family:
+        "Manrope",
+        "Inter",
+        system-ui,
+        sans-serif;
+
+    font-size: clamp(54px, 6.2vw, 88px);
+    line-height: 0.98;
+    letter-spacing: -0.065em;
+    font-weight: 800;
+}
+
+.modern-home .premium-hero-content h1 em {
+    display: block;
+    margin-top: 8px;
+
+    color: #d19aff;
+
+    font-style: normal;
+}
+
+.modern-home .premium-hero-description {
+    max-width: 580px;
+    margin: 30px 0 0;
+
+    color: rgba(250,249,252,0.63);
+
+    font-size: 17px;
+    line-height: 1.7;
+}
+
+/* ---------------------------------------------------------
+   BUTTONS
+--------------------------------------------------------- */
+
+.modern-home .premium-hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 34px;
+}
+
+.modern-home .premium-primary-button,
+.modern-home .premium-secondary-button {
+    min-height: 52px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+
+    padding: 0 21px;
+
+    border-radius: 11px;
+
+    font-size: 14px;
+    font-weight: 800;
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease,
+        border-color 0.25s ease,
+        background 0.25s ease;
+}
+
+.modern-home .premium-primary-button {
+    color: #0b080f;
+    background: #d19aff;
+    box-shadow: 0 15px 45px rgba(183,108,255,0.16);
+}
+
+.modern-home .premium-primary-button:hover {
+    color: #0b080f;
+    transform: translateY(-3px);
+    box-shadow: 0 20px 55px rgba(183,108,255,0.30);
+}
+
+.modern-home .premium-primary-button span,
+.modern-home .premium-secondary-button span {
+    font-size: 18px;
+    line-height: 1;
+}
+
+.modern-home .premium-secondary-button {
+    color: rgba(250,249,252,0.85);
+    background: rgba(255,255,255,0.035);
+    border: 1px solid rgba(255,255,255,0.11);
+    backdrop-filter: blur(16px);
+}
+
+.modern-home .premium-secondary-button:hover {
+    color: #ffffff;
+    transform: translateY(-3px);
+    background: rgba(255,255,255,0.065);
+    border-color: rgba(209,154,255,0.35);
+}
+
+/* ---------------------------------------------------------
+   TRUST STATS
+--------------------------------------------------------- */
+
+.modern-home .premium-hero-trust {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+
+    margin-top: 42px;
+}
+
+.modern-home .premium-trust-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.modern-home .premium-trust-item strong {
+    color: #ffffff;
+
+    font-family:
+        "Manrope",
+        sans-serif;
+
+    font-size: 17px;
+    font-weight: 800;
+}
+
+.modern-home .premium-trust-item small {
+    color: rgba(250,249,252,0.42);
+
+    font-size: 10px;
+    letter-spacing: 0.06em;
+}
+
+.modern-home .premium-trust-divider {
+    width: 1px;
+    height: 32px;
+    background: rgba(255,255,255,0.12);
+}
+
+/* ---------------------------------------------------------
+   PRODUCT / VISUAL SIDE
+--------------------------------------------------------- */
+
+.modern-home .premium-hero-product {
+    position: relative;
+
+    min-height: 570px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modern-home .premium-product-backdrop {
+    position: absolute;
+
+    width: 470px;
+    height: 470px;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(183,108,255,0.15),
+            rgba(183,108,255,0.04) 45%,
+            transparent 70%
+        );
+
+    filter: blur(3px);
+}
+
+.modern-home .premium-product-ring {
+    position: absolute;
+
+    width: 430px;
+    height: 430px;
+
+    border-radius: 50%;
+
+    border: 1px solid rgba(255,255,255,0.08);
+
+    box-shadow:
+        inset 0 0 70px rgba(183,108,255,0.04),
+        0 0 80px rgba(183,108,255,0.05);
+
+    animation: tileReviveRing 8s linear infinite;
+}
+
+.modern-home .premium-product-ring::before {
+    content: "";
+
+    position: absolute;
+    inset: 30px;
+
+    border-radius: 50%;
+
+    border: 1px solid rgba(183,108,255,0.08);
+}
+
+/* ---------------------------------------------------------
+   IMAGE-FREE PRODUCT PLACEHOLDER
+--------------------------------------------------------- */
+
+.modern-home .premium-product-image-wrap {
+    position: relative;
+    z-index: 3;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modern-home .premium-product-placeholder {
+    position: relative;
+
+    width: 265px;
+    height: 405px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    overflow: hidden;
+
+    border-radius: 28px 28px 34px 34px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,0.10),
+            rgba(255,255,255,0.025) 40%,
+            rgba(0,0,0,0.35)
+        ),
+        #15121b;
+
+    border: 1px solid rgba(255,255,255,0.12);
+
+    box-shadow:
+        0 45px 90px rgba(0,0,0,0.65),
+        inset 0 1px 0 rgba(255,255,255,0.09),
+        0 0 80px rgba(183,108,255,0.09);
+
+    transform: perspective(900px) rotateY(-8deg);
+    animation: tileReviveProductFloat 5s ease-in-out infinite;
+}
+
+.modern-home .premium-product-placeholder::before {
+    content: "";
+
+    position: absolute;
+    top: -30px;
+    left: 22%;
+
+    width: 56%;
+    height: 90px;
+
+    border-radius: 50%;
+
+    background: rgba(255,255,255,0.035);
+
+    filter: blur(2px);
+}
+
+.modern-home .premium-product-placeholder::after {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    background:
+        linear-gradient(
+            110deg,
+            transparent 15%,
+            rgba(255,255,255,0.08) 40%,
+            transparent 50%
+        );
+
+    opacity: 0.55;
+    pointer-events: none;
+}
+
+.modern-home .premium-product-monogram {
+    position: relative;
+    z-index: 2;
+
+    width: 105px;
+    height: 105px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    border: 1px solid rgba(209,154,255,0.45);
+
+    color: #d19aff;
+
+    font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+    font-size: 38px;
+    letter-spacing: -0.08em;
+
+    box-shadow:
+        0 0 50px rgba(183,108,255,0.12),
+        inset 0 0 30px rgba(183,108,255,0.05);
+}
+
+.modern-home .premium-product-placeholder-copy {
+    position: relative;
+    z-index: 2;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    margin-top: 28px;
+
+    text-align: center;
+}
+
+.modern-home .premium-product-placeholder-copy strong {
+    color: #ffffff;
+
+    font-family:
+        "Manrope",
+        sans-serif;
+
+    font-size: 15px;
+    letter-spacing: 0.18em;
+}
+
+.modern-home .premium-product-placeholder-copy span {
+    margin-top: 7px;
+
+    color: rgba(255,255,255,0.38);
+
+    font-size: 8px;
+    letter-spacing: 0.20em;
+}
+
+/* ---------------------------------------------------------
+   FLOATING DETAILS
+--------------------------------------------------------- */
+
+.modern-home .premium-product-label {
+    position: absolute;
+
+    right: 1%;
+    top: 19%;
+
+    z-index: 5;
+
+    display: flex;
+    flex-direction: column;
+
+    padding: 15px 17px;
+
+    color: rgba(255,255,255,0.65);
+
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    line-height: 1.6;
+
+    background: rgba(20,16,27,0.68);
+
+    border: 1px solid rgba(255,255,255,0.09);
+
+    border-radius: 12px;
+
+    backdrop-filter: blur(18px);
+
+    box-shadow: 0 20px 50px rgba(0,0,0,0.28);
+}
+
+.modern-home .premium-product-label span {
+    margin-bottom: 3px;
+    color: rgba(255,255,255,0.28);
+}
+
+.modern-home .premium-product-label strong {
+    color: #d19aff;
+    font-size: 10px;
+}
+
+.modern-home .premium-product-note {
+    position: absolute;
+
+    left: 2%;
+    bottom: 19%;
+
+    z-index: 5;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 13px 16px;
+
+    background: rgba(20,16,27,0.72);
+
+    border: 1px solid rgba(255,255,255,0.09);
+
+    border-radius: 12px;
+
+    backdrop-filter: blur(18px);
+
+    box-shadow: 0 20px 50px rgba(0,0,0,0.28);
+}
+
+.modern-home .premium-product-note > span {
+    color: #d19aff;
+    font-size: 16px;
+}
+
+.modern-home .premium-product-note div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.modern-home .premium-product-note strong {
+    color: #ffffff;
+    font-size: 12px;
+}
+
+.modern-home .premium-product-note small {
+    color: rgba(255,255,255,0.42);
+    font-size: 9px;
+}
+
+/* ---------------------------------------------------------
+   BOTTOM BAR
+--------------------------------------------------------- */
+
+.modern-home .premium-hero-bottom {
+    position: absolute;
+
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    z-index: 5;
+
+    border-top: 1px solid rgba(255,255,255,0.07);
+
+    background: rgba(7,6,10,0.42);
+
+    backdrop-filter: blur(14px);
+}
+
+.modern-home .premium-hero-bottom-inner {
+    width: min(1280px, calc(100% - 72px));
+
+    min-height: 54px;
+
+    margin: 0 auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    color: rgba(255,255,255,0.32);
+
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+}
+
+.modern-home .premium-bottom-line {
+    flex: 1;
+
+    height: 1px;
+
+    margin: 0 30px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,255,255,0.12),
+            transparent
+        );
+}
+
+/* ---------------------------------------------------------
+   ANIMATIONS
+--------------------------------------------------------- */
+
+@keyframes tileReviveHeroGlow {
+    0%, 100% {
+        transform: translateY(-50%) scale(1);
+        opacity: 0.65;
+    }
+
+    50% {
+        transform: translateY(-50%) scale(1.08);
+        opacity: 0.9;
+    }
+}
+
+@keyframes tileReviveProductFloat {
+    0%, 100% {
+        transform: perspective(900px) rotateY(-8deg) translateY(0);
+    }
+
+    50% {
+        transform: perspective(900px) rotateY(-8deg) translateY(-12px);
+    }
+}
+
+@keyframes tileReviveRing {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ---------------------------------------------------------
+   TABLET
+--------------------------------------------------------- */
+
+@media (max-width: 1000px) {
+
+    .modern-home .premium-hero-container {
+        width: min(100% - 48px, 760px);
+
+        grid-template-columns: 1fr;
+
+        min-height: auto;
+
+        padding-top: 125px;
+        padding-bottom: 100px;
+
+        text-align: center;
+    }
+
+    .modern-home .premium-hero-content {
+        max-width: 760px;
+        margin: 0 auto;
+    }
+
+    .modern-home .premium-hero-description {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .modern-home .premium-hero-actions,
+    .modern-home .premium-hero-trust {
+        justify-content: center;
+    }
+
+    .modern-home .premium-hero-product {
+        min-height: 500px;
+    }
+
+    .modern-home .premium-product-label {
+        right: 10%;
+    }
+
+    .modern-home .premium-product-note {
+        left: 10%;
+    }
+}
+
+/* ---------------------------------------------------------
+   MOBILE
+--------------------------------------------------------- */
+
+@media (max-width: 760px) {
+
+    .modern-home .premium-hero {
+        min-height: auto;
+    }
+
+    .modern-home .premium-hero-container {
+        width: calc(100% - 34px);
+
+        padding-top: 110px;
+        padding-bottom: 85px;
+
+        gap: 25px;
+    }
+
+    .modern-home .premium-hero-content h1 {
+        font-size: clamp(46px, 14vw, 67px);
+        letter-spacing: -0.06em;
+    }
+
+    .modern-home .premium-hero-description {
+        margin-top: 22px;
+        font-size: 15px;
+        line-height: 1.65;
+    }
+
+    .modern-home .premium-hero-actions {
+        flex-direction: column;
+        align-items: stretch;
+
+        margin-top: 28px;
+    }
+
+    .modern-home .premium-primary-button,
+    .modern-home .premium-secondary-button {
+        width: 100%;
+    }
+
+    .modern-home .premium-hero-trust {
+        gap: 13px;
+        margin-top: 32px;
+    }
+
+    .modern-home .premium-trust-divider {
+        height: 27px;
+    }
+
+    .modern-home .premium-trust-item strong {
+        font-size: 14px;
+    }
+
+    .modern-home .premium-trust-item small {
+        font-size: 8px;
+    }
+
+    .modern-home .premium-hero-product {
+        min-height: 440px;
+    }
+
+    .modern-home .premium-product-backdrop {
+        width: 330px;
+        height: 330px;
+    }
+
+    .modern-home .premium-product-ring {
+        width: 310px;
+        height: 310px;
+    }
+
+    .modern-home .premium-product-placeholder {
+        width: 205px;
+        height: 315px;
+        border-radius: 22px 22px 27px 27px;
+    }
+
+    .modern-home .premium-product-monogram {
+        width: 78px;
+        height: 78px;
+        font-size: 28px;
+    }
+
+    .modern-home .premium-product-placeholder-copy {
+        margin-top: 20px;
+    }
+
+    .modern-home .premium-product-placeholder-copy strong {
+        font-size: 11px;
+    }
+
+    .modern-home .premium-product-placeholder-copy span {
+        font-size: 6px;
+    }
+
+    .modern-home .premium-product-label {
+        top: 12%;
+        right: 0;
+        padding: 10px 11px;
+    }
+
+    .modern-home .premium-product-note {
+        left: 0;
+        bottom: 12%;
+        padding: 10px 12px;
+    }
+
+    .modern-home .premium-hero-bottom-inner {
+        width: calc(100% - 34px);
+        min-height: 48px;
+    }
+
+    .modern-home .premium-bottom-line {
+        margin: 0 12px;
+    }
+}
+
+@media (max-width: 420px) {
+
+    .modern-home .premium-hero-eyebrow {
+        font-size: 9px;
+        letter-spacing: 0.14em;
+    }
+
+    .modern-home .premium-hero-content h1 {
+        font-size: 43px;
+    }
+
+    .modern-home .premium-hero-product {
+        min-height: 390px;
+    }
+
+    .modern-home .premium-product-placeholder {
+        width: 180px;
+        height: 285px;
+    }
+
+    .modern-home .premium-product-ring {
+        width: 275px;
+        height: 275px;
+    }
+
+    .modern-home .premium-product-backdrop {
+        width: 295px;
+        height: 295px;
+    }
+
+    .modern-home .premium-product-label {
+        transform: scale(0.85);
+        transform-origin: right center;
+    }
+
+    .modern-home .premium-product-note {
+        transform: scale(0.85);
+        transform-origin: left center;
+    }
+
+    .modern-home .premium-hero-bottom-inner {
+        font-size: 7px;
+    }
+}

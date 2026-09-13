@@ -8,6 +8,7 @@ import Footer from "./components/layout/Footer";
 
 import Home from "./pages/Home";
 import Shop from "./pages/Shop";
+import ProductDetails from "./pages/ProductDetails";
 import Cart from "./pages/Cart";
 import Account from "./pages/Account";
 import Checkout from "./pages/Checkout";
@@ -15,15 +16,21 @@ import Gallery from "./pages/Gallery";
 
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminProducts from "./pages/admin/AdminProducts";
 import AdminOrders from "./pages/admin/AdminOrders";
 import AdminOrderDetails from "./pages/admin/AdminOrderDetails";
 import AdminGallery from "./pages/admin/AdminGallery";
 import MobileGallery from "./pages/admin/MobileGallery";
 import AdminReports from "./pages/admin/AdminReports";
+import AdminExpenditure from "./pages/admin/AdminExpenditure";
+import AdminCustomers from "./pages/admin/AdminCustomers";
+import AdminOffers from "./pages/admin/AdminOffers";
+import AdminCreateOrder from "./pages/admin/AdminCreateOrder";
 
 import StainedTiles from "./pages/cleaning/StainedTiles";
 
 import "./index.css";
+import "./App.css";
 
 
 // ============================================================
@@ -34,21 +41,14 @@ function AppContent() {
 
     const location = useLocation();
 
-    // Every route beginning with /admin is considered an admin route
     const isAdminRoute = location.pathname.startsWith("/admin");
 
-    // Admin login is completely separate from the public website
     const isAdminLogin = location.pathname === "/admin/login";
 
-    // Show public website chrome only when NOT inside admin
     const showPublicLayout = !isAdminRoute;
 
     return (
         <>
-
-            {/* =====================================================
-                PUBLIC WEBSITE ONLY
-               ===================================================== */}
 
             {showPublicLayout && (
                 <AnnouncementBar />
@@ -57,11 +57,6 @@ function AppContent() {
             {showPublicLayout && (
                 <Header />
             )}
-
-
-            {/* =====================================================
-                ROUTES
-               ===================================================== */}
 
             <Routes>
 
@@ -77,6 +72,15 @@ function AppContent() {
                 <Route
                     path="/shop"
                     element={<Shop />}
+                />
+
+                {/* =================================================
+                    PRODUCT DETAILS
+                   ================================================= */}
+
+                <Route
+                    path="/shop/product/:id"
+                    element={<ProductDetails />}
                 />
 
                 <Route
@@ -145,29 +149,46 @@ function AppContent() {
                    ================================================= */}
 
                 <Route
+                    path="/admin/products"
+                    element={<AdminProducts />}
+                />
+                <Route
                     path="/admin/reports"
                     element={<AdminReports />}
+                />
+                <Route
+                    path="/admin/expenditure"
+                    element={<AdminExpenditure />}
                 />
 
 
                 {/* =================================================
                     ADMIN ORDERS
                    ================================================= */}
+                <Route
+                    path="/admin/customers"
+                    element={<AdminCustomers />}
+                />
+
+                <Route
+                    path="/admin/offers"
+                    element={<AdminOffers />}
+                />
 
                 <Route
                     path="/admin/orders"
                     element={<AdminOrders />}
                 />
 
+                  <Route
+                      path="/admin/orders/create"
+                      element={<AdminCreateOrder />}
+                  />
 
-                {/* =================================================
-                    ADMIN ORDER DETAILS
-                   ================================================= */}
-
-                <Route
-                    path="/admin/orders/:id"
-                    element={<AdminOrderDetails />}
-                />
+                  <Route
+                      path="/admin/orders/:id"
+                      element={<AdminOrderDetails />}
+                  />
 
 
                 {/* =================================================
@@ -191,10 +212,6 @@ function AppContent() {
 
             </Routes>
 
-
-            {/* =====================================================
-                PUBLIC FOOTER ONLY
-               ===================================================== */}
 
             {showPublicLayout && (
                 <Footer />
@@ -225,4 +242,16 @@ function App() {
 }
 
 export default App;
+
+
+
+
+
+
+
+
+
+
+
+
 

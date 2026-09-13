@@ -457,14 +457,28 @@ function AdminOrders() {
 
                     </div>
 
-                    <button
-                        type="button"
-                        className="orders-refresh-button"
-                        onClick={loadOrders}
-                        disabled={loading}
-                    >
-                        Refresh Orders
-                    </button>
+                    <div className="orders-header-actions">
+
+                        <button
+                            type="button"
+                            className="admin-create-order-btn"
+                            onClick={() =>
+                                navigate("/admin/orders/create")
+                            }
+                        >
+                            + Create Order
+                        </button>
+
+                        <button
+                            type="button"
+                            className="orders-refresh-button"
+                            onClick={loadOrders}
+                            disabled={loading}
+                        >
+                            Refresh Orders
+                        </button>
+
+                    </div>
 
                 </header>
 

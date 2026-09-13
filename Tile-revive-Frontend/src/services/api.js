@@ -1,4 +1,50 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || "";
+// ======================================================
+// PRODUCT IMAGE URL HELPER
+// Converts backend-relative uploaded image paths into
+// browser-accessible backend URLs.
+// ======================================================
+
+export function getProductImageUrl(image) {
+    if (!image) {
+        return "";
+    }
+
+    const value = String(image).trim();
+
+    if (!value) {
+        return "";
+    }
+
+    // Already a complete URL
+    if (/^https?:\/\//i.test(value)) {
+        return value;
+    }
+
+    // Uploaded images are served by the backend
+    if (value.startsWith("/uploads/") || value.startsWith("uploads/")) {
+        /*
+         * API_BASE_URL points to /api, while uploaded images
+         * are served from the backend root at /uploads.
+         *
+         * Example:
+         * API_BASE_URL = http://192.168.0.100:5000/api
+         * Image        = /uploads/products/example.jpg
+         *
+         * Result:
+         * http://192.168.0.100:5000/uploads/products/example.jpg
+         */
+
+        const backendOrigin = (API_BASE_URL || "http://localhost:5000")
+            .replace(/\/api\/?$/i, "")
+            .replace(/\/$/, "");
+
+        return `${backendOrigin}/${value.replace(/^\/+/, "")}`;
+    }
+
+    // Preserve normal frontend/public images
+    return value;
+}
 
 
 // ======================================================
@@ -104,6 +150,7 @@ async function refreshAccessToken() {
     return refreshPromise;
 }
 
+
 // ======================================================
 // REQUEST
 // ======================================================
@@ -113,11 +160,23 @@ async function request(
     options = {},
     allowRefresh = true
 ) {
-    let token = getAccessToken();
+    if (allowRefresh && refreshPromise) {
+        await refreshPromise;
+    }
+
+    const token = getAccessToken();
+
+    const isFormData =
+        typeof FormData !== "undefined" &&
+        options.body instanceof FormData;
 
     const headers = {
         Accept: "application/json",
-        "Content-Type": "application/json",
+        ...(isFormData
+            ? {}
+            : {
+                "Content-Type": "application/json"
+            }),
         ...(options.headers || {}),
     };
 
@@ -128,6 +187,7 @@ async function request(
     let response;
 
     try {
+        console.log("API REQUEST:", `${API_BASE_URL}${endpoint}`);
         response = await fetch(
             `${API_BASE_URL}${endpoint}`,
             {
@@ -136,7 +196,10 @@ async function request(
             }
         );
     } catch (error) {
-        console.error("API NETWORK ERROR:", error);
+        console.error(
+            "API NETWORK ERROR:",
+            error
+        );
 
         throw new Error(
             "Unable to connect to the server. Make sure the backend is running."
@@ -144,32 +207,34 @@ async function request(
     }
 
     // ==================================================
-    // HANDLE 401
+    // HANDLE EXPIRED ACCESS TOKEN
     // ==================================================
 
-    if (response.status === 401 && allowRefresh) {
+    if (
+        response.status === 401 &&
+        allowRefresh
+    ) {
         try {
-            /*
-             * All simultaneous 401 requests share the same
-             * refreshPromise. Only one refresh request is sent.
-             */
-            const freshToken = await refreshAccessToken();
+            const freshToken =
+                await refreshAccessToken();
 
             if (!freshToken) {
-                throw new Error("Unable to obtain a new access token.");
+                throw new Error(
+                    "Unable to obtain a new access token."
+                );
             }
 
-            /*
-             * Retry directly with the freshly issued token.
-             *
-             * This avoids recursively entering request() with
-             * stale authorization state.
-             */
             const retryHeaders = {
                 Accept: "application/json",
-                "Content-Type": "application/json",
+                ...(isFormData
+                    ? {}
+                    : {
+                        "Content-Type":
+                            "application/json"
+                    }),
                 ...(options.headers || {}),
-                Authorization: `Bearer ${freshToken}`,
+                Authorization:
+                    `Bearer ${freshToken}`,
             };
 
             let retryResponse;
@@ -196,48 +261,27 @@ async function request(
             let retryData = {};
 
             try {
-                retryData = await retryResponse.json();
+                retryData =
+                    await retryResponse.json();
             } catch {
                 retryData = {};
             }
 
-            /*
-             * The newly refreshed token itself was rejected.
-             * This is a genuine authentication failure.
-             */
             if (retryResponse.status === 401) {
                 console.error(
                     `API AUTH FAILURE AFTER TOKEN REFRESH: ${endpoint}`
                 );
 
-                /*
-                 * Before logging out, check whether another
-                 * request has already installed a newer token.
-                 */
-                const currentToken = getAccessToken();
+                clearAuth();
 
                 if (
-                    currentToken &&
-                    currentToken !== freshToken
+                    window.location.pathname.startsWith(
+                        "/admin"
+                    )
                 ) {
-                    console.warn(
-                        "AUTH: A newer access token exists. Retrying request once more."
-                    );
-
-                    return request(
-                        endpoint,
-                        {
-                            ...options,
-                            headers: {
-                                ...(options.headers || {}),
-                                Authorization: `Bearer ${currentToken}`,
-                            },
-                        },
-                        false
-                    );
+                    window.location.href =
+                        "/admin/login";
                 }
-
-                redirectToLogin();
 
                 throw new Error(
                     retryData.message ||
@@ -270,11 +314,16 @@ async function request(
                 refreshError
             );
 
-            /*
-             * Only redirect when the refresh operation itself
-             * failed or the newly refreshed token was rejected.
-             */
-            redirectToLogin();
+            clearAuth();
+
+            if (
+                window.location.pathname.startsWith(
+                    "/admin"
+                )
+            ) {
+                window.location.href =
+                    "/admin/login";
+            }
 
             throw new Error(
                 refreshError.message ||
@@ -300,39 +349,6 @@ async function request(
     // ==================================================
 
     if (response.status === 401) {
-        console.error(
-            `API AUTH FAILURE AFTER REFRESH: ${endpoint}`
-        );
-
-        /*
-         * If another request has already replaced the token,
-         * use that newer token instead of logging the user out.
-         */
-        const currentToken = getAccessToken();
-
-        if (
-            currentToken &&
-            currentToken !== token
-        ) {
-            console.warn(
-                "AUTH: Detected newer access token. Retrying request."
-            );
-
-            return request(
-                endpoint,
-                {
-                    ...options,
-                    headers: {
-                        ...(options.headers || {}),
-                        Authorization: `Bearer ${currentToken}`,
-                    },
-                },
-                false
-            );
-        }
-
-        redirectToLogin();
-
         throw new Error(
             data.message ||
             data.error ||
@@ -463,6 +479,43 @@ export async function getAdminDashboard() {
 // ADMIN ORDERS
 // ======================================================
 
+export async function getAdminCustomers() {
+    return request(
+        "/customers",
+        {
+            method: "GET",
+        }
+    );
+}
+
+export async function createCustomer(customerData) {
+    if (!customerData?.fullName?.trim()) {
+        throw new Error("Full name is required.");
+    }
+
+    if (!customerData?.phoneNumber?.trim()) {
+        throw new Error("Phone number is required.");
+    }
+
+    return request("/customers", {
+        method: "POST",
+        body: JSON.stringify({
+            fullName: customerData.fullName.trim(),
+            phoneNumber: customerData.phoneNumber.trim(),
+            email: customerData.email?.trim() || null,
+            county: customerData.county?.trim() || null,
+            location: customerData.location?.trim() || null,
+        }),
+    });
+}
+export async function getAdminCustomer360(customerId) {
+    return request(
+        `/customers/${customerId}/360`,
+        {
+            method: "GET",
+        }
+    );
+}
 export async function getAdminOrders() {
     return request(
         "/admin/orders",
@@ -471,10 +524,120 @@ export async function getAdminOrders() {
         }
     );
 }
+/* ============================================================
+   ADMIN OFFER LIBRARY
+   ============================================================ */
+
+export async function getAdminOffers() {
+    return request(
+        "/admin/offers",
+        {
+            method: "GET",
+        }
+    );
+}
+
+export async function createAdminOffer(offerData) {
+    if (!offerData?.name?.trim()) {
+        throw new Error("Offer name is required.");
+    }
+
+    if (!offerData?.type) {
+        throw new Error("Offer type is required.");
+    }
+
+    return request(
+        "/admin/offers",
+        {
+            method: "POST",
+            body: JSON.stringify({
+                name: offerData.name.trim(),
+                description:
+                    offerData.description?.trim() || null,
+                type: offerData.type,
+                productId:
+                    offerData.productId
+                        ? Number(offerData.productId)
+                        : null,
+                quantity:
+                    Number(offerData.quantity || 1),
+                discountValue:
+                    Number(offerData.discountValue || 0),
+                status:
+                    offerData.status || "ACTIVE",
+            }),
+        }
+    );
+}
+
+export async function updateAdminOffer(
+    offerId,
+    offerData
+) {
+    if (!offerId) {
+        throw new Error("Offer ID is required.");
+    }
+
+    return request(
+        `/admin/offers/${encodeURIComponent(
+            String(offerId)
+        )}`,
+        {
+            method: "PATCH",
+            body: JSON.stringify(offerData),
+        }
+    );
+}
+
+export async function deleteAdminOffer(offerId) {
+    if (!offerId) {
+        throw new Error("Offer ID is required.");
+    }
+
+    return request(
+        `/admin/offers/${encodeURIComponent(
+            String(offerId)
+        )}`,
+        {
+            method: "DELETE",
+        }
+    );
+}
+
 
 // ======================================================
-// ADMIN ORDER DETAILS
+// CREATE ADMIN ORDER
 // ======================================================
+
+export async function createAdminOrder(orderData) {
+    if (!orderData) {
+        throw new Error("Order data is required.");
+    }
+
+    if (!orderData.customerId) {
+        throw new Error("Customer is required.");
+    }
+
+    if (!Array.isArray(orderData.items) || orderData.items.length === 0) {
+        throw new Error("At least one order item is required.");
+    }
+
+    return request("/admin/orders/create", {
+        method: "POST",
+        body: JSON.stringify({
+            customerId: Number(orderData.customerId),
+            paymentMethod: orderData.paymentMethod || "COD",
+            offer: orderData.offer || null,
+            items: orderData.items.map((item) => ({
+                productId: Number(item.productId),
+                quantity: Number(item.quantity || 1),
+                unitPrice: Number(item.unitPrice || 0),
+                isFreeItem: Boolean(item.isFreeItem),
+                offerName: item.offerName || null,
+            })),
+        }),
+    });
+}
 
 export async function getAdminOrder(orderId) {
     const id = validateOrderId(orderId);
@@ -596,9 +759,136 @@ export async function getAdminReports(period = "30D") {
     );
 }
 
+
+// ======================================================
+// EXPENSES
+// ======================================================
+
+export async function getExpenses(params = {}) {
+    const query = new URLSearchParams();
+
+    Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "") {
+            query.set(key, value);
+        }
+    });
+
+    const suffix = query.toString()
+        ? `?${query.toString()}`
+        : "";
+
+    return request(`/expenses${suffix}`);
+}
+
+export async function getExpenseSummary(params = {}) {
+    const query = new URLSearchParams();
+
+    Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "") {
+            query.set(key, value);
+        }
+    });
+
+    const suffix = query.toString()
+        ? `?${query.toString()}`
+        : "";
+
+    return request(`/expenses/summary${suffix}`);
+}
+
+export async function getExpense(expenseId) {
+    return request(`/expenses/${expenseId}`);
+}
+
+export async function createExpense(expenseData) {
+    return request(
+        "/expenses",
+        {
+            method: "POST",
+            body: JSON.stringify(expenseData)
+        }
+    );
+}
+
+export async function updateExpense(expenseId, expenseData) {
+    return request(
+        `/expenses/${expenseId}`,
+        {
+            method: "PUT",
+            body: JSON.stringify(expenseData)
+        }
+    );
+}
+
+export async function deleteExpense(expenseId) {
+    return request(
+        `/expenses/${expenseId}`,
+        {
+            method: "DELETE"
+        }
+    );
+}
+
 // ======================================================
 // DEFAULT EXPORT
 // ======================================================
+
+
+/* ============================================================
+   ADMIN PRODUCT MANAGEMENT
+   ============================================================ */
+
+export async function createProduct(productData) {
+    return await request(
+        "/products",
+        {
+            method: "POST",
+            body: JSON.stringify(productData)
+        }
+    );
+}
+
+export async function updateProduct(productId, productData) {
+    return await request(
+        `/products/${productId}`,
+        {
+            method: "PUT",
+            body: JSON.stringify(productData)
+        }
+    );
+}
+
+export async function deleteProduct(productId) {
+    return await request(
+        `/products/${productId}`,
+        {
+            method: "DELETE"
+        }
+    );
+}
+
+export async function uploadProductImage(productId, file) {
+    const formData = new FormData();
+
+    formData.append("image", file);
+
+    return await request(
+        `/products/${productId}/image`,
+        {
+            method: "POST",
+            body: formData
+        }
+    );
+}
+
+export async function removeProductImage(productId) {
+    return await request(
+        `/products/${productId}/image`,
+        {
+            method: "DELETE"
+        }
+    );
+}
 
 export default {
     getProducts,
@@ -607,7 +897,10 @@ export default {
     initiateMpesaPayment,
 
     getAdminDashboard,
+    getAdminCustomers,
+    getAdminCustomer360,
     getAdminOrders,
+    createAdminOrder,
     getAdminOrder,
 
     updateAdminOrderStatus,
@@ -618,6 +911,205 @@ export default {
 
     getAdminReports,
 };
+
+
+
+
+
+
+
+
+
+export async function uploadProductGalleryImage(
+    productId,
+    file,
+    slot
+) {
+    const formData = new FormData();
+
+    formData.append("image", file);
+    formData.append("slot", String(slot));
+
+    return await request(
+        `/products/${productId}/images`,
+        {
+            method: "POST",
+            body: formData
+        }
+    );
+}
+
+export async function removeProductGalleryImage(
+    productId,
+    slot
+) {
+    return await request(
+        `/products/${productId}/images/${slot}`,
+        {
+            method: "DELETE"
+        }
+    );
+}
+
+export async function getProductImages(productId) {
+    const response = await request(
+        `/products/${productId}/images`
+    );
+
+    return Array.isArray(response?.images)
+        ? response.images
+        : [];
+}
+
+
+
+
+
+/* ============================================================
+   FINANCIAL REPORT API
+   Central financial engine
+   ============================================================ */
+
+export const getFinancialSummary = async ({
+    startDate,
+    endDate,
+} = {}) => {
+
+    const params = new URLSearchParams();
+
+    if (startDate) {
+        params.set("startDate", startDate);
+    }
+
+    if (endDate) {
+        params.set("endDate", endDate);
+    }
+
+    const query = params.toString();
+
+    console.log("FINANCIAL SUMMARY: request about to fire");
+
+    const response = await request(
+        `/reports/financial/financial-summary${query ? `?${query}` : ""}`,
+        {
+            method: "GET",
+        }
+    );
+
+    console.log("FINANCIAL SUMMARY RESPONSE:", JSON.stringify(response, null, 2));
+
+    return response?.data || {};
+};
+
+
+export const getFinancialTrend = async ({
+    startDate,
+    endDate,
+} = {}) => {
+
+    const params = new URLSearchParams();
+
+    if (startDate) {
+        params.set("startDate", startDate);
+    }
+
+    if (endDate) {
+        params.set("endDate", endDate);
+    }
+
+    const query = params.toString();
+
+    return request(
+        `/reports/financial/financial-trend${query ? `?${query}` : ""}`,
+        {
+            method: "GET",
+        }
+    );
+};
+
+
+export const getProductProfitability = async ({
+    startDate,
+    endDate,
+} = {}) => {
+
+    const params = new URLSearchParams();
+
+    if (startDate) {
+        params.set("startDate", startDate);
+    }
+
+    if (endDate) {
+        params.set("endDate", endDate);
+    }
+
+    const query = params.toString();
+
+    return request(
+        `/reports/financial/product-profitability${query ? `?${query}` : ""}`,
+        {
+            method: "GET",
+        }
+    );
+};
+
+
+export const getExpenseBreakdown = async ({
+    startDate,
+    endDate,
+} = {}) => {
+
+    const params = new URLSearchParams();
+
+    if (startDate) {
+        params.set("startDate", startDate);
+    }
+
+    if (endDate) {
+        params.set("endDate", endDate);
+    }
+
+    const query = params.toString();
+
+    return request(
+        `/reports/financial/expense-breakdown${query ? `?${query}` : ""}`,
+        {
+            method: "GET",
+        }
+    );
+};
+
+
+export const getCashFlow = async ({
+    startDate,
+    endDate,
+} = {}) => {
+
+    const params = new URLSearchParams();
+
+    if (startDate) {
+        params.set("startDate", startDate);
+    }
+
+    if (endDate) {
+        params.set("endDate", endDate);
+    }
+
+    const query = params.toString();
+
+    return request(
+        `/reports/financial/cash-flow${query ? `?${query}` : ""}`,
+        {
+            method: "GET",
+        }
+    );
+};
+
+
+
+
+
+
 
 
 

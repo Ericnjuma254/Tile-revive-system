@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./AdminLogin.css";
 
-const API_BASE_URL = "http://192.168.0.101:5000/api";
+const API_BASE_URL = "http://192.168.0.100:5000/api";
 
 function AdminLogin() {
     const navigate = useNavigate();
@@ -403,3 +403,4 @@ function AdminLogin() {
 }
 
 export default AdminLogin;
+

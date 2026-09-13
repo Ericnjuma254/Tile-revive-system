@@ -1,6 +1,153 @@
 const express = require("express");
 const router = express.Router();
-const prisma = require("../db");
+const prisma = require("..\/db");
+const fs = require("fs");
+const path = require("path");
+const multer = require("multer");
+
+// ======================================================
+// PRODUCT IMAGE UPLOAD CONFIGURATION
+// ======================================================
+
+const productUploadDirectory = path.join(
+    process.cwd(),
+    "uploads",
+    "products"
+);
+
+if (!fs.existsSync(productUploadDirectory)) {
+    fs.mkdirSync(productUploadDirectory, {
+        recursive: true
+    });
+}
+
+const productImageStorage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, productUploadDirectory);
+    },
+
+    filename: function (req, file, cb) {
+        const extension =
+            path.extname(file.originalname).toLowerCase();
+
+        const safeName =
+            path
+                .basename(
+                    file.originalname,
+                    extension
+                )
+                .replace(/[^a-zA-Z0-9-_]/g, "-")
+                .replace(/-+/g, "-")
+                .toLowerCase();
+
+        const uniqueName =
+            `${safeName}-${Date.now()}${extension}`;
+
+        cb(null, uniqueName);
+    }
+});
+
+const uploadProductImage = multer({
+    storage: productImageStorage,
+
+    limits: {
+        fileSize: 5 * 1024 * 1024
+    },
+
+    fileFilter: function (req, file, cb) {
+        const allowedTypes = [
+            "image/jpeg",
+            "image/jpg",
+            "image/png",
+            "image/webp"
+        ];
+
+        if (!allowedTypes.includes(file.mimetype)) {
+            return cb(
+                new Error(
+                    "Only JPG, JPEG, PNG and WEBP images are allowed."
+                )
+            );
+        }
+
+        cb(null, true);
+    }
+});
+
+
+
+// ======================================================
+// PRODUCT IMAGE GALLERY HELPERS
+// ======================================================
+
+const MAX_PRODUCT_IMAGES = 10;
+
+function isLocalProductGalleryImage(image) {
+    if (!image || typeof image !== "string") return false;
+
+    return image.startsWith("/uploads/products/");
+}
+
+function deleteLocalProductGalleryImage(image) {
+    if (!isLocalProductGalleryImage(image)) return;
+
+    try {
+        const filename = path.basename(image);
+
+        const filePath = path.join(
+            process.cwd(),
+            "uploads",
+            "products",
+            filename
+        );
+
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+        }
+    } catch (error) {
+        console.warn(
+            "Unable to delete gallery image:",
+            error.message
+        );
+    }
+}
+
+function normaliseProductImages(product) {
+    const gallery = Array.isArray(product.productimage)
+        ? product.productimage
+            .sort((a, b) => {
+                if (a.sortOrder !== b.sortOrder) {
+                    return a.sortOrder - b.sortOrder;
+                }
+
+                return a.id - b.id;
+            })
+            .map((item) => ({
+                id: item.id,
+                image: item.image,
+                sortOrder: item.sortOrder,
+                createdAt: item.createdAt
+            }))
+        : [];
+
+    return {
+        ...product,
+        images: [
+            ...(product.image
+                ? [{
+                    id: "primary",
+                    image: product.image,
+                    sortOrder: 1,
+                    primary: true
+                }]
+                : []),
+            ...gallery.map((item) => ({
+                ...item,
+                primary: false
+            }))
+        ].slice(0, MAX_PRODUCT_IMAGES)
+    };
+}
 
 // ======================================================
 // ADD PRODUCT
@@ -243,7 +390,6 @@ router.get("/:id", async (req, res) => {
 
 router.put("/:id", async (req, res) => {
     try {
-
         const id = Number(req.params.id);
 
         if (!Number.isInteger(id)) {
@@ -253,12 +399,14 @@ router.put("/:id", async (req, res) => {
             });
         }
 
-        const oldProduct =
-            await prisma.product.findUnique({
-                where: {
-                    id
-                }
-            });
+        console.log("==============================================");
+        console.log("UPDATE PRODUCT REQUEST");
+        console.log("Product ID:", id);
+        console.log("Request body:", req.body);
+
+        const oldProduct = await prisma.product.findUnique({
+            where: { id }
+        });
 
         if (!oldProduct) {
             return res.status(404).json({
@@ -267,82 +415,126 @@ router.put("/:id", async (req, res) => {
             });
         }
 
-        const newStock =
-            req.body.stock !== undefined
-                ? Number(req.body.stock)
-                : oldProduct.stock;
+        const body = req.body || {};
 
-        const product =
-            await prisma.product.update({
-                where: {
-                    id
-                },
-                data: {
-                    ...req.body,
+        const productData = {};
 
-                    price:
-                        req.body.price !== undefined
-                            ? Number(req.body.price)
-                            : undefined,
-
-                    costPrice:
-                        req.body.costPrice !== undefined
-                            ? Number(req.body.costPrice)
-                            : undefined,
-
-                    discountPrice:
-                        req.body.discountPrice !== undefined
-                            ? Number(req.body.discountPrice)
-                            : undefined,
-
-                    stock:
-                        req.body.stock !== undefined
-                            ? Number(req.body.stock)
-                            : undefined,
-
-                    minimumStock:
-                        req.body.minimumStock !== undefined
-                            ? Number(req.body.minimumStock)
-                            : undefined
-                }
-            });
-
-        // ==================================================
-        // RECORD STOCK ADJUSTMENT
-        // ==================================================
-
-        if (newStock !== oldProduct.stock) {
-
-            const difference =
-                newStock - oldProduct.stock;
-
-            await prisma.inventoryTransaction.create({
-                data: {
-                    productId: product.id,
-
-                    type:
-                        difference > 0
-                            ? "STOCK_IN"
-                            : "STOCK_OUT",
-
-                    quantity:
-                        Math.abs(difference),
-
-                    previousStock:
-                        oldProduct.stock,
-
-                    newStock,
-
-                    reference:
-                        product.sku || null,
-
-                    note:
-                        "Stock manually adjusted"
-                }
-            });
+        if (body.name !== undefined) {
+            productData.name = String(body.name).trim();
         }
 
-        res.json({
+        if (body.description !== undefined) {
+            productData.description = body.description;
+        }
+
+        if (body.shortDescription !== undefined) {
+            productData.shortDescription = body.shortDescription;
+        }
+
+        if (body.sku !== undefined) {
+            productData.sku = body.sku === "" ? null : body.sku;
+        }
+
+        if (body.barcode !== undefined) {
+            productData.barcode = body.barcode === "" ? null : body.barcode;
+        }
+
+        if (body.price !== undefined) {
+            productData.price = Number(body.price);
+        }
+
+        if (body.costPrice !== undefined) {
+            productData.costPrice =
+                body.costPrice === null || body.costPrice === ""
+                    ? null
+                    : Number(body.costPrice);
+        }
+
+        if (body.discountPrice !== undefined) {
+            productData.discountPrice =
+                body.discountPrice === null || body.discountPrice === ""
+                    ? null
+                    : Number(body.discountPrice);
+        }
+
+        if (body.stock !== undefined) {
+            productData.stock = Number(body.stock);
+        }
+
+        if (body.minimumStock !== undefined) {
+            productData.minimumStock = Number(body.minimumStock);
+        }
+
+        if (body.category !== undefined) {
+            productData.category =
+                body.category === "" ? null : body.category;
+        }
+
+        if (body.brand !== undefined) {
+            productData.brand =
+                body.brand === "" ? null : body.brand;
+        }
+
+        if (body.featured !== undefined) {
+            productData.featured = Boolean(body.featured);
+        }
+
+        if (body.status !== undefined) {
+            productData.status = body.status;
+        }
+
+        console.log("Prisma update data:", productData);
+
+        const newStock =
+            productData.stock !== undefined
+                ? productData.stock
+                : oldProduct.stock;
+
+        const product = await prisma.$transaction(async (tx) => {
+
+            const updatedProduct = await tx.product.update({
+                where: { id },
+                data: productData
+            });
+
+            if (newStock !== oldProduct.stock) {
+
+                const difference =
+                    newStock - oldProduct.stock;
+
+                await tx.inventoryTransaction.create({
+                    data: {
+                        productId: id,
+
+                        type:
+                            difference > 0
+                                ? "STOCK_IN"
+                                : "STOCK_OUT",
+
+                        quantity: Math.abs(difference),
+
+                        previousStock: oldProduct.stock,
+
+                        newStock,
+
+                        reference:
+                            updatedProduct.sku || null,
+
+                        note:
+                            "Stock manually adjusted"
+                    }
+                });
+            }
+
+            return updatedProduct;
+        });
+
+        console.log(
+            "PRODUCT UPDATE SUCCESS:",
+            product.id
+        );
+
+        return res.json({
             success: true,
             message: "Product updated successfully",
             product
@@ -350,62 +542,24 @@ router.put("/:id", async (req, res) => {
 
     } catch (error) {
 
-        console.error(
-            "UPDATE PRODUCT ERROR:",
-            error
-        );
+        console.error("==============================================");
+        console.error("UPDATE PRODUCT ERROR");
+        console.error("Name:", error.name);
+        console.error("Message:", error.message);
+        console.error("Code:", error.code);
+        console.error("Meta:", error.meta);
+        console.error("Stack:", error.stack);
+        console.error("==============================================");
 
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message: "Failed to update product",
-            error: error.message
+            error: error.message,
+            code: error.code || null
         });
     }
 });
-
-
 // ======================================================
-// DELETE PRODUCT
-// DELETE /api/products/:id
-// ======================================================
-
-router.delete("/:id", async (req, res) => {
-    try {
-
-        const id = Number(req.params.id);
-
-        if (!Number.isInteger(id)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid product ID"
-            });
-        }
-
-        await prisma.product.delete({
-            where: {
-                id
-            }
-        });
-
-        res.json({
-            success: true,
-            message: "Product deleted successfully"
-        });
-
-    } catch (error) {
-
-        console.error(
-            "DELETE PRODUCT ERROR:",
-            error
-        );
-
-        res.status(500).json({
-            success: false,
-            message: "Failed to delete product",
-            error: error.message
-        });
-    }
-});
 
 // ======================================================
 // STOCK IN
@@ -684,3 +838,563 @@ router.post("/:id/stock/adjust", async (req, res) => {
 });
 
 module.exports = router;
+
+/* ============================================================
+   PRODUCT IMAGE MANAGEMENT
+   ============================================================ */
+
+function isLocalProductImage(image) {
+    if (!image || typeof image !== "string") {
+        return false;
+    }
+
+    return image.startsWith("/uploads/products/");
+}
+
+function deleteLocalProductImage(image) {
+    if (!isLocalProductImage(image)) {
+        return;
+    }
+
+    const filename = path.basename(image);
+
+    const filePath = path.join(
+        process.cwd(),
+        "uploads",
+        "products",
+        filename
+    );
+
+    try {
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+        }
+    } catch (error) {
+        console.error(
+            "PRODUCT IMAGE DELETE ERROR:",
+            error
+        );
+    }
+}
+
+
+/* ============================================================
+   UPLOAD / REPLACE PRODUCT IMAGE
+   POST /api/products/:id/image
+   ============================================================ */
+
+router.post(
+    "/:id/image",
+    uploadProductImage.single("image"),
+    async (req, res) => {
+        try {
+            const id = Number(req.params.id);
+
+            if (!Number.isInteger(id)) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid product ID."
+                });
+            }
+
+            if (!req.file) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Please select a product image."
+                });
+            }
+
+            const existingProduct =
+                await prisma.product.findUnique({
+                    where: { id }
+                });
+
+            if (!existingProduct) {
+                deleteLocalProductImage(
+                    `/uploads/products/${req.file.filename}`
+                );
+
+                return res.status(404).json({
+                    success: false,
+                    message: "Product not found."
+                });
+            }
+
+            const newImage =
+                `/uploads/products/${req.file.filename}`;
+
+            const product =
+                await prisma.product.update({
+                    where: { id },
+                    data: {
+                        image: newImage
+                    }
+                });
+
+            deleteLocalProductImage(
+                existingProduct.image
+            );
+
+            return res.json({
+                success: true,
+                message: "Product image updated successfully.",
+                product
+            });
+
+        } catch (error) {
+            console.error(
+                "PRODUCT IMAGE UPLOAD ERROR:",
+                error
+            );
+
+            if (req.file) {
+                deleteLocalProductImage(
+                    `/uploads/products/${req.file.filename}`
+                );
+            }
+
+            return res.status(500).json({
+                success: false,
+                message: "Failed to upload product image.",
+                error: error.message
+            });
+        }
+    }
+);
+
+
+/* ============================================================
+   REMOVE PRODUCT IMAGE
+   DELETE /api/products/:id/image
+   ============================================================ */
+
+router.delete(
+    "/:id/image",
+    async (req, res) => {
+        try {
+            const id = Number(req.params.id);
+
+            if (!Number.isInteger(id)) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid product ID."
+                });
+            }
+
+            const existingProduct =
+                await prisma.product.findUnique({
+                    where: { id }
+                });
+
+            if (!existingProduct) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Product not found."
+                });
+            }
+
+            const product =
+                await prisma.product.update({
+                    where: { id },
+                    data: {
+                        image: null
+                    }
+                });
+
+            deleteLocalProductImage(
+                existingProduct.image
+            );
+
+            return res.json({
+                success: true,
+                message: "Product image removed successfully.",
+                product
+            });
+
+        } catch (error) {
+            console.error(
+                "PRODUCT IMAGE REMOVE ERROR:",
+                error
+            );
+
+            return res.status(500).json({
+                success: false,
+                message: "Failed to remove product image."
+            });
+        }
+    }
+);
+
+
+
+
+
+
+
+
+
+// ======================================================
+// PRODUCT GALLERY IMAGE MANAGEMENT
+// ======================================================
+
+// POST /api/products/:id/images
+// Upload or replace one of the 10 image slots.
+// Slot 1 = primary image.
+// Slots 2-10 = productimage gallery records.
+
+router.post(
+    "/:id/images",
+    uploadProductImage.single("image"),
+    async (req, res) => {
+
+        try {
+            const id = Number(req.params.id);
+            const slot = Number(req.body.slot || 1);
+
+            if (!Number.isInteger(id) || id <= 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid product ID."
+                });
+            }
+
+            if (!Number.isInteger(slot) || slot < 1 || slot > 10) {
+                if (req.file) {
+                    deleteLocalProductGalleryImage(
+                        `/uploads/products/${req.file.filename}`
+                    );
+                }
+
+                return res.status(400).json({
+                    success: false,
+                    message: "Image slot must be between 1 and 10."
+                });
+            }
+
+            if (!req.file) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Please select an image."
+                });
+            }
+
+            const product = await prisma.product.findUnique({
+                where: {
+                    id
+                }
+            });
+
+            if (!product) {
+                deleteLocalProductGalleryImage(
+                    `/uploads/products/${req.file.filename}`
+                );
+
+                return res.status(404).json({
+                    success: false,
+                    message: "Product not found."
+                });
+            }
+
+            const newImage =
+                `/uploads/products/${req.file.filename}`;
+
+            // ==================================================
+            // SLOT 1 = PRIMARY PRODUCT IMAGE
+            // ==================================================
+
+            if (slot === 1) {
+
+                const oldImage = product.image;
+
+                await prisma.product.update({
+                    where: {
+                        id
+                    },
+                    data: {
+                        image: newImage
+                    }
+                });
+
+                if (
+                    oldImage &&
+                    oldImage !== newImage
+                ) {
+                    deleteLocalProductGalleryImage(oldImage);
+                }
+
+                return res.json({
+                    success: true,
+                    message: "Primary product image updated.",
+                    slot: 1,
+                    image: newImage
+                });
+            }
+
+            // ==================================================
+            // SLOTS 2-10 = GALLERY
+            // ==================================================
+
+            const existing =
+                await prisma.productimage.findFirst({
+                    where: {
+                        productId: id,
+                        sortOrder: slot
+                    }
+                });
+
+            if (existing) {
+
+                await prisma.productimage.update({
+                    where: {
+                        id: existing.id
+                    },
+                    data: {
+                        image: newImage
+                    }
+                });
+
+                deleteLocalProductGalleryImage(
+                    existing.image
+                );
+
+                return res.json({
+                    success: true,
+                    message: `Product image slot ${slot} updated.`,
+                    slot,
+                    image: newImage,
+                    id: existing.id
+                });
+            }
+
+            const totalGalleryImages =
+                await prisma.productimage.count({
+                    where: {
+                        productId: id
+                    }
+                });
+
+            if (totalGalleryImages >= 9) {
+                deleteLocalProductGalleryImage(newImage);
+
+                return res.status(400).json({
+                    success: false,
+                    message: "A product can have a maximum of 10 images."
+                });
+            }
+
+            const created =
+                await prisma.productimage.create({
+                    data: {
+                        productId: id,
+                        image: newImage,
+                        sortOrder: slot
+                    }
+                });
+
+            return res.status(201).json({
+                success: true,
+                message: `Product image slot ${slot} added.`,
+                slot,
+                image: newImage,
+                id: created.id
+            });
+
+        } catch (error) {
+
+            if (req.file) {
+                deleteLocalProductGalleryImage(
+                    `/uploads/products/${req.file.filename}`
+                );
+            }
+
+            console.error(
+                "PRODUCT GALLERY UPLOAD ERROR:",
+                error
+            );
+
+            return res.status(500).json({
+                success: false,
+                message: "Failed to upload product image.",
+                error: error.message
+            });
+        }
+    }
+);
+
+
+// DELETE /api/products/:id/images/:slot
+
+router.delete(
+    "/:id/images/:slot",
+    async (req, res) => {
+
+        try {
+
+            const id = Number(req.params.id);
+            const slot = Number(req.params.slot);
+
+            if (
+                !Number.isInteger(id) ||
+                !Number.isInteger(slot) ||
+                slot < 1 ||
+                slot > 10
+            ) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid product image slot."
+                });
+            }
+
+            const product =
+                await prisma.product.findUnique({
+                    where: {
+                        id
+                    }
+                });
+
+            if (!product) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Product not found."
+                });
+            }
+
+            // ==================================================
+            // PRIMARY IMAGE
+            // ==================================================
+
+            if (slot === 1) {
+
+                const oldImage = product.image;
+
+                await prisma.product.update({
+                    where: {
+                        id
+                    },
+                    data: {
+                        image: null
+                    }
+                });
+
+                deleteLocalProductGalleryImage(
+                    oldImage
+                );
+
+                return res.json({
+                    success: true,
+                    message: "Primary product image removed."
+                });
+            }
+
+            // ==================================================
+            // GALLERY IMAGE
+            // ==================================================
+
+            const galleryImage =
+                await prisma.productimage.findFirst({
+                    where: {
+                        productId: id,
+                        sortOrder: slot
+                    }
+                });
+
+            if (!galleryImage) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Image slot is empty."
+                });
+            }
+
+            await prisma.productimage.delete({
+                where: {
+                    id: galleryImage.id
+                }
+            });
+
+            deleteLocalProductGalleryImage(
+                galleryImage.image
+            );
+
+            return res.json({
+                success: true,
+                message: `Product image slot ${slot} removed.`
+            });
+
+        } catch (error) {
+
+            console.error(
+                "PRODUCT GALLERY DELETE ERROR:",
+                error
+            );
+
+            return res.status(500).json({
+                success: false,
+                message: "Failed to remove product image.",
+                error: error.message
+            });
+        }
+    }
+);
+
+
+// GET /api/products/:id/images
+
+router.get(
+    "/:id/images",
+    async (req, res) => {
+
+        try {
+
+            const id = Number(req.params.id);
+
+            const product =
+                await prisma.product.findUnique({
+                    where: {
+                        id
+                    },
+                    include: {
+                        productimage: {
+                            orderBy: [
+                                {
+                                    sortOrder: "asc"
+                                },
+                                {
+                                    id: "asc"
+                                }
+                            ]
+                        }
+                    }
+                });
+
+            if (!product) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Product not found."
+                });
+            }
+
+            const result =
+                normaliseProductImages(product);
+
+            return res.json({
+                success: true,
+                images: result.images
+            });
+
+        } catch (error) {
+
+            console.error(
+                "GET PRODUCT IMAGES ERROR:",
+                error
+            );
+
+            return res.status(500).json({
+                success: false,
+                message: "Failed to load product images.",
+                error: error.message
+            });
+        }
+    }
+);
+
+

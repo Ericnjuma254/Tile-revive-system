@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import "./Gallery.css";
 
-const API_URL = "http://192.168.0.101:5000";
+const API_URL = "http://192.168.0.100:5000";
 
 function Gallery() {
     const [gallery, setGallery] = useState([]);

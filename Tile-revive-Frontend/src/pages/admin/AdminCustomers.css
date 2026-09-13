@@ -1,0 +1,2092 @@
+.admin-customers-page {
+    min-height: 100vh;
+    background:
+        radial-gradient(
+            circle at 80% 0%,
+            rgba(50, 232, 117, 0.07),
+            transparent 30%
+        ),
+        #050505;
+    color: #f5f5f5;
+    padding: 32px;
+    box-sizing: border-box;
+}
+
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+
+.customers-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.customers-eyebrow,
+.section-label {
+    display: block;
+    color: #32e875;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.customers-header h1 {
+    margin: 7px 0 8px;
+    font-size: clamp(30px, 4vw, 48px);
+    line-height: 1;
+    letter-spacing: -0.04em;
+}
+
+.customers-header p {
+    margin: 0;
+    max-width: 650px;
+    color: #858585;
+    font-size: 14px;
+}
+
+.customers-header-status {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 10px 14px;
+    border: 1px solid rgba(50, 232, 117, 0.18);
+    border-radius: 999px;
+    background: rgba(50, 232, 117, 0.05);
+    color: #32e875;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    white-space: nowrap;
+}
+
+.status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #32e875;
+    box-shadow: 0 0 12px rgba(50, 232, 117, 0.7);
+}
+
+
+/* ============================================================
+   KPI CARDS
+   ============================================================ */
+
+.customer-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 32px;
+}
+
+.customer-kpi-card {
+    position: relative;
+    min-height: 132px;
+    padding: 19px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 18px;
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 255, 255, 0.045),
+            rgba(255, 255, 255, 0.015)
+        );
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.035),
+        0 14px 45px rgba(0, 0, 0, 0.24);
+    box-sizing: border-box;
+    transition:
+        transform 180ms ease,
+        border-color 180ms ease,
+        background 180ms ease,
+        box-shadow 180ms ease;
+}
+
+.customer-kpi-card::after {
+    content: "";
+    position: absolute;
+    right: -35px;
+    bottom: -45px;
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: rgba(50, 232, 117, 0.025);
+    filter: blur(25px);
+    pointer-events: none;
+}
+
+.customer-kpi-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(255, 255, 255, 0.13);
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 255, 255, 0.06),
+            rgba(255, 255, 255, 0.018)
+        );
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.045),
+        0 20px 55px rgba(0, 0, 0, 0.32);
+}
+
+.customer-kpi-card span {
+    position: relative;
+    z-index: 1;
+    display: block;
+    color: #858585;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+}
+
+.customer-kpi-card strong {
+    position: relative;
+    z-index: 1;
+    display: block;
+    margin-top: 16px;
+    color: #f5f5f5;
+    font-size: 29px;
+    font-weight: 750;
+    line-height: 1;
+    letter-spacing: -0.04em;
+}
+
+.customer-kpi-card small {
+    position: relative;
+    z-index: 1;
+    display: block;
+    margin-top: 9px;
+    color: #555;
+    font-size: 11px;
+    line-height: 1.35;
+}
+
+.customer-kpi-revenue {
+    border-color: rgba(50, 232, 117, 0.16);
+    background:
+        linear-gradient(
+            145deg,
+            rgba(50, 232, 117, 0.075),
+            rgba(255, 255, 255, 0.018)
+        );
+}
+
+.customer-kpi-revenue strong {
+    color: #32e875;
+}
+
+.customer-kpi-segment {
+    cursor: pointer;
+}
+
+.customer-kpi-segment:hover {
+    border-color: rgba(50, 232, 117, 0.25);
+}
+
+.customer-kpi-new {
+    border-top: 2px solid rgba(80, 160, 255, 0.45);
+}
+
+.customer-kpi-active {
+    border-top: 2px solid rgba(50, 232, 117, 0.55);
+}
+
+.customer-kpi-returning {
+    border-top: 2px solid rgba(170, 110, 255, 0.55);
+}
+
+.customer-kpi-risk {
+    border-top: 2px solid rgba(255, 170, 60, 0.55);
+}
+
+.customer-kpi-inactive {
+    border-top: 2px solid rgba(255, 75, 75, 0.45);
+}
+
+.customer-kpi-vip {
+    border-color: rgba(50, 232, 117, 0.22);
+    border-top: 2px solid #32e875;
+    background:
+        linear-gradient(
+            145deg,
+            rgba(50, 232, 117, 0.085),
+            rgba(255, 255, 255, 0.018)
+        );
+}
+
+.customer-kpi-highlight {
+    border-color: rgba(50, 232, 117, 0.2);
+}
+
+.customer-kpi-vip strong {
+    color: #32e875;
+}
+
+/* ============================================================
+   KPI RESPONSIVE LAYOUT
+============================================================ */
+
+@media (max-width: 1200px) {
+    .customer-kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 680px) {
+    .customer-kpi-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .customer-kpi-card {
+        min-height: 118px;
+        padding: 17px;
+    }
+
+    .customer-kpi-card strong {
+        font-size: 26px;
+    }
+}
+/* ============================================================
+   DIRECTORY
+   ============================================================ */
+
+.customer-directory {
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.018);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
+}
+
+.section-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding: 24px 24px 18px;
+}
+
+.section-heading h2 {
+    margin: 7px 0 0;
+    font-size: 22px;
+    letter-spacing: -0.025em;
+}
+
+.customer-refresh-button,
+.customer-360-header button {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 9px;
+    background: rgba(255, 255, 255, 0.04);
+    color: #aaa;
+    padding: 9px 14px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.customer-refresh-button:hover,
+.customer-360-header button:hover {
+    border-color: rgba(50, 232, 117, 0.35);
+    color: #32e875;
+}
+
+
+/* ============================================================
+   TOOLBAR
+   ============================================================ */
+
+.customer-toolbar {
+    display: grid;
+    grid-template-columns: minmax(240px, 1fr) 180px 180px;
+    gap: 10px;
+    padding: 0 24px 18px;
+}
+
+.customer-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 42px;
+    padding: 0 13px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.25);
+}
+
+.customer-search span {
+    color: #32e875;
+    font-size: 20px;
+}
+
+.customer-search input,
+.customer-toolbar select {
+    width: 100%;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    outline: none;
+    border-radius: 10px;
+    background: #0a0a0a;
+    color: #ddd;
+    padding: 11px 12px;
+    font-size: 12px;
+    box-sizing: border-box;
+}
+
+.customer-search input {
+    border: 0;
+    padding: 0;
+    background: transparent;
+}
+
+.customer-search input::placeholder {
+    color: #555;
+}
+
+.customer-toolbar select {
+    cursor: pointer;
+}
+
+
+/* ============================================================
+   TABLE
+   ============================================================ */
+
+.customer-table-wrapper {
+    overflow-x: auto;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.customer-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 900px;
+}
+
+.customer-table th {
+    padding: 13px 18px;
+    background: rgba(255, 255, 255, 0.018);
+    color: #555;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-align: left;
+    text-transform: uppercase;
+}
+
+.customer-table td {
+    padding: 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.045);
+    color: #aaa;
+    font-size: 12px;
+}
+
+.customer-empty-state {
+    padding: 65px 20px;
+    text-align: center;
+}
+
+.empty-icon {
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    margin: 0 auto 16px;
+    border: 1px solid rgba(50, 232, 117, 0.2);
+    border-radius: 50%;
+    color: #32e875;
+    font-size: 24px;
+    background: rgba(50, 232, 117, 0.04);
+}
+
+.customer-empty-state h3 {
+    margin: 0 0 7px;
+    color: #ddd;
+    font-size: 15px;
+}
+
+.customer-empty-state p {
+    max-width: 430px;
+    margin: 0 auto;
+    color: #555;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+
+/* ============================================================
+   CUSTOMER 360 — PROFESSIONAL RIGHT SIDE DRAWER
+   ============================================================ */
+
+.customer-360-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+
+    width: min(620px, 100vw);
+    height: 100vh;
+
+    margin: 0;
+    padding: 0;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    border: 0;
+    border-left: 1px solid rgba(50, 232, 117, 0.18);
+    border-radius: 0;
+
+    background:
+        radial-gradient(
+            circle at 100% 0%,
+            rgba(50, 232, 117, 0.075),
+            transparent 28%
+        ),
+        linear-gradient(
+            180deg,
+            #0b0b0b 0%,
+            #070707 48%,
+            #050505 100%
+        );
+
+    color: #f5f5f5;
+
+    box-shadow:
+        -30px 0 90px rgba(0, 0, 0, 0.7),
+        -100vw 0 0 100vw rgba(0, 0, 0, 0.58);
+
+    animation: customerDrawerIn 0.28s cubic-bezier(.22,.8,.24,1);
+    scrollbar-width: thin;
+    scrollbar-color: rgba(50, 232, 117, 0.35) transparent;
+}
+
+.customer-360-panel::-webkit-scrollbar {
+    width: 6px;
+}
+
+.customer-360-panel::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.customer-360-panel::-webkit-scrollbar-thumb {
+    background: rgba(50, 232, 117, 0.25);
+    border-radius: 999px;
+}
+
+.customer-360-panel::-webkit-scrollbar-thumb:hover {
+    background: rgba(50, 232, 117, 0.45);
+}
+
+
+/* ============================================================
+   DRAWER HEADER
+   ============================================================ */
+
+.customer-360-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 18px;
+
+    padding: 22px 24px 20px;
+
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(10, 10, 10, 0.98),
+            rgba(10, 10, 10, 0.91)
+        );
+
+    backdrop-filter: blur(18px);
+}
+
+.customer-360-header > div:first-child {
+    min-width: 0;
+}
+
+.customer-360-header .section-label {
+    margin-bottom: 5px;
+}
+
+.customer-360-header h2 {
+    margin: 0;
+
+    color: #f5f5f5;
+    font-size: 23px;
+    line-height: 1.15;
+    letter-spacing: -0.035em;
+}
+
+.customer-360-header p {
+    margin: 7px 0 0;
+    color: #686868;
+    font-size: 11px;
+}
+
+.customer-360-header button {
+    flex-shrink: 0;
+
+    width: 34px;
+    height: 34px;
+
+    display: grid;
+    place-items: center;
+
+    padding: 0;
+
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+
+    background: rgba(255, 255, 255, 0.04);
+    color: #777;
+
+    font-size: 18px;
+    cursor: pointer;
+
+    transition:
+        border-color .18s ease,
+        background .18s ease,
+        color .18s ease,
+        transform .18s ease;
+}
+
+.customer-360-header button:hover {
+    border-color: rgba(50, 232, 117, 0.35);
+    background: rgba(50, 232, 117, 0.08);
+    color: #32e875;
+    transform: rotate(4deg);
+}
+
+
+/* ============================================================
+   DRAWER CONTENT
+   ============================================================ */
+
+.customer-360-panel > * {
+    box-sizing: border-box;
+}
+
+.customer-360-panel .customer-profile-grid,
+.customer-360-panel .customer-metrics-grid,
+.customer-360-panel .customer-insights-grid,
+.customer-360-panel .customer-detail-card {
+    box-sizing: border-box;
+}
+
+.customer-360-panel > section,
+.customer-360-panel > div:not(.customer-360-header) {
+    width: 100%;
+}
+
+
+/* Give the existing detail content breathing room */
+
+.customer-360-panel .customer-profile-grid,
+.customer-360-panel .customer-metrics-grid,
+.customer-360-panel .customer-insights-grid {
+    padding-left: 24px;
+    padding-right: 24px;
+}
+
+.customer-360-panel .customer-detail-card.full-width {
+    margin-left: 24px;
+    margin-right: 24px;
+}
+
+
+/* ============================================================
+   METRIC CARDS
+   ============================================================ */
+
+.customer-360-panel .customer-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+
+    margin-top: 18px;
+    margin-bottom: 18px;
+}
+
+.customer-360-panel .customer-metrics-grid > div {
+    min-height: 82px;
+
+    padding: 14px;
+
+    border: 1px solid rgba(255, 255, 255, 0.065);
+    border-radius: 13px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 255, 255, 0.035),
+            rgba(255, 255, 255, 0.012)
+        );
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.025);
+
+    transition:
+        border-color .18s ease,
+        transform .18s ease;
+}
+
+.customer-360-panel .customer-metrics-grid > div:hover {
+    border-color: rgba(50, 232, 117, 0.18);
+    transform: translateY(-1px);
+}
+
+.customer-360-panel .customer-metrics-grid span {
+    display: block;
+
+    color: #626262;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+
+.customer-360-panel .customer-metrics-grid strong {
+    display: block;
+
+    margin-top: 9px;
+
+    color: #f2f2f2;
+    font-size: 16px;
+    letter-spacing: -0.025em;
+}
+
+.customer-360-panel .customer-metrics-grid > div:first-child strong {
+    color: #32e875;
+}
+
+
+/* ============================================================
+   INSIGHTS
+   ============================================================ */
+
+.customer-360-panel .customer-insights-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+
+    margin-bottom: 10px;
+}
+
+.customer-360-panel .customer-detail-card {
+    padding: 18px;
+
+    border: 1px solid rgba(255, 255, 255, 0.065);
+    border-radius: 15px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 255, 255, 0.028),
+            rgba(255, 255, 255, 0.012)
+        );
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.customer-360-panel .customer-detail-card.full-width {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.customer-360-panel .detail-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 15px;
+
+    margin-bottom: 16px;
+}
+
+.customer-360-panel .detail-card-header h3 {
+    margin: 5px 0 0;
+
+    color: #ededed;
+    font-size: 15px;
+    letter-spacing: -0.02em;
+}
+
+.customer-360-panel .detail-card-header > span:last-child {
+    flex-shrink: 0;
+
+    color: #555;
+    font-size: 10px;
+}
+
+
+/* ============================================================
+   ACCOUNT INFORMATION
+   ============================================================ */
+
+.customer-360-panel .account-details {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.customer-360-panel .account-details > div {
+    padding: 11px 12px;
+
+    border: 1px solid rgba(255, 255, 255, 0.045);
+    border-radius: 10px;
+
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.customer-360-panel .account-details span {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #555;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+}
+
+.customer-360-panel .account-details strong {
+    display: block;
+
+    overflow: hidden;
+
+    color: #ccc;
+    font-size: 11px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+/* ============================================================
+   PRODUCT INSIGHT
+   ============================================================ */
+
+.customer-360-panel .product-insight {
+    padding: 14px;
+
+    border-left: 2px solid #32e875;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(50, 232, 117, 0.06),
+            transparent
+        );
+}
+
+.customer-360-panel .product-insight strong {
+    display: block;
+
+    margin-bottom: 10px;
+
+    color: #f0f0f0;
+    font-size: 14px;
+}
+
+.customer-360-panel .product-insight div {
+    margin-top: 5px;
+
+    color: #888;
+    font-size: 11px;
+}
+
+.customer-360-panel .product-insight small {
+    display: block;
+
+    margin-top: 10px;
+
+    color: #555;
+    font-size: 10px;
+}
+
+
+/* ============================================================
+   MINI TABLES
+   ============================================================ */
+
+.customer-360-panel .mini-table-wrapper {
+    overflow-x: auto;
+
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 11px;
+}
+
+.customer-360-panel .mini-table {
+    width: 100%;
+    min-width: 500px;
+
+    border-collapse: collapse;
+}
+
+.customer-360-panel .mini-table th {
+    padding: 10px 12px;
+
+    background: rgba(255, 255, 255, 0.018);
+
+    color: #505050;
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-align: left;
+    text-transform: uppercase;
+}
+
+.customer-360-panel .mini-table td {
+    padding: 12px;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+
+    color: #888;
+    font-size: 10px;
+}
+
+.customer-360-panel .mini-table td strong {
+    color: #d5d5d5;
+}
+
+
+/* ============================================================
+   STATUS PILLS
+   ============================================================ */
+
+.customer-360-panel .table-status,
+.customer-360-panel .profile-status {
+    display: inline-flex;
+    align-items: center;
+
+    padding: 4px 7px;
+
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+
+    background: rgba(255, 255, 255, 0.035);
+
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: .05em;
+}
+
+
+/* ============================================================
+   PREFERENCES
+   ============================================================ */
+
+.customer-360-panel .preference-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.customer-360-panel .preference-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+
+    padding: 13px 0;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.045);
+}
+
+.customer-360-panel .preference-row:first-child {
+    border-top: 0;
+}
+
+.customer-360-panel .preference-row strong {
+    display: block;
+
+    color: #ddd;
+    font-size: 11px;
+}
+
+.customer-360-panel .preference-row small {
+    display: block;
+
+    margin-top: 4px;
+
+    color: #555;
+    font-size: 9px;
+}
+
+.customer-360-panel .preference-stats {
+    text-align: right;
+}
+
+.customer-360-panel .preference-stats span {
+    display: block;
+
+    color: #666;
+    font-size: 9px;
+}
+
+.customer-360-panel .preference-stats strong {
+    margin-top: 4px;
+    color: #32e875;
+}
+
+
+/* ============================================================
+   TIMELINES
+   ============================================================ */
+
+.customer-360-panel .timeline {
+    position: relative;
+
+    padding-left: 17px;
+}
+
+.customer-360-panel .timeline::before {
+    content: "";
+
+    position: absolute;
+    top: 5px;
+    bottom: 5px;
+    left: 3px;
+
+    width: 1px;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(50, 232, 117, 0.35),
+            rgba(255, 255, 255, 0.04)
+        );
+}
+
+.customer-360-panel .timeline-item {
+    position: relative;
+
+    padding: 0 0 17px 13px;
+}
+
+.customer-360-panel .timeline-marker {
+    position: absolute;
+
+    top: 4px;
+    left: -17px;
+
+    width: 7px;
+    height: 7px;
+
+    border: 2px solid #050505;
+    border-radius: 50%;
+
+    background: #32e875;
+    box-shadow: 0 0 0 1px rgba(50, 232, 117, 0.35);
+}
+
+.customer-360-panel .timeline-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.customer-360-panel .timeline-top strong {
+    color: #bbb;
+    font-size: 10px;
+}
+
+.customer-360-panel .timeline-top span {
+    color: #4d4d4d;
+    font-size: 9px;
+    white-space: nowrap;
+}
+
+.customer-360-panel .timeline-content p {
+    margin: 5px 0;
+
+    color: #777;
+    font-size: 10px;
+}
+
+.customer-360-panel .timeline-content small {
+    color: #444;
+    font-size: 9px;
+}
+
+
+/* ============================================================
+   EMPTY / LOADING
+   ============================================================ */
+
+.customer-360-panel .detail-empty {
+    padding: 18px;
+
+    color: #505050;
+    font-size: 10px;
+    line-height: 1.6;
+    text-align: center;
+}
+
+
+/* ============================================================
+   DRAWER ANIMATION
+   ============================================================ */
+
+@keyframes customerDrawerIn {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 800px) {
+
+    .customer-360-panel {
+        width: 100vw;
+        border-left: 0;
+    }
+
+    .customer-360-header {
+        padding: 18px 16px;
+    }
+
+    .customer-360-panel .customer-profile-grid,
+    .customer-360-panel .customer-metrics-grid,
+    .customer-360-panel .customer-insights-grid {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .customer-360-panel .customer-detail-card.full-width {
+        margin-left: 16px;
+        margin-right: 16px;
+    }
+}
+
+@media (max-width: 500px) {
+
+    .customer-360-panel .customer-metrics-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .customer-360-panel .account-details {
+        grid-template-columns: 1fr;
+    }
+
+    .customer-360-header h2 {
+        font-size: 20px;
+    }
+}
+
+/* ============================================================
+   CUSTOMER ROW INTERACTION
+   ============================================================ */
+
+.customer-table tbody tr.customer-row {
+    cursor: pointer;
+    transition:
+        background .18s ease,
+        box-shadow .18s ease,
+        transform .18s ease;
+}
+
+.customer-table tbody tr.customer-row:hover {
+    background:
+        linear-gradient(
+            90deg,
+            rgba(50, 232, 117, 0.08),
+            rgba(50, 232, 117, 0.015)
+        );
+
+    box-shadow:
+        inset 3px 0 0 #32e875,
+        inset 0 1px 0 rgba(50, 232, 117, 0.05);
+}
+
+.customer-table tbody tr.customer-row:hover .customer-name-cell {
+    transform: translateX(4px);
+}
+
+.customer-name-cell {
+    transition: transform .18s ease;
+}
+
+.customer-click-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #ddd;
+    transition: color .18s ease;
+}
+
+.customer-row:hover .customer-click-name {
+    color: #32e875;
+}
+
+.customer-view-hint {
+    opacity: 0;
+    transform: translateX(-5px);
+
+    color: #32e875;
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: .08em;
+
+    transition:
+        opacity .18s ease,
+        transform .18s ease;
+}
+
+.customer-row:hover .customer-view-hint {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+
+/* ============================================================
+   CUSTOMER 360 HEADER ACTIONS
+   ============================================================ */
+
+.customer-360-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.customer-email-button {
+    min-height: 36px;
+    padding: 0 13px;
+
+    border: 1px solid rgba(50, 232, 117, 0.25);
+    border-radius: 9px;
+
+    background: rgba(50, 232, 117, 0.08);
+    color: #32e875;
+
+    font-size: 10px;
+    font-weight: 800;
+
+    cursor: pointer;
+
+    transition:
+        background .18s ease,
+        border-color .18s ease,
+        box-shadow .18s ease,
+        transform .18s ease;
+}
+
+.customer-email-button:hover {
+    background: rgba(50, 232, 117, 0.16);
+    border-color: rgba(50, 232, 117, 0.5);
+
+    box-shadow:
+        0 0 24px rgba(50, 232, 117, 0.12);
+
+    transform: translateY(-1px);
+}
+
+.customer-close-button {
+    width: 36px !important;
+    height: 36px !important;
+
+    padding: 0 !important;
+
+    display: grid !important;
+    place-items: center !important;
+
+    font-size: 20px !important;
+}
+
+
+/* ============================================================
+   EMAIL COMPOSER
+   ============================================================ */
+
+.customer-email-composer {
+    margin: 16px 24px 10px;
+    padding: 18px;
+
+    border: 1px solid rgba(50, 232, 117, 0.2);
+    border-radius: 16px;
+
+    background:
+        radial-gradient(
+            circle at 100% 0%,
+            rgba(50, 232, 117, 0.08),
+            transparent 32%
+        ),
+        rgba(50, 232, 117, 0.025);
+
+    box-shadow:
+        0 15px 45px rgba(0, 0, 0, 0.35);
+
+    animation: customerEmailIn .2s ease-out;
+}
+
+@keyframes customerEmailIn {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.email-composer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.email-composer-header h3 {
+    margin: 5px 0;
+    color: #eee;
+    font-size: 17px;
+}
+
+.email-composer-header p {
+    margin: 0;
+    color: #555;
+    font-size: 10px;
+}
+
+.email-composer-close {
+    width: 28px;
+    height: 28px;
+
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 8px;
+
+    background: rgba(255,255,255,.03);
+    color: #666;
+
+    cursor: pointer;
+}
+
+.email-recipient {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    margin-top: 15px;
+    padding: 10px 12px;
+
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: 9px;
+
+    background: rgba(0,0,0,.25);
+}
+
+.email-recipient span,
+.email-field > span {
+    color: #4f4f4f;
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: .12em;
+}
+
+.email-recipient strong {
+    color: #aaa;
+    font-size: 10px;
+}
+
+.email-field {
+    display: block;
+    margin-top: 11px;
+}
+
+.email-field > span {
+    display: block;
+    margin-bottom: 6px;
+}
+
+.email-field input,
+.email-field textarea {
+    width: 100%;
+    box-sizing: border-box;
+
+    border: 1px solid rgba(255,255,255,.07);
+    border-radius: 9px;
+
+    outline: none;
+
+    background: rgba(0,0,0,.3);
+    color: #ddd;
+
+    font-family: inherit;
+    font-size: 11px;
+}
+
+.email-field input {
+    height: 40px;
+    padding: 0 11px;
+}
+
+.email-field textarea {
+    padding: 11px;
+    resize: vertical;
+    line-height: 1.6;
+}
+
+.email-field input:focus,
+.email-field textarea:focus {
+    border-color: rgba(50,232,117,.4);
+    box-shadow: 0 0 0 3px rgba(50,232,117,.05);
+}
+
+.email-composer-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+
+    margin-top: 14px;
+}
+
+.email-composer-footer span {
+    color: #484848;
+    font-size: 9px;
+}
+
+.email-send-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 36px;
+    padding: 0 15px;
+
+    border-radius: 9px;
+
+    background: #32e875;
+    color: #041008;
+
+    font-size: 10px;
+    font-weight: 900;
+    text-decoration: none;
+}
+
+.email-send-button:hover {
+    box-shadow: 0 8px 25px rgba(50,232,117,.18);
+}
+
+@media (max-width: 600px) {
+
+    .customer-email-button {
+        width: 36px;
+        padding: 0;
+        font-size: 0;
+    }
+
+    .customer-email-button::before {
+        content: "✉";
+        font-size: 15px;
+    }
+
+    .customer-email-composer {
+        margin-left: 16px;
+        margin-right: 16px;
+    }
+
+    .email-composer-footer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .email-send-button {
+        width: 100%;
+    }
+}
+
+
+/* ============================================================
+   CUSTOMER HEALTH
+   ============================================================ */
+
+.customer-health-panel {
+    margin-bottom: 32px;
+    padding: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 20px;
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 255, 255, 0.035),
+            rgba(255, 255, 255, 0.012)
+        );
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.025),
+        0 18px 55px rgba(0, 0, 0, 0.25);
+}
+
+.customer-health-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.customer-health-header h2 {
+    margin: 5px 0 5px;
+    color: #f5f5f5;
+    font-size: 20px;
+    letter-spacing: -0.025em;
+}
+
+.customer-health-header p {
+    margin: 0;
+    color: #626262;
+    font-size: 12px;
+}
+
+.customer-health-total {
+    min-width: 110px;
+    text-align: right;
+}
+
+.customer-health-total strong {
+    display: block;
+    color: #32e875;
+    font-size: 25px;
+    letter-spacing: -0.04em;
+}
+
+.customer-health-total span {
+    display: block;
+    margin-top: 5px;
+    color: #555;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+}
+
+.customer-health-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.customer-health-row {
+    display: grid;
+    grid-template-columns: 190px minmax(120px, 1fr) 90px;
+    align-items: center;
+    gap: 18px;
+    width: 100%;
+    padding: 13px 14px;
+    border: 1px solid transparent;
+    border-radius: 13px;
+    background: rgba(255, 255, 255, 0.018);
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition:
+        background 160ms ease,
+        border-color 160ms ease,
+        transform 160ms ease;
+}
+
+.customer-health-row:hover {
+    transform: translateX(3px);
+    border-color: rgba(50, 232, 117, 0.16);
+    background: rgba(50, 232, 117, 0.035);
+}
+
+.customer-health-info {
+    min-width: 0;
+}
+
+.customer-health-name {
+    display: block;
+    color: #e8e8e8;
+    font-size: 12px;
+    font-weight: 750;
+}
+
+.customer-health-description {
+    display: block;
+    margin-top: 3px;
+    color: #505050;
+    font-size: 10px;
+}
+
+.customer-health-bar {
+    height: 7px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.055);
+}
+
+.customer-health-bar-fill {
+    height: 100%;
+    min-width: 2px;
+    border-radius: inherit;
+    background: #32e875;
+    box-shadow: 0 0 14px rgba(50, 232, 117, 0.18);
+    transition: width 400ms ease;
+}
+
+.customer-health-value {
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-end;
+    gap: 7px;
+}
+
+.customer-health-value strong {
+    color: #e8e8e8;
+    font-size: 13px;
+}
+
+.customer-health-value span {
+    color: #555;
+    font-size: 10px;
+}
+
+.customer-health-at-risk .customer-health-bar-fill {
+    background: #d99a43;
+}
+
+.customer-health-inactive .customer-health-bar-fill {
+    background: #a94b4b;
+}
+
+.customer-health-vip .customer-health-bar-fill {
+    background: #32e875;
+    box-shadow: 0 0 18px rgba(50, 232, 117, 0.28);
+}
+
+@media (max-width: 720px) {
+
+    .customer-health-panel {
+        padding: 18px;
+    }
+
+    .customer-health-header {
+        gap: 14px;
+    }
+
+    .customer-health-row {
+        grid-template-columns: 1fr 70px;
+        gap: 10px;
+    }
+
+    .customer-health-bar {
+        grid-column: 1 / -1;
+        grid-row: 2;
+    }
+
+    .customer-health-value {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    .customer-health-total {
+        min-width: auto;
+    }
+}
+
+/* ============================================================
+   ADD CUSTOMER
+   ============================================================ */
+
+.customer-add-button {
+    border: 1px solid rgba(50, 232, 117, 0.35);
+    background: rgba(50, 232, 117, 0.08);
+    color: #32e875;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.customer-add-button:hover {
+    background: rgba(50, 232, 117, 0.16);
+    border-color: rgba(50, 232, 117, 0.65);
+    transform: translateY(-1px);
+}
+
+.customer-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(0, 0, 0, 0.78);
+    backdrop-filter: blur(10px);
+}
+
+.customer-add-modal {
+    width: min(680px, 100%);
+    background: #0b0b0b;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 18px;
+    box-shadow:
+        0 30px 90px rgba(0, 0, 0, 0.65),
+        0 0 0 1px rgba(50, 232, 117, 0.04);
+    overflow: hidden;
+}
+
+.customer-add-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 26px 28px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.customer-add-modal-header h2 {
+    margin: 5px 0 6px;
+    color: #fff;
+    font-size: 25px;
+}
+
+.customer-add-modal-header p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.52);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.customer-modal-close {
+    width: 34px;
+    height: 34px;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 9px;
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.70);
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.customer-modal-close:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+
+.customer-modal-error {
+    margin: 18px 28px 0;
+    padding: 11px 13px;
+    border: 1px solid rgba(255, 80, 80, 0.28);
+    border-radius: 9px;
+    background: rgba(255, 80, 80, 0.08);
+    color: #ff8585;
+    font-size: 13px;
+}
+
+.customer-add-form {
+    padding: 24px 28px 28px;
+}
+
+.customer-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.customer-form-grid label {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.customer-form-grid label span {
+    color: rgba(255, 255, 255, 0.68);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.customer-form-grid input {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 10px;
+    background: #050505;
+    color: #fff;
+    padding: 12px 13px;
+    outline: none;
+    font-size: 13px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.customer-form-grid input::placeholder {
+    color: rgba(255, 255, 255, 0.28);
+}
+
+.customer-form-grid input:focus {
+    border-color: rgba(50, 232, 117, 0.55);
+    box-shadow: 0 0 0 3px rgba(50, 232, 117, 0.08);
+}
+
+.customer-form-full {
+    grid-column: 1 / -1;
+}
+
+.customer-add-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 26px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.customer-modal-cancel,
+.customer-modal-submit {
+    border-radius: 10px;
+    padding: 11px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.customer-modal-cancel {
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.70);
+}
+
+.customer-modal-submit {
+    border: 1px solid rgba(50, 232, 117, 0.5);
+    background: #32e875;
+    color: #050505;
+}
+
+.customer-modal-submit:hover {
+    filter: brightness(1.06);
+}
+
+.customer-modal-cancel:disabled,
+.customer-modal-submit:disabled,
+.customer-modal-close:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+    .customer-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .customer-form-full {
+        grid-column: auto;
+    }
+
+    .customer-add-modal-header,
+    .customer-add-form {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .customer-add-form-actions {
+        flex-direction: column-reverse;
+    }
+
+    .customer-modal-cancel,
+    .customer-modal-submit {
+        width: 100%;
+    }
+}
+
+/* CUSTOMER 360 ADD CUSTOMER */
+
+.customer-add-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 42px;
+    padding: 0 16px;
+    border: 1px solid rgba(50, 232, 117, 0.45);
+    border-radius: 10px;
+    background: rgba(50, 232, 117, 0.08);
+    color: #32e875;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition:
+        background 160ms ease,
+        border-color 160ms ease,
+        transform 160ms ease,
+        box-shadow 160ms ease;
+}
+
+.customer-add-button span {
+    font-size: 19px;
+    line-height: 1;
+    font-weight: 400;
+}
+
+.customer-add-button:hover {
+    background: rgba(50, 232, 117, 0.15);
+    border-color: #32e875;
+    box-shadow: 0 0 24px rgba(50, 232, 117, 0.12);
+    transform: translateY(-1px);
+}
+
+.customer-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(0, 0, 0, 0.78);
+    backdrop-filter: blur(10px);
+}
+
+.customer-add-modal {
+    width: min(680px, 100%);
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 18px;
+    background:
+        linear-gradient(
+            145deg,
+            rgba(18, 18, 18, 0.98),
+            rgba(7, 7, 7, 0.99)
+        );
+    box-shadow:
+        0 30px 90px rgba(0, 0, 0, 0.65),
+        0 0 0 1px rgba(50, 232, 117, 0.03);
+}
+
+.customer-add-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 26px 28px 22px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.customer-add-modal-header h2 {
+    margin: 7px 0 6px;
+    color: #fff;
+    font-size: 25px;
+    font-weight: 750;
+    letter-spacing: -0.02em;
+}
+
+.customer-add-modal-header p {
+    max-width: 500px;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.48);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.customer-modal-close {
+    flex: 0 0 auto;
+    width: 38px;
+    height: 38px;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.035);
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+    transition:
+        background 160ms ease,
+        color 160ms ease,
+        border-color 160ms ease;
+}
+
+.customer-modal-close:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.16);
+    color: #fff;
+}
+
+.customer-modal-error {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 20px 28px 0;
+    padding: 12px 14px;
+    border: 1px solid rgba(255, 75, 75, 0.25);
+    border-radius: 10px;
+    background: rgba(255, 75, 75, 0.07);
+    color: #ff8d8d;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.customer-modal-error strong {
+    color: #ffb0b0;
+    font-size: 13px;
+}
+
+.customer-add-form {
+    padding: 24px 28px 28px;
+}
+
+.customer-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.customer-form-grid label {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.customer-form-grid label > span {
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 12px;
+    font-weight: 650;
+}
+
+.customer-form-grid input {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 46px;
+    padding: 0 13px;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 10px;
+    outline: none;
+    background: rgba(255, 255, 255, 0.035);
+    color: #fff;
+    font: inherit;
+    font-size: 13px;
+    transition:
+        border-color 160ms ease,
+        background 160ms ease,
+        box-shadow 160ms ease;
+}
+
+.customer-form-grid input::placeholder {
+    color: rgba(255, 255, 255, 0.25);
+}
+
+.customer-form-grid input:focus {
+    border-color: rgba(50, 232, 117, 0.55);
+    background: rgba(50, 232, 117, 0.035);
+    box-shadow: 0 0 0 3px rgba(50, 232, 117, 0.08);
+}
+
+.customer-form-full {
+    grid-column: 1 / -1;
+}
+
+.customer-add-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 26px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.customer-modal-cancel,
+.customer-modal-submit {
+    min-height: 42px;
+    padding: 0 18px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+        background 160ms ease,
+        border-color 160ms ease,
+        transform 160ms ease;
+}
+
+.customer-modal-cancel {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.035);
+    color: rgba(255, 255, 255, 0.68);
+}
+
+.customer-modal-cancel:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+
+.customer-modal-submit {
+    border: 1px solid #32e875;
+    background: #32e875;
+    color: #050505;
+}
+
+.customer-modal-submit:hover {
+    background: #48ed86;
+    transform: translateY(-1px);
+}
+
+.customer-modal-cancel:disabled,
+.customer-modal-submit:disabled,
+.customer-modal-close:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+@media (max-width: 700px) {
+    .customer-modal-backdrop {
+        padding: 12px;
+        align-items: flex-end;
+    }
+
+    .customer-add-modal {
+        max-height: calc(100vh - 24px);
+        border-radius: 16px 16px 12px 12px;
+    }
+
+    .customer-add-modal-header,
+    .customer-add-form {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .customer-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .customer-form-full {
+        grid-column: auto;
+    }
+
+    .customer-add-form-actions {
+        flex-direction: column-reverse;
+    }
+
+    .customer-modal-cancel,
+    .customer-modal-submit {
+        width: 100%;
+    }
+}
+

@@ -605,3 +605,35 @@
     }
 
 }
+/* =========================================================
+   ORDERS HEADER ACTIONS
+   ========================================================= */
+
+.orders-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.admin-create-order-btn {
+    border: 0;
+    border-radius: 10px;
+    padding: 11px 18px;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    background: #32e875;
+    color: #050505;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.admin-create-order-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(50, 232, 117, 0.22);
+}
+
+.admin-create-order-btn:active {
+    transform: translateY(0);
+}

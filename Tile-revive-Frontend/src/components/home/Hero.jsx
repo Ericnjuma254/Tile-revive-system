@@ -1,149 +1,137 @@
-import heroImage from "../../assets/hero.png";
 import { Link } from "react-router-dom";
 
 function Hero() {
     return (
-        <section className="hero-section">
+        <section className="premium-hero">
 
-            <div className="container hero-container">
+            {/* Luxury architectural background */}
+            <div className="premium-hero-background">
+                <div className="premium-hero-glow"></div>
+                <div className="premium-hero-line"></div>
 
-                {/* =========================
-                    HERO CONTENT
-                ========================= */}
+                <div className="premium-hero-texture"></div>
+                <div className="premium-hero-purple-glow"></div>
+            </div>
 
-                <div className="hero-content">
+            <div className="premium-hero-container">
 
-                    <div className="hero-eyebrow">
-                        <span className="hero-eyebrow-dot"></span>
-                        PROFESSIONAL CLEANING SOLUTIONS
+                {/* CONTENT */}
+                <div className="premium-hero-content">
+
+                    <div className="premium-hero-eyebrow">
+                        <span></span>
+                        PREMIUM SURFACE CARE
+                        <span></span>
                     </div>
 
-                    <h1 className="hero-title">
+                    <h1>
                         Bring Back
-                        <span>the Original Shine.</span>
+                        <em>the Original Shine.</em>
                     </h1>
 
-                    <p className="hero-description">
-                        Give tired, stained and dull surfaces a fresh start.
-                        Tile Revive is made to help restore the clean,
-                        refreshed look your home deserves.
+                    <p className="premium-hero-description">
+                        Powerful cleaning solutions designed to help
+                        restore the appearance of tiles, grout and
+                        everyday surfaces without replacing them.
                     </p>
 
-                    <div className="hero-actions">
+                    <div className="premium-hero-actions">
 
                         <Link
                             to="/shop"
-                            className="btn btn-primary hero-button"
+                            className="premium-primary-button"
                         >
                             Shop Tile Revive
                             <span>→</span>
                         </Link>
 
                         <a
-                            href="#cleaning-areas"
-                            className="hero-secondary-button"
+                            href="#results"
+                            className="premium-secondary-button"
                         >
-                            Explore what it cleans
+                            See the Results
                             <span>↓</span>
                         </a>
 
                     </div>
 
-                    {/* TRUST POINTS */}
+                    <div className="premium-hero-trust">
 
-                    <div className="hero-trust">
-
-                        <div className="hero-trust-item">
-                            <span className="hero-trust-icon">✓</span>
-                            <div>
-                                <strong>Powerful Cleaning</strong>
-                                <small>Made for suitable surfaces</small>
-                            </div>
+                        <div className="premium-trust-item">
+                            <strong>15,000+</strong>
+                            <small>Customers</small>
                         </div>
 
-                        <div className="hero-trust-item">
-                            <span className="hero-trust-icon">✓</span>
-                            <div>
-                                <strong>Easy to Use</strong>
-                                <small>Simple cleaning process</small>
-                            </div>
+                        <div className="premium-trust-divider"></div>
+
+                        <div className="premium-trust-item">
+                            <strong>M-Pesa</strong>
+                            <small>Secure payment</small>
                         </div>
 
-                        <div className="hero-trust-item">
-                            <span className="hero-trust-icon">✓</span>
-                            <div>
-                                <strong>Nairobi Delivery</strong>
-                                <small>Convenient delivery options</small>
-                            </div>
+                        <div className="premium-trust-divider"></div>
+
+                        <div className="premium-trust-item">
+                            <strong>COD</strong>
+                            <small>Available</small>
                         </div>
 
                     </div>
 
                 </div>
 
+                {/* LUXURY VISUAL */}
+                <div className="premium-hero-product">
 
-                {/* =========================
-                    HERO PRODUCT VISUAL
-                ========================= */}
+                    <div className="premium-product-backdrop"></div>
 
-                <div className="hero-visual">
+                    <div className="premium-product-ring"></div>
 
-                    <div className="hero-product-scene">
+                    <div className="premium-product-image-wrap">
 
-                        <div className="hero-product-glow"></div>
+                        <div className="premium-product-placeholder">
 
-                        <div className="hero-product-ring ring-one"></div>
-                        <div className="hero-product-ring ring-two"></div>
-
-                        <div className="hero-product-card">
-
-                            <div className="hero-product-badge">
-                                TILE REVIVE
+                            <div className="premium-product-monogram">
+                                TR
                             </div>
 
-                            <img
-                                src={heroImage}
-                                alt="Tile Revive cleaning solution"
-                                className="hero-image"
-                            />
-
-                        </div>
-
-                        {/* FLOATING VALUE CARD */}
-
-                        <div className="hero-floating-card hero-floating-top">
-
-                            <span className="floating-icon">
-                                ✦
-                            </span>
-
-                            <div>
-                                <strong>Revive the Look</strong>
-                                <span>Fresh-looking surfaces</span>
-                            </div>
-
-                        </div>
-
-
-                        {/* FLOATING TRUST CARD */}
-
-                        <div className="hero-floating-card hero-floating-bottom">
-
-                            <span className="floating-check">
-                                ✓
-                            </span>
-
-                            <div>
-                                <strong>Shop With Confidence</strong>
-                                <span>M-Pesa • Cash on Delivery</span>
+                            <div className="premium-product-placeholder-copy">
+                                <strong>TILE REVIVE</strong>
+                                <span>PREMIUM SURFACE CARE</span>
                             </div>
 
                         </div>
 
                     </div>
 
+                    <div className="premium-product-label">
+                        <span>01</span>
+                        SURFACE
+                        <strong>REVIVAL</strong>
+                    </div>
+
+                    <div className="premium-product-note">
+                        <span>✦</span>
+                        <div>
+                            <strong>Revive.</strong>
+                            <small>Don't replace.</small>
+                        </div>
+                    </div>
+
                 </div>
 
+            </div>
+
+            <div className="premium-hero-bottom">
+                <div className="premium-hero-bottom-inner">
+                    <span>DEEP CLEANING SOLUTIONS</span>
+
+                    <div className="premium-bottom-line"></div>
+
+                    <span>
+                        NAIROBI · KENYA
+                    </span>
+                </div>
             </div>
 
         </section>

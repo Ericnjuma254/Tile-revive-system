@@ -952,9 +952,21 @@ const totalProfit =
 
                 entry.orders += 1;
 
+                const normalizedPaymentStatus =
+                    String(
+                        order.paymentStatus || ""
+                    )
+                        .trim()
+                        .toUpperCase();
+
                 const isSuccessful =
-                    String(order.paymentStatus || "").toUpperCase() ===
-                    "SUCCESS";
+                    [
+                        "SUCCESS",
+                        "PAID",
+                        "COMPLETED",
+                    ].includes(
+                        normalizedPaymentStatus
+                    );
 
                 if (isSuccessful) {
                     entry.successfulOrders += 1;
@@ -1003,11 +1015,22 @@ const totalProfit =
                 );
 
             const geographicSuccessfulOrders =
-                geographicOrders.filter(
-                    (order) =>
-                        String(order.paymentStatus || "").toUpperCase() ===
-                        "SUCCESS"
-                );
+                geographicOrders.filter((order) => {
+                    const normalizedPaymentStatus =
+                        String(
+                            order.paymentStatus || ""
+                        )
+                            .trim()
+                            .toUpperCase();
+
+                    return [
+                        "SUCCESS",
+                        "PAID",
+                        "COMPLETED",
+                    ].includes(
+                        normalizedPaymentStatus
+                    );
+                });
 
             const geographicRevenue =
                 geographicSuccessfulOrders.reduce(
@@ -1059,6 +1082,207 @@ const totalProfit =
             // FINAL REPORT RESPONSE
             // ======================================================
 
+
+            /* ============================================================
+               GEOGRAPHIC REVENUE TREND - REAL PAYMENT DATA
+               ============================================================
+               Revenue is calculated from successful payment records.
+
+               payment.status    = SUCCESS
+               payment.amountPaid = actual received amount
+               payment.order      = geographic source
+               ============================================================ */
+
+            const geographicRevenuePayments =
+                await prisma.payment.findMany({
+                    where: {
+                        status: "SUCCESS",
+                        createdAt: {
+                            gte: startDate,
+                            lte: now,
+                        },
+                        orderId: {
+                            not: null,
+                        },
+                    },
+                    select: {
+                        id: true,
+                        amountPaid: true,
+                        createdAt: true,
+                        order: {
+                            select: {
+                                id: true,
+                                county: true,
+                                location: true,
+                            },
+                        },
+                    },
+                    orderBy: {
+                        createdAt: "asc",
+                    },
+                });
+
+            const geographicRevenueTrendMap =
+                new Map();
+
+            const revenueTrendPeriod =
+                String(period || "30D").toUpperCase();
+
+            const getGeographicRevenueBucket = (date) => {
+                const d = new Date(date);
+
+                if (
+                    revenueTrendPeriod === "7D" ||
+                    revenueTrendPeriod === "30D"
+                ) {
+                    return new Date(
+                        d.getFullYear(),
+                        d.getMonth(),
+                        d.getDate()
+                    );
+                }
+
+                if (revenueTrendPeriod === "90D") {
+                    const day = new Date(
+                        d.getFullYear(),
+                        d.getMonth(),
+                        d.getDate()
+                    );
+
+                    const dayOfWeek = day.getDay();
+
+                    day.setDate(
+                        day.getDate() -
+                            (dayOfWeek === 0
+                                ? 6
+                                : dayOfWeek - 1)
+                    );
+
+                    return day;
+                }
+
+                return new Date(
+                    d.getFullYear(),
+                    d.getMonth(),
+                    1
+                );
+            };
+
+            const getGeographicRevenueLabel = (date) => {
+                const d = new Date(date);
+
+                if (
+                    revenueTrendPeriod === "7D" ||
+                    revenueTrendPeriod === "30D"
+                ) {
+                    return d.toLocaleDateString(
+                        "en-KE",
+                        {
+                            day: "2-digit",
+                            month: "short",
+                        }
+                    );
+                }
+
+                if (revenueTrendPeriod === "90D") {
+                    return `Week of ${d.toLocaleDateString(
+                        "en-KE",
+                        {
+                            day: "2-digit",
+                            month: "short",
+                        }
+                    )}`;
+                }
+
+                return d.toLocaleDateString(
+                    "en-KE",
+                    {
+                        month: "short",
+                        year: "numeric",
+                    }
+                );
+            };
+
+            for (
+                const payment
+                of geographicRevenuePayments
+            ) {
+                if (!payment.order) {
+                    continue;
+                }
+
+                const bucketDate =
+                    getGeographicRevenueBucket(
+                        payment.createdAt
+                    );
+
+                const bucketKey =
+                    bucketDate.toISOString();
+
+                const county =
+                    normalizeGeographicCounty(
+                        payment.order.county,
+                        payment.order.location
+                    );
+
+                if (
+                    !geographicRevenueTrendMap.has(
+                        bucketKey
+                    )
+                ) {
+                    geographicRevenueTrendMap.set(
+                        bucketKey,
+                        {
+                            name:
+                                getGeographicRevenueLabel(
+                                    bucketDate
+                                ),
+                            revenue: 0,
+                            orders: 0,
+                            counties: {},
+                        }
+                    );
+                }
+
+                const bucket =
+                    geographicRevenueTrendMap.get(
+                        bucketKey
+                    );
+
+                const amount =
+                    Number(
+                        payment.amountPaid || 0
+                    );
+
+                bucket.revenue += amount;
+                bucket.orders += 1;
+
+                if (!bucket.counties[county]) {
+                    bucket.counties[county] = {
+                        revenue: 0,
+                        orders: 0,
+                    };
+                }
+
+                bucket.counties[county].revenue +=
+                    amount;
+
+                bucket.counties[county].orders +=
+                    1;
+            }
+
+            const geographicRevenueTrend =
+                Array.from(
+                    geographicRevenueTrendMap.entries()
+                )
+                    .sort(
+                        (a, b) =>
+                            new Date(a[0]) -
+                            new Date(b[0])
+                    )
+                    .map(
+                        ([, value]) => value
+                    );
             return res.json({
                 success: true,
 
@@ -1141,6 +1365,9 @@ const totalProfit =
                 // ==================================================
 
                 geographicAnalytics: {
+                    revenueTrend:
+                        geographicRevenueTrend,
+
                     summary: {
                         totalOrders:
                             geographicOrders.length,
@@ -1259,6 +1486,10 @@ const totalProfit =
 );
 
 module.exports = router;
+
+
+
+
 
 
 

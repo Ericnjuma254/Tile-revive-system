@@ -26,6 +26,11 @@ import { useNavigate } from "react-router-dom";
 
 import {
     getAdminReports,
+    getFinancialSummary,
+    getFinancialTrend,
+    getProductProfitability,
+    getExpenseBreakdown,
+    getCashFlow,
 } from "../../services/api";
 
 import GeographicAnalytics from "./GeographicAnalytics";
@@ -45,6 +50,57 @@ const number = (value) =>
 
 const percent = (value) =>
     `${Number(value || 0).toFixed(1)}%`;
+
+
+// ============================================================
+// FINANCIAL DATE RANGE
+// ============================================================
+
+const getFinancialDateRange = (selectedPeriod) => {
+
+    const end = new Date();
+    const start = new Date(end);
+
+    switch (selectedPeriod) {
+
+        case "1D":
+            start.setHours(0, 0, 0, 0);
+            break;
+
+        case "7D":
+            start.setDate(start.getDate() - 6);
+            start.setHours(0, 0, 0, 0);
+            break;
+
+        case "30D":
+            start.setDate(start.getDate() - 29);
+            start.setHours(0, 0, 0, 0);
+            break;
+
+        case "90D":
+            start.setDate(start.getDate() - 89);
+            start.setHours(0, 0, 0, 0);
+            break;
+
+        case "1Y":
+            start.setMonth(0, 1);
+            start.setHours(0, 0, 0, 0);
+            break;
+
+        default:
+            start.setDate(start.getDate() - 29);
+            start.setHours(0, 0, 0, 0);
+            break;
+    }
+
+    const formatDate = (date) =>
+        date.toISOString().slice(0, 10);
+
+    return {
+        startDate: formatDate(start),
+        endDate: formatDate(end),
+    };
+};
 
 
 function getTimelineConfig(period) {
@@ -603,6 +659,16 @@ function AdminReports() {
     const [refreshing, setRefreshing] = useState(false);
     const [error, setError] = useState("");
 
+    // ========================================================
+    // CENTRAL FINANCIAL DATA
+    // ========================================================
+
+    const [financial, setFinancial] = useState(null);
+    const [financialTrend, setFinancialTrend] = useState([]);
+    const [productProfitability, setProductProfitability] = useState([]);
+    const [expenseBreakdown, setExpenseBreakdown] = useState([]);
+    const [cashFlow, setCashFlow] = useState(null);
+
     const [activeSection, setActiveSection] =
         useState("overview");
 
@@ -622,13 +688,73 @@ function AdminReports() {
         try {
 
             setError("");
-
             setRefreshing(true);
 
-            const data = await getAdminReports(period);
+            const { startDate, endDate } =
+                getFinancialDateRange(period);
+
+            const requestDefinitions = [
+                ["adminReports", () => getAdminReports(period)],
+                ["financialSummary", () => getFinancialSummary({ startDate, endDate })],
+                ["financialTrend", () => getFinancialTrend({ startDate, endDate })],
+                ["productProfitability", () => getProductProfitability({ startDate, endDate })],
+                ["expenseBreakdown", () => getExpenseBreakdown({ startDate, endDate })],
+                ["cashFlow", () => getCashFlow({ startDate, endDate })],
+            ];
+
+            const requestResults = await Promise.all(
+                requestDefinitions.map(async ([name, requestFn]) => {
+                    try {
+                        const result = await requestFn();
+                        console.log(`REPORT API OK: ${name}`, result);
+                        return result;
+                    } catch (requestError) {
+                        console.error(`REPORT API FAILED: ${name}`, requestError);
+                        throw requestError;
+                    }
+                })
+            );
+
+            const [
+                reportResult,
+                financialResult,
+                financialTrendResult,
+                productProfitabilityResult,
+                expenseBreakdownResult,
+                cashFlowResult,
+            ] = requestResults;
 
             setReports(
-                normalizeReports(data)
+                normalizeReports(reportResult)
+            );
+
+            setFinancial(
+                financialResult?.data ??
+                financialResult ??
+                null
+            );
+
+            setFinancialTrend(
+                financialTrendResult?.data ??
+                financialTrendResult ??
+                []
+            );
+
+            setProductProfitability(
+                productProfitabilityResult?.data ??
+                productProfitabilityResult ??
+                []
+            );
+
+            setExpenseBreakdown(
+                expenseBreakdownResult?.data ??
+                expenseBreakdownResult ??
+                []
+            );
+            setCashFlow(
+                cashFlowResult?.data ??
+                cashFlowResult ??
+                null
             );
 
         } catch (err) {
@@ -642,7 +768,6 @@ function AdminReports() {
                 err?.message ||
                 "Unable to load reports."
             );
-
         } finally {
 
             setLoading(false);
@@ -651,8 +776,6 @@ function AdminReports() {
         }
 
     }, [period]);
-
-
     useEffect(() => {
 
         loadReports();
@@ -726,6 +849,116 @@ function AdminReports() {
     // ========================================================
     // CHART DATA
     // ========================================================
+
+    const financialTrendData = useMemo(() => {
+
+        if (!Array.isArray(financialTrend)) {
+            return [];
+        }
+
+        return financialTrend.map((item, index) => ({
+
+            name:
+                item.name ||
+                item.date ||
+                item.day ||
+                `D${index + 1}`,
+
+            revenue:
+                Number(item.revenue || 0),
+
+            cogs:
+                Number(item.cogs || 0),
+
+            grossProfit:
+                Number(item.grossProfit || 0),
+
+            expenses:
+                Number(item.expenses || 0),
+
+            netProfit:
+                Number(item.netProfit || 0),
+
+            cashIn:
+                Number(item.revenue || 0),
+
+            cashOut:
+                Number(item.expenses || 0),
+
+            cashFlow:
+                Number(item.revenue || 0) -
+                Number(item.expenses || 0),
+
+        }));
+
+    }, [financialTrend]);
+
+
+    const expenseBreakdownData = useMemo(() => {
+
+        if (!Array.isArray(expenseBreakdown)) {
+            return [];
+        }
+
+        return expenseBreakdown
+            .map((item, index) => ({
+
+                name:
+                    item.category ||
+                    item.name ||
+                    `Category ${index + 1}`,
+
+                value:
+                    Number(
+                        item.amount ??
+                        item.total ??
+                        item.value ??
+                        0
+                    ),
+
+            }))
+            .filter(
+                (item) => item.value > 0
+            );
+
+    }, [expenseBreakdown]);
+
+
+    const profitabilityData = useMemo(() => {
+
+        if (!Array.isArray(productProfitability)) {
+            return [];
+        }
+
+        return [...productProfitability]
+            .sort(
+                (a, b) =>
+                    Number(b.grossProfit || 0) -
+                    Number(a.grossProfit || 0)
+            )
+            .slice(0, 8)
+            .map((item, index) => ({
+
+                name:
+                    item.productName ||
+                    item.name ||
+                    `Product ${index + 1}`,
+
+                revenue:
+                    Number(item.revenue || 0),
+
+                cogs:
+                    Number(item.cogs || 0),
+
+                grossProfit:
+                    Number(item.grossProfit || 0),
+
+                margin:
+                    Number(item.margin || 0),
+
+            }));
+
+    }, [productProfitability]);
 
     const salesData = useMemo(() => {
 
@@ -2297,192 +2530,477 @@ function AdminReports() {
                     <AnalyticsHeading
                         index="05"
                         title="Financial Analytics"
-                        description="Monitor the financial health of Tile Revive."
+                        description="Revenue, COGS, expenses, profit and cash flow from the central financial engine."
                         period={period}
                     />
 
+
+
+                    {/* ==================================================
+                        FINANCIAL KPIs
+                       ================================================== */}
 
                     <div className="financial-grid">
 
                         <MetricCard
                             label="REVENUE"
-                            value={currency(data.revenue)}
+                            value={currency(
+                                financial?.revenue
+                            )}
                             symbol="↗"
+                            positive
                         />
 
                         <MetricCard
-                            label="EXPENDITURE"
+                            label="COGS"
                             value={currency(
-                                data.expenditure
+                                financial?.cogs
+                            )}
+                            symbol="◌"
+                        />
+
+                        <MetricCard
+                            label="GROSS PROFIT"
+                            value={currency(
+                                financial?.grossProfit
+                            )}
+                            symbol="◆"
+                            positive
+                        />
+
+                        <MetricCard
+                            label="EXPENSES"
+                            value={currency(
+                                financial?.totalExpenses
                             )}
                             symbol="↘"
                         />
 
                         <MetricCard
                             label="NET PROFIT"
-                            value={currency(data.profit)}
+                            value={currency(
+                                financial?.netProfit
+                            )}
                             symbol="✦"
                             positive
                         />
 
                         <MetricCard
-                            label="ORDERS"
-                            value={number(data.orders)}
-                            symbol="◈"
+                            label="PROFIT MARGIN"
+                            value={percent(
+                                financial?.profitMargin
+                            )}
+                            symbol="%"
+                            positive
                         />
 
                     </div>
 
 
+                    {/* ==================================================
+                        PROFIT & LOSS
+                       ================================================== */}
+
                     <div className="chart-grid">
 
                         <ChartPanel
-                            title="Financial position"
-                            subtitle="Revenue vs expenditure"
+                            title="Profit & Loss trend"
+                            subtitle="Revenue, COGS, gross profit, expenses and net profit"
                             large
                         >
 
-                            <ResponsiveContainer
-                                width="100%"
-                                height="100%"
-                            >
+                            {financialTrendData.length ? (
 
-                                <BarChart
-                                    data={[
-                                        {
-                                            name: "Revenue",
-                                            amount:
-                                                Number(
-                                                    data.revenue
-                                                ),
-                                        },
-                                        {
-                                            name: "Expenditure",
-                                            amount:
-                                                Number(
-                                                    data.expenditure
-                                                ),
-                                        },
-                                        {
-                                            name: "Profit",
-                                            amount:
-                                                Number(
-                                                    data.profit
-                                                ),
-                                        },
-                                    ]}
+                                <ResponsiveContainer
+                                    width="100%"
+                                    height="100%"
                                 >
 
-                                    <CartesianGrid
-                                        stroke="rgba(255,255,255,.06)"
-                                        vertical={false}
-                                    />
+                                    <LineChart
+                                        data={financialTrendData}
+                                    >
 
-                                    <XAxis
-                                        dataKey="name"
-                                        stroke="#555"
-                                        tick={{
-                                            fill: "#777",
-                                            fontSize: 10,
-                                        }}
-                                        axisLine={false}
-                                        tickLine={false}
-                                    />
+                                        <CartesianGrid
+                                            stroke="rgba(255,255,255,.06)"
+                                            vertical={false}
+                                        />
 
-                                    <YAxis
-                                        stroke="#555"
-                                        tick={{
-                                            fill: "#666",
-                                            fontSize: 10,
-                                        }}
-                                        axisLine={false}
-                                        tickLine={false}
-                                    />
+                                        <XAxis
+                                            dataKey="name"
+                                            stroke="#555"
+                                            tick={{
+                                                fill: "#666",
+                                                fontSize: 10,
+                                            }}
+                                            axisLine={false}
+                                            tickLine={false}
+                                        />
 
-                                    <Tooltip
-                                        content={
-                                            <ChartTooltip />
+                                        <YAxis
+                                            stroke="#555"
+                                            tick={{
+                                                fill: "#666",
+                                                fontSize: 10,
+                                            }}
+                                            axisLine={false}
+                                            tickLine={false}
+                                        />
+
+                                        <Tooltip
+                                            content={
+                                                <ChartTooltip />
+                                            }
+                                        />
+
+                                        <Line
+                                            type="monotone"
+                                            dataKey="revenue"
+                                            name="Revenue"
+                                            stroke="#32e875"
+                                            strokeWidth={2.5}
+                                            dot={false}
+                                        />
+
+                                        <Line
+                                            type="monotone"
+                                            dataKey="cogs"
+                                            name="COGS"
+                                            stroke="#777"
+                                            strokeWidth={2}
+                                            dot={false}
+                                        />
+
+                                        <Line
+                                            type="monotone"
+                                            dataKey="grossProfit"
+                                            name="Gross Profit"
+                                            stroke="#fff"
+                                            strokeWidth={2}
+                                            dot={false}
+                                        />
+
+                                        <Line
+                                            type="monotone"
+                                            dataKey="netProfit"
+                                            name="Net Profit"
+                                            stroke="#aaa"
+                                            strokeWidth={2}
+                                            dot={false}
+                                        />
+
+                                    </LineChart>
+
+                                </ResponsiveContainer>
+
+                            ) : (
+
+                                <EmptyChart
+                                    message="No financial activity for this period."
+                                />
+
+                            )}
+
+                        </ChartPanel>
+
+
+                        {/* ==================================================
+                            EXPENSE BREAKDOWN
+                           ================================================== */}
+
+                        <ChartPanel
+                            title="Expense structure"
+                            subtitle="Where paid expenses are going"
+                        >
+
+                            {expenseBreakdownData.length ? (
+
+                                <ResponsiveContainer
+                                    width="100%"
+                                    height="100%"
+                                >
+
+                                    <PieChart>
+
+                                        <Pie
+                                            data={
+                                                expenseBreakdownData
+                                            }
+                                            dataKey="value"
+                                            nameKey="name"
+                                            cx="50%"
+                                            cy="50%"
+                                            innerRadius={55}
+                                            outerRadius={95}
+                                            paddingAngle={3}
+                                        >
+
+                                            {expenseBreakdownData.map(
+                                                (_, index) => (
+
+                                                    <Cell
+                                                        key={index}
+                                                        fill={
+                                                            index === 0
+                                                                ? "#32e875"
+                                                                : "#555"
+                                                        }
+                                                    />
+
+                                                )
+                                            )}
+
+                                        </Pie>
+
+                                        <Tooltip
+                                            content={
+                                                <ChartTooltip />
+                                            }
+                                        />
+
+                                    </PieChart>
+
+                                </ResponsiveContainer>
+
+                            ) : (
+
+                                <EmptyChart
+                                    message="No paid expenses recorded for this period."
+                                />
+
+                            )}
+
+                        </ChartPanel>
+
+                    </div>
+
+
+                    {/* ==================================================
+                        PRODUCT PROFITABILITY + CASH FLOW
+                       ================================================== */}
+
+                    <div className="chart-grid">
+
+                        <ChartPanel
+                            title="Product profitability"
+                            subtitle="Top products ranked by gross profit"
+                            large
+                        >
+
+                            {profitabilityData.length ? (
+
+                                <ResponsiveContainer
+                                    width="100%"
+                                    height="100%"
+                                >
+
+                                    <BarChart
+                                        data={
+                                            profitabilityData
                                         }
-                                    />
+                                        layout="vertical"
+                                    >
 
-                                    <Bar
-                                        dataKey="amount"
-                                        name="Amount"
-                                        fill="#fff"
-                                        radius={[
-                                            4,
-                                            4,
-                                            0,
-                                            0,
-                                        ]}
-                                    />
+                                        <CartesianGrid
+                                            stroke="rgba(255,255,255,.06)"
+                                            horizontal={false}
+                                        />
 
-                                </BarChart>
+                                        <XAxis
+                                            type="number"
+                                            stroke="#555"
+                                            tick={{
+                                                fill: "#666",
+                                                fontSize: 10,
+                                            }}
+                                            axisLine={false}
+                                            tickLine={false}
+                                        />
 
-                            </ResponsiveContainer>
+                                        <YAxis
+                                            type="category"
+                                            dataKey="name"
+                                            width={120}
+                                            stroke="#555"
+                                            tick={{
+                                                fill: "#999",
+                                                fontSize: 10,
+                                            }}
+                                            axisLine={false}
+                                            tickLine={false}
+                                        />
+
+                                        <Tooltip
+                                            content={
+                                                <ChartTooltip />
+                                            }
+                                        />
+
+                                        <Bar
+                                            dataKey="grossProfit"
+                                            name="Gross Profit"
+                                            fill="#32e875"
+                                            radius={[
+                                                0,
+                                                4,
+                                                4,
+                                                0,
+                                            ]}
+                                        />
+
+                                    </BarChart>
+
+                                </ResponsiveContainer>
+
+                            ) : (
+
+                                <EmptyChart
+                                    message="Product profitability will appear after successful sales."
+                                />
+
+                            )}
 
                         </ChartPanel>
 
 
                         <ChartPanel
-                            title="Payment mix"
-                            subtitle="Payment methods"
+                            title="Cash flow"
+                            subtitle="Revenue received vs paid expenses"
                         >
 
-                            <ResponsiveContainer
-                                width="100%"
-                                height="100%"
-                            >
+                            {financialTrendData.length ? (
 
-                                <PieChart>
+                                <ResponsiveContainer
+                                    width="100%"
+                                    height="100%"
+                                >
 
-                                    <Pie
-                                        data={paymentData}
-                                        dataKey="value"
-                                        nameKey="name"
-                                        cx="50%"
-                                        cy="50%"
-                                        innerRadius={65}
-                                        outerRadius={100}
-                                        paddingAngle={3}
+                                    <BarChart
+                                        data={
+                                            financialTrendData
+                                        }
                                     >
 
-                                        {paymentData.map(
-                                            (_, index) => (
-                                                <Cell
-                                                    key={index}
-                                                    fill={
-                                                        index ===
-                                                        0
-                                                            ? "#32e875"
-                                                            : "#444"
-                                                    }
-                                                />
-                                            )
-                                        )}
+                                        <CartesianGrid
+                                            stroke="rgba(255,255,255,.06)"
+                                            vertical={false}
+                                        />
 
-                                    </Pie>
+                                        <XAxis
+                                            dataKey="name"
+                                            stroke="#555"
+                                            tick={{
+                                                fill: "#666",
+                                                fontSize: 10,
+                                            }}
+                                            axisLine={false}
+                                            tickLine={false}
+                                        />
 
-                                    <Tooltip
-                                        content={
-                                            <ChartTooltip />
-                                        }
-                                    />
+                                        <YAxis
+                                            stroke="#555"
+                                            tick={{
+                                                fill: "#666",
+                                                fontSize: 10,
+                                            }}
+                                            axisLine={false}
+                                            tickLine={false}
+                                        />
 
-                                </PieChart>
+                                        <Tooltip
+                                            content={
+                                                <ChartTooltip />
+                                            }
+                                        />
 
-                            </ResponsiveContainer>
+                                        <Bar
+                                            dataKey="cashIn"
+                                            name="Cash In"
+                                            fill="#32e875"
+                                            radius={[
+                                                3,
+                                                3,
+                                                0,
+                                                0,
+                                            ]}
+                                        />
+
+                                        <Bar
+                                            dataKey="cashOut"
+                                            name="Cash Out"
+                                            fill="#777"
+                                            radius={[
+                                                3,
+                                                3,
+                                                0,
+                                                0,
+                                            ]}
+                                        />
+
+                                    </BarChart>
+
+                                </ResponsiveContainer>
+
+                            ) : (
+
+                                <EmptyChart
+                                    message="Cash-flow activity will appear for this period."
+                                />
+
+                            )}
 
                         </ChartPanel>
+
+                    </div>
+
+
+                    {/* ==================================================
+                        CASH SUMMARY
+                       ================================================== */}
+
+                    <div className="financial-grid">
+
+                        <MetricCard
+                            label="CASH IN"
+                            value={currency(
+                                cashFlow?.cashIn ??
+                                financial?.cashIn
+                            )}
+                            symbol="↑"
+                            positive
+                        />
+
+                        <MetricCard
+                            label="CASH OUT"
+                            value={currency(
+                                cashFlow?.cashOut ??
+                                financial?.cashOut
+                            )}
+                            symbol="↓"
+                        />
+
+                        <MetricCard
+                            label="NET CASH FLOW"
+                            value={currency(
+                                cashFlow?.cashFlow ??
+                                financial?.cashFlow
+                            )}
+                            symbol="≈"
+                            positive
+                        />
+
+                        <MetricCard
+                            label="UNITS SOLD"
+                            value={number(
+                                financial?.unitsSold
+                            )}
+                            symbol="◈"
+                        />
 
                     </div>
 
                 </section>
 
             )}
-
-
-
             {/* ==================================================
                 GEOGRAPHIC
                ================================================== */}
@@ -2681,14 +3199,6 @@ function EmptyChart({ message }) {
 
 
 export default AdminReports;
-
-
-
-
-
-
-
-
 
 
 

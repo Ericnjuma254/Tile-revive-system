@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
-import { getProducts } from "../services/api";
+import { getProducts, getProductImageUrl } from "../services/api";
 
 function Shop() {
     const [products, setProducts] = useState([]);
@@ -83,10 +84,13 @@ function Shop() {
                                         key={product.id}
                                         className="product-card"
                                     >
-                                        <div className="product-image">
+                                        <Link
+                                            to={`/shop/product/${product.id}`}
+                                            className="product-image product-image-link"
+                                        >
                                             {product.image ? (
                                                 <img
-                                                    src={product.image}
+                                                    src={getProductImageUrl(product.image)}
                                                     alt={product.name}
                                                 />
                                             ) : (
@@ -97,7 +101,7 @@ function Shop() {
                                                     </small>
                                                 </div>
                                             )}
-                                        </div>
+                                        </Link>
 
                                         <div className="product-info">
 
@@ -107,9 +111,12 @@ function Shop() {
                                                 </span>
                                             )}
 
-                                            <h2>
-                                                {product.name}
-                                            </h2>
+                                            <Link
+                                                to={`/shop/product/${product.id}`}
+                                                className="product-card-title"
+                                            >
+                                                <h2>{product.name}</h2>
+                                            </Link>
 
                                             <p className="product-price">
                                                 KES{" "}
@@ -184,3 +191,4 @@ function Shop() {
 }
 
 export default Shop;
+

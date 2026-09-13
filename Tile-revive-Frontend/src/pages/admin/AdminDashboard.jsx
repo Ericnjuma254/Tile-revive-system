@@ -5,6 +5,7 @@ import {
     getAdminDashboard,
     getAdminOrders,
     getPendingUsers,
+    getFinancialSummary,
 } from "../../services/api";
 
 import "./AdminDashboard.css";
@@ -13,6 +14,103 @@ function AdminDashboard() {
     const navigate = useNavigate();
 
     const [dashboard, setDashboard] = useState(null);
+    const [financial, setFinancial] = useState(null);
+    const [financialPeriod, setFinancialPeriod] = useState("this_month");
+const getFinancialPeriodDates = (period) => {
+    const now = new Date();
+
+    const startOfDay = (date) => {
+        const d = new Date(date);
+        d.setHours(0, 0, 0, 0);
+        return d;
+    };
+
+    const endOfDay = (date) => {
+        const d = new Date(date);
+        d.setHours(23, 59, 59, 999);
+        return d;
+    };
+
+    switch (period) {
+        case "today": {
+            return {
+                startDate: startOfDay(now).toISOString(),
+                endDate: endOfDay(now).toISOString(),
+            };
+        }
+
+        case "yesterday": {
+            const yesterday = new Date(now);
+            yesterday.setDate(yesterday.getDate() - 1);
+
+            return {
+                startDate: startOfDay(yesterday).toISOString(),
+                endDate: endOfDay(yesterday).toISOString(),
+            };
+        }
+        case "last_7_days": {
+            const start = new Date(now);
+            start.setDate(start.getDate() - 6);
+
+            return {
+                startDate: startOfDay(start).toISOString(),
+                endDate: endOfDay(now).toISOString(),
+            };
+        }
+
+        case "this_month": {
+            const start = new Date(
+                now.getFullYear(),
+                now.getMonth(),
+                1
+            );
+
+            return {
+                startDate: startOfDay(start).toISOString(),
+                endDate: endOfDay(now).toISOString(),
+            };
+        }
+
+        case "last_month": {
+            const start = new Date(
+                now.getFullYear(),
+                now.getMonth() - 1,
+                1
+            );
+
+            const end = new Date(
+                now.getFullYear(),
+                now.getMonth(),
+                0
+            );
+
+            return {
+                startDate: startOfDay(start).toISOString(),
+                endDate: endOfDay(end).toISOString(),
+            };
+        }
+
+        case "this_year": {
+            const start = new Date(
+                now.getFullYear(),
+                0,
+                1
+            );
+
+            return {
+                startDate: startOfDay(start).toISOString(),
+                endDate: endOfDay(now).toISOString(),
+            };
+        }
+
+        default:
+            return {
+                startDate: undefined,
+                endDate: undefined,
+            };
+    }
+};
+
     const [orders, setOrders] = useState([]);
     const [pendingUsers, setPendingUsers] = useState([]);
 
@@ -46,14 +144,20 @@ function AdminDashboard() {
                 dashboardData,
                 ordersData,
                 usersData,
+                financialData,
             ] = await Promise.all([
                 getAdminDashboard(),
                 getAdminOrders(),
                 getPendingUsers(),
+                (console.log("DASHBOARD: calling getFinancialSummary", financialPeriod), getFinancialSummary(getFinancialPeriodDates(financialPeriod))),
             ]);
 
             setDashboard(
                 dashboardData || {}
+            );
+
+            setFinancial(
+                financialData || {}
             );
 
             setOrders(
@@ -97,7 +201,7 @@ function AdminDashboard() {
             setLoading(false);
             setRefreshing(false);
         }
-    }, [logout]);
+    }, [logout, financialPeriod]);
 
     // ======================================================
     // INITIAL LOAD
@@ -217,6 +321,34 @@ function AdminDashboard() {
             dashboard?.totalTransactions || 0
         );
 
+    // ======================================================
+    // CENTRAL FINANCIAL ENGINE
+    // ======================================================
+
+    const financialRevenue =
+        Number(financial?.revenue || 0);
+
+    const financialCOGS =
+        Number(financial?.cogs || 0);
+
+    const financialGrossProfit =
+        Number(financial?.grossProfit || 0);
+
+    const financialExpenses =
+        Number(financial?.totalExpenses || 0);
+
+    const financialNetProfit =
+        Number(financial?.netProfit || 0);
+
+    const financialCashFlow =
+        Number(financial?.cashFlow || 0);
+
+    const financialProfitMargin =
+        Number(financial?.profitMargin || 0);
+
+    const financialMissingCosts =
+        Number(financial?.missingCostItems || 0);
+
     const lowStock =
         Array.isArray(
             dashboard?.lowStock
@@ -308,6 +440,18 @@ function AdminDashboard() {
                     >
                         <span>◔</span>
                         Reports
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={() =>
+                            navigate(
+                                "/admin/expenditure"
+                            )
+                        }
+                    >
+                        <span>₵</span>
+                        Expenditure
                     </button>
 
                     <button
@@ -571,6 +715,230 @@ function AdminDashboard() {
                                 Products in store
                             </small>
 
+                        </div>
+
+                    </div>
+
+                </section>
+
+                {/* ==================================================
+                    FINANCIAL SNAPSHOT
+                ================================================== */}
+
+                <section className="dashboard-section financial-snapshot">
+
+                    <div className="section-heading">
+
+                        <div>
+                            <h2>
+                                Financial Snapshot
+                            </h2>
+
+                            <p>
+                                Current financial performance from the central financial engine
+                            </p>
+                        </div>
+
+                        <div className="financial-filter-wrapper">
+                            <label htmlFor="financial-period">
+                                Period
+                            </label>
+
+                            <select
+                                id="financial-period"
+                                className="financial-period-select"
+                                value={financialPeriod}
+                                onChange={(event) =>
+                                    setFinancialPeriod(event.target.value)
+                                }
+                            >
+                                <option value="today">
+                                    Today
+                                </option>
+
+                                <option value="yesterday">
+                                    Yesterday
+                                </option>
+
+                                <option value="last_7_days">
+                                    Last 7 Days
+                                </option>
+
+                                <option value="this_month">
+                                    This Month
+                                </option>
+
+                                <option value="last_month">
+                                    Last Month
+                                </option>
+
+                                <option value="last_3_months">
+                                    Last 3 Months
+                                </option>
+
+                                <option value="this_year">
+                                    This Year
+                                </option>
+
+                                <option value="all_time">
+                                    All Time
+                                </option>
+                            </select>
+                        </div>
+
+                        <button
+                            type="button"
+                            className="financial-report-button"
+                            onClick={() =>
+                                navigate("/admin/reports")
+                            }
+                        >
+                            View Financial Reports
+                            <span>→</span>
+                        </button>
+
+                    </div>
+
+                    <div className="financial-dashboard-grid">
+
+                        <div className="financial-dashboard-card revenue">
+
+                            <span>Revenue</span>
+
+                            <strong>
+                                {formatCurrency(
+                                    financialRevenue
+                                )}
+                            </strong>
+
+                            <small>
+                                Successful payments
+                            </small>
+
+                        </div>
+
+                        <div className="financial-dashboard-card cogs">
+
+                            <span>COGS</span>
+
+                            <strong>
+                                {formatCurrency(
+                                    financialCOGS
+                                )}
+                            </strong>
+
+                            <small>
+                                Cost of goods sold
+                            </small>
+
+                        </div>
+
+                        <div className="financial-dashboard-card gross">
+
+                            <span>Gross Profit</span>
+
+                            <strong>
+                                {formatCurrency(
+                                    financialGrossProfit
+                                )}
+                            </strong>
+
+                            <small>
+                                Revenue minus COGS
+                            </small>
+
+                        </div>
+
+                        <div className="financial-dashboard-card expenses">
+
+                            <span>Expenses</span>
+
+                            <strong>
+                                {formatCurrency(
+                                    financialExpenses
+                                )}
+                            </strong>
+
+                            <small>
+                                Paid business expenses
+                            </small>
+
+                        </div>
+
+                        <div
+                            className={`financial-dashboard-card ${
+                                financialNetProfit >= 0
+                                    ? "positive"
+                                    : "negative"
+                            }`}
+                        >
+
+                            <span>Net Profit</span>
+
+                            <strong>
+                                {formatCurrency(
+                                    financialNetProfit
+                                )}
+                            </strong>
+
+                            <small>
+                                After COGS & expenses
+                            </small>
+
+                        </div>
+
+                        <div
+                            className={`financial-dashboard-card ${
+                                financialCashFlow >= 0
+                                    ? "positive"
+                                    : "negative"
+                            }`}
+                        >
+
+                            <span>Cash Flow</span>
+
+                            <strong>
+                                {formatCurrency(
+                                    financialCashFlow
+                                )}
+                            </strong>
+
+                            <small>
+                                Cash in minus cash out
+                            </small>
+
+                        </div>
+
+                    </div>
+
+                    <div className="financial-dashboard-footer">
+
+                        <div>
+                            <span>Profit Margin</span>
+
+                            <strong>
+                                {financialProfitMargin.toFixed(1)}%
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Financial Status</span>
+
+                            <strong
+                                className={
+                                    financialMissingCosts > 0
+                                        ? "warning"
+                                        : "healthy"
+                                }
+                            >
+                                {financialMissingCosts > 0
+                                    ? `${financialMissingCosts} product cost${
+                                          financialMissingCosts === 1
+                                              ? ""
+                                              : "s"
+                                      } missing`
+                                    : "Cost data complete"}
+                            </strong>
                         </div>
 
                     </div>
@@ -1144,3 +1512,12 @@ function AdminDashboard() {
 }
 
 export default AdminDashboard;
+
+
+
+
+
+
+
+
+

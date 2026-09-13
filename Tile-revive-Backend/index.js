@@ -34,6 +34,8 @@ const galleryRoutes = require("./routes/gallery");
 const customerAuthRoutes = require("./routes/customerAuth");
 const reportsRoutes = require("./routes/reports");
 const analyticsRoutes = require("./routes/analytics");
+const expensesRoutes = require("./routes/expenses");
+const financialReportsRoutes = require("./routes/financialReports");
 
 // ======================================================
 // SERVICES
@@ -55,6 +57,19 @@ const PORT = process.env.PORT || 5000;
 // ======================================================
 
 app.use(cors());
+/* ======================================================
+   UPLOADED PRODUCT IMAGES
+   Images uploaded through Admin Products are served
+   directly from the backend uploads directory.
+   ====================================================== */
+
+const path = require("path");
+
+app.use(
+    "/uploads",
+    express.static(path.join(process.cwd(), "uploads"))
+);
+
 
 app.use(express.json());
 
@@ -177,6 +192,16 @@ app.use(
 app.use(
     "/api/analytics",
     analyticsRoutes
+);
+
+app.use(
+    "/api/expenses",
+    expensesRoutes
+);
+
+app.use(
+    "/api/reports/financial",
+    financialReportsRoutes
 );
 
 // ======================================================
@@ -2018,3 +2043,4 @@ app.listen(
         );
     }
 );
+

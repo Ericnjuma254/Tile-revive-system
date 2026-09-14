@@ -436,3 +436,6 @@ router.put(
 });
 
 module.exports = router;
+module.exports.requireCustomerAuth = requireCustomerAuth;
+
+

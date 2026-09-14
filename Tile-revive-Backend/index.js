@@ -34,6 +34,7 @@ const authRoutes = require("./routes/auth");
 const cartRoutes = require("./routes/cart");
 const galleryRoutes = require("./routes/gallery");
 const customerAuthRoutes = require("./routes/customerAuth");
+const reviewsRoutes = require("./routes/reviews");
 const reportsRoutes = require("./routes/reports");
 const analyticsRoutes = require("./routes/analytics");
 const expensesRoutes = require("./routes/expenses");
@@ -51,6 +52,7 @@ const sendWhatsAppReceipt = require("./services/sendWhatsApp");
 // ======================================================
 
 const app = express();
+app.set("trust proxy", 1);
 
 const PORT = process.env.PORT || 5000;
 
@@ -237,11 +239,8 @@ app.use(
     "/api/gallery",
     galleryRoutes
 );
-
-app.use(
-    "/api/customer-auth",
-    customerAuthRoutes
-);
+app.use("/api/customer-auth", customerAuthRoutes);
+app.use("/api/reviews", reviewsRoutes);
 
 app.use(
     "/api/admin/reports",
@@ -1938,6 +1937,10 @@ app.listen(
         );
     }
 );
+
+
+
+
 
 
 

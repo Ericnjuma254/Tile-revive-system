@@ -1114,3 +1114,19 @@ export const getCashFlow = async ({
 
 
 
+
+export async function getProductReviews(productId) {
+    const response = await request(
+        `/reviews/product/${productId}`
+    );
+
+    return {
+        reviews: Array.isArray(response?.reviews)
+            ? response.reviews
+            : [],
+        summary: response?.summary || {
+            averageRating: 0,
+            reviewCount: 0
+        }
+    };
+}

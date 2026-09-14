@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { getProducts, getProductImages, getProductImageUrl } from "../services/api";
+import { getProducts, getProductImages, getProductImageUrl, getProductReviews } from "../services/api";
 import { useCart } from "../context/CartContext";
+import CustomerAuth from "../components/customer/CustomerAuth";
+import { createProductReview } from "../services/customerAuth";
 import "./ProductDetails.css";
 
 const demoReviews = [
@@ -31,14 +33,6 @@ const demoReviews = [
     }
 ];
 
-const ratingBreakdown = [
-    { stars: 5, percentage: 82 },
-    { stars: 4, percentage: 12 },
-    { stars: 3, percentage: 4 },
-    { stars: 2, percentage: 1 },
-    { stars: 1, percentage: 1 }
-];
-
 function Stars({ rating = 5 }) {
     return (
         <span className="product-stars" aria-label={`${rating} out of 5 stars`}>
@@ -64,6 +58,22 @@ function ProductDetails() {
     const [selectedImage, setSelectedImage] = useState("");
     const [productImages, setProductImages] = useState([]);
     const [galleryLoading, setGalleryLoading] = useState(false);
+
+    const [reviews, setReviews] = useState([]);
+    const [reviewSummary, setReviewSummary] = useState({
+        averageRating: 0,
+        reviewCount: 0
+    });
+    const [reviewsLoading, setReviewsLoading] = useState(false);
+    const [reviewsError, setReviewsError] = useState("");
+
+    const [showCustomerAuth, setShowCustomerAuth] = useState(false);
+    const [showReviewForm, setShowReviewForm] = useState(false);
+    const [reviewRating, setReviewRating] = useState(0);
+    const [reviewComment, setReviewComment] = useState("");
+    const [reviewSubmitting, setReviewSubmitting] = useState(false);
+    const [reviewSubmitError, setReviewSubmitError] = useState("");
+    const [reviewSubmitSuccess, setReviewSubmitSuccess] = useState("");
 
     
 
@@ -199,6 +209,147 @@ useEffect(() => {
         }
     }, [product]);
 
+    useEffect(() => {
+        if (!product) return;
+
+        let mounted = true;
+
+        const loadReviews = async () => {
+            try {
+                setReviewsLoading(true);
+                setReviewsError("");
+
+                const data = await getProductReviews(product.id);
+
+                if (!mounted) return;
+
+                setReviews(data.reviews || []);
+                setReviewSummary(
+                    data.summary || {
+                        averageRating: 0,
+                        reviewCount: 0
+                    }
+                );
+            } catch (error) {
+                console.error(
+                    "Failed to load product reviews:",
+                    error
+                );
+
+                if (mounted) {
+                    setReviews([]);
+                    setReviewSummary({
+                        averageRating: 0,
+                        reviewCount: 0
+                    });
+                    setReviewsError(
+                        "We couldn't load reviews right now."
+                    );
+                }
+            } finally {
+                if (mounted) {
+                    setReviewsLoading(false);
+                }
+            }
+        };
+
+        loadReviews();
+
+        return () => {
+            mounted = false;
+        };
+    }, [product]);
+
+    const handleWriteReview = () => {
+        const token = localStorage.getItem("customerAccessToken");
+
+        setReviewSubmitError("");
+        setReviewSubmitSuccess("");
+
+        if (!token) {
+            setShowCustomerAuth(true);
+            return;
+        }
+
+        setShowReviewForm(true);
+    };
+
+    const handleCustomerAuthSuccess = () => {
+        setShowCustomerAuth(false);
+        setReviewRating(0);
+        setReviewComment("");
+        setReviewSubmitError("");
+        setReviewSubmitSuccess("");
+        setShowReviewForm(true);
+    };
+
+    const handleSubmitReview = async (event) => {
+        event.preventDefault();
+
+        if (!product) return;
+
+        setReviewSubmitError("");
+        setReviewSubmitSuccess("");
+
+        if (!reviewRating) {
+            setReviewSubmitError("Please select a star rating.");
+            return;
+        }
+
+        if (reviewComment.trim().length > 1000) {
+            setReviewSubmitError(
+                "Review must be 1000 characters or less."
+            );
+            return;
+        }
+
+        try {
+            setReviewSubmitting(true);
+
+            const result = await createProductReview({
+                productId: product.id,
+                rating: reviewRating,
+                comment: reviewComment.trim()
+            });
+
+            setReviewSubmitSuccess(
+                result?.message ||
+                "Review submitted successfully."
+            );
+
+            setReviews((currentReviews) => [
+                result.review,
+                ...currentReviews
+            ]);
+
+            if (result.summary) {
+                setReviewSummary(result.summary);
+            }
+
+            setReviewRating(0);
+            setReviewComment("");
+
+            setTimeout(() => {
+                setShowReviewForm(false);
+                setReviewSubmitSuccess("");
+            }, 1200);
+
+        } catch (error) {
+            console.error(
+                "PRODUCT REVIEW SUBMISSION ERROR:",
+                error
+            );
+
+            setReviewSubmitError(
+                error?.message ||
+                "Unable to submit your review."
+            );
+
+        } finally {
+            setReviewSubmitting(false);
+        }
+    };
+
     if (loading) {
         return (
             <main className="product-details-page">
@@ -237,7 +388,26 @@ useEffect(() => {
 
     const price = Number(product.price || 0);
     const stock = Number(product.stock || 0);
-    const rating = 4.8;
+    const rating = Number(reviewSummary.averageRating || 0);
+    const reviewCount = Number(reviewSummary.reviewCount || 0);
+
+    const ratingBreakdown = useMemo(() => {
+        const total = reviews.length;
+
+        return [5, 4, 3, 2, 1].map((stars) => {
+            const count = reviews.filter(
+                (review) => Number(review.rating) === stars
+            ).length;
+
+            return {
+                stars,
+                count,
+                percentage: total
+                    ? Math.round((count / total) * 100)
+                    : 0
+            };
+        });
+    }, [reviews]);
 
     const productImage =
         selectedImage ||
@@ -470,7 +640,7 @@ useEffect(() => {
                             <span className="rating-divider">|</span>
 
                             <span>
-                                24 verified reviews
+                                {reviewCount > 0 ? `${reviewCount} verified reviews` : "No reviews yet"}
                             </span>
                         </div>
 
@@ -855,6 +1025,7 @@ useEffect(() => {
                         <button
                             type="button"
                             className="write-review-button"
+                            onClick={handleWriteReview}
                         >
                             Write a Review
                         </button>
@@ -864,14 +1035,14 @@ useEffect(() => {
                     <div className="reviews-summary">
 
                         <div className="overall-rating">
-                            <strong>4.8</strong>
+                            <strong>{reviewCount > 0 ? rating.toFixed(1) : "—"}</strong>
 
                             <div className="overall-stars">
                                 ★★★★★
                             </div>
 
                             <span>
-                                Based on 24 verified reviews
+                                Based on {reviewCount > 0 ? `${reviewCount} verified reviews` : "No reviews yet"}
                             </span>
                         </div>
 
@@ -902,37 +1073,75 @@ useEffect(() => {
 
                     <div className="review-list">
 
-                        {demoReviews.map((review) => (
-                            <article
-                                className="review-card"
-                                key={review.id}
-                            >
+                        {reviewsLoading ? (
+                            <div className="reviews-empty-state">
+                                <strong>Loading reviews...</strong>
+                                <span>
+                                    Fetching real customer feedback.
+                                </span>
+                            </div>
+                        ) : reviewsError ? (
+                            <div className="reviews-empty-state">
+                                <strong>Reviews unavailable</strong>
+                                <span>{reviewsError}</span>
+                            </div>
+                        ) : reviews.length === 0 ? (
+                            <div className="reviews-empty-state">
+                                <strong>No reviews yet</strong>
+                                <span>
+                                    Be the first customer to review this product.
+                                </span>
+                            </div>
+                        ) : (
+                            reviews.map((review) => (
+                                <article
+                                    className="review-card"
+                                    key={review.id}
+                                >
 
-                                <div className="review-top">
+                                    <div className="review-top">
 
-                                    <div className="review-avatar">
-                                        {review.name.charAt(0)}
-                                    </div>
-
-                                    <div>
-                                        <strong>{review.name}</strong>
-
-                                        <div className="review-stars">
-                                            {"★★★★★"}
+                                        <div className="review-avatar">
+                                            {(review.customer?.fullName || "Customer")
+                                                .charAt(0)
+                                                .toUpperCase()}
                                         </div>
+
+                                        <div>
+                                            <strong>
+                                                {review.customer?.fullName || "Customer"}
+                                            </strong>
+
+                                            <div className="review-stars">
+                                                <Stars rating={review.rating} />
+                                            </div>
+                                        </div>
+
+                                        <span>
+                                            {new Date(
+                                                review.createdAt
+                                            ).toLocaleDateString(
+                                                "en-KE",
+                                                {
+                                                    day: "numeric",
+                                                    month: "short",
+                                                    year: "numeric"
+                                                }
+                                            )}
+                                        </span>
+
                                     </div>
 
-                                    <span>{review.date}</span>
+                                    <div className="review-content">
+                                        <p>
+                                            {review.comment ||
+                                                "Customer left a rating without a comment."}
+                                        </p>
+                                    </div>
 
-                                </div>
-
-                                <div className="review-content">
-                                    <h3>{review.title}</h3>
-                                    <p>{review.text}</p>
-                                </div>
-
-                            </article>
-                        ))}
+                                </article>
+                            ))
+                        )}
 
                     </div>
 
@@ -1022,11 +1231,148 @@ useEffect(() => {
                 )}
 
             </div>
+            {showReviewForm && (
+                <div
+                    className="review-modal-overlay"
+                    onClick={(event) => {
+                        if (event.target === event.currentTarget) {
+                            setShowReviewForm(false);
+                        }
+                    }}
+                >
+                    <div className="review-modal">
+
+                        <div className="review-modal-header">
+                            <div>
+                                <span className="section-eyebrow">
+                                    YOUR EXPERIENCE
+                                </span>
+
+                                <h2>Write a Review</h2>
+
+                                <p>
+                                    Share your genuine experience with this product.
+                                </p>
+                            </div>
+
+                            <button
+                                type="button"
+                                className="review-modal-close"
+                                onClick={() => setShowReviewForm(false)}
+                                aria-label="Close review form"
+                            >
+                                ×
+                            </button>
+                        </div>
+
+                        <form
+                            className="review-form"
+                            onSubmit={handleSubmitReview}
+                        >
+                            <div className="review-form-rating">
+                                <label>Your rating</label>
+
+                                <div
+                                    className="review-rating-selector"
+                                    aria-label="Select product rating"
+                                >
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                        <button
+                                            key={star}
+                                            type="button"
+                                            className={
+                                                star <= reviewRating
+                                                    ? "active"
+                                                    : ""
+                                            }
+                                            onClick={() =>
+                                                setReviewRating(star)
+                                            }
+                                            aria-label={`${star} star${star > 1 ? "s" : ""}`}
+                                        >
+                                            ★
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="review-form-field">
+                                <label htmlFor="product-review-comment">
+                                    Your review
+                                </label>
+
+                                <textarea
+                                    id="product-review-comment"
+                                    value={reviewComment}
+                                    onChange={(event) =>
+                                        setReviewComment(event.target.value)
+                                    }
+                                    placeholder="Tell other customers about your experience..."
+                                    maxLength={1000}
+                                    rows={6}
+                                />
+
+                                <span className="review-character-count">
+                                    {reviewComment.length}/1000
+                                </span>
+                            </div>
+
+                            {reviewSubmitError && (
+                                <div className="review-form-message error">
+                                    {reviewSubmitError}
+                                </div>
+                            )}
+
+                            {reviewSubmitSuccess && (
+                                <div className="review-form-message success">
+                                    {reviewSubmitSuccess}
+                                </div>
+                            )}
+
+                            <div className="review-form-actions">
+                                <button
+                                    type="button"
+                                    className="review-cancel-button"
+                                    onClick={() => setShowReviewForm(false)}
+                                    disabled={reviewSubmitting}
+                                >
+                                    Cancel
+                                </button>
+
+                                <button
+                                    type="submit"
+                                    className="review-submit-button"
+                                    disabled={reviewSubmitting}
+                                >
+                                    {reviewSubmitting
+                                        ? "Submitting..."
+                                        : "Submit Review"}
+                                </button>
+                            </div>
+
+                            <p className="review-form-note">
+                                Reviews are limited to customers who have purchased
+                                this product.
+                            </p>
+                        </form>
+
+                    </div>
+                </div>
+            )}
+
+            {showCustomerAuth && (
+                <CustomerAuth
+                    onSuccess={handleCustomerAuthSuccess}
+                    onClose={() => setShowCustomerAuth(false)}
+                />
+            )}
+
         </main>
     );
 }
 
 export default ProductDetails;
+
 
 
 

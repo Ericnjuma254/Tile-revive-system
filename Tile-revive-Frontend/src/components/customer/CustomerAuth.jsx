@@ -5,7 +5,7 @@ import {
     verifyCustomerOtp
 } from "../../services/customerAuth";
 
-import "./CustomerAuth.css";
+import "./customerAuth.css";
 
 function CustomerAuth({
     onSuccess,

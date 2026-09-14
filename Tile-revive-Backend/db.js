@@ -9,7 +9,9 @@ const adapter = new PrismaMariaDb({
     user: process.env.DB_USER || "root",
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME || "tile_revive_db",
-    connectionLimit: 5,
+    connectionLimit: 2,
+    connectTimeout: 10000,
+    acquireTimeout: 30000,
     ssl: { rejectUnauthorized: false },
 });
 
@@ -18,3 +20,4 @@ const prisma = new PrismaClient({
 });
 
 module.exports = prisma;
+

@@ -180,8 +180,45 @@ router.post("/request-email-otp", otpLimiter, async (req, res) => {
 
     } catch (error) {
         console.error(
-            "CUSTOMER OTP ERROR:",
-            error
+            "======================================"
+        );
+
+        console.error(
+            "CUSTOMER OTP ERROR"
+        );
+
+        console.error(
+            "Name:",
+            error?.name
+        );
+
+        console.error(
+            "Code:",
+            error?.code
+        );
+
+        console.error(
+            "Command:",
+            error?.command
+        );
+
+        console.error(
+            "Response Code:",
+            error?.responseCode
+        );
+
+        console.error(
+            "Response:",
+            error?.response
+        );
+
+        console.error(
+            "Message:",
+            error?.message
+        );
+
+        console.error(
+            "======================================"
         );
 
         return res.status(500).json({
@@ -437,5 +474,6 @@ router.put(
 
 module.exports = router;
 module.exports.requireCustomerAuth = requireCustomerAuth;
+
 
 

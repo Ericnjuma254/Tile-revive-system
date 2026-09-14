@@ -7903,3 +7903,80 @@ a {
 
 
 
+
+/* =========================================================
+   TILE REVIVE - HIGH CONTRAST PAYMENT METHOD
+   ========================================================= */
+
+.payment-method-section {
+    margin-top: 30px;
+    padding: 28px;
+    border: 1px solid rgba(255,255,255,0.16);
+    border-radius: 18px;
+    background: #000 !important;
+    color: #fff !important;
+    box-shadow: 0 18px 45px rgba(0,0,0,0.18);
+}
+
+.payment-method-section h2 {
+    margin: 0 0 18px;
+    color: #fff !important;
+    font-size: 21px;
+    font-weight: 800;
+}
+
+.payment-options {
+    display: grid;
+    gap: 14px;
+}
+
+.payment-option {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px;
+    border: 2px solid rgba(255,255,255,0.30) !important;
+    border-radius: 14px;
+    background: #050505 !important;
+    color: #fff !important;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.payment-option:hover {
+    border-color: #fff !important;
+    background: #111 !important;
+}
+
+.payment-option-active {
+    border-color: #32e875 !important;
+    background: #000 !important;
+    box-shadow:
+        0 0 0 1px rgba(50,232,117,0.25),
+        0 10px 30px rgba(50,232,117,0.08);
+}
+
+.payment-option input {
+    width: 19px;
+    height: 19px;
+    accent-color: #32e875;
+    flex-shrink: 0;
+}
+
+.payment-option-content {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.payment-option-content strong {
+    color: #fff !important;
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.payment-option-content small {
+    color: #d6d6d6 !important;
+    font-size: 13px;
+    line-height: 1.5;
+}

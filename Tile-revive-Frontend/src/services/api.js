@@ -1130,3 +1130,67 @@ export async function getProductReviews(productId) {
         }
     };
 }
+
+/*
+ * =====================================================
+ * CUSTOMER REVIEWS
+ * =====================================================
+ */
+
+/**
+ * Get all public product reviews.
+ */
+export async function getAllReviews() {
+    const response = await request("/reviews");
+
+    return {
+        reviews: Array.isArray(response?.reviews)
+            ? response.reviews
+            : [],
+        summary: response?.summary || {
+            averageRating: 0,
+            reviewCount: 0
+        }
+    };
+}
+
+
+/**
+ * Get products that the signed-in customer can review.
+ *
+ * The backend determines eligibility from real orders.
+ */
+export async function getMyReviewProducts() {
+    const token =
+        localStorage.getItem("customerAccessToken");
+
+    if (!token) {
+        throw new Error(
+            "Please sign in to review a product."
+        );
+    }
+
+    const response = await fetch(
+        `${API_URL}/reviews/my-products`,
+        {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(
+            data.message ||
+            "Unable to load products available for review."
+        );
+    }
+
+    return Array.isArray(data?.products)
+        ? data.products
+        : [];
+}
+

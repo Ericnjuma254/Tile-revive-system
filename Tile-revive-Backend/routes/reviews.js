@@ -5,6 +5,164 @@ const { requireCustomerAuth } = require("./customerAuth");
 const router = express.Router();
 
 // ======================================================
+/**
+ * GET ALL REVIEWS
+ * Public
+ *
+ * Used by the customer-facing Reviews page.
+ */
+router.get("/", async (req, res) => {
+    try {
+        const reviews = await prisma.productreview.findMany({
+            orderBy: {
+                createdAt: "desc"
+            },
+            include: {
+                customer: {
+                    select: {
+                        id: true,
+                        fullName: true
+                    }
+                },
+                product: {
+                    select: {
+                        id: true,
+                        name: true
+                    }
+                }
+            }
+        });
+
+        const total = reviews.length;
+
+        const averageRating =
+            total > 0
+                ? Number(
+                    (
+                        reviews.reduce(
+                            (sum, review) =>
+                                sum + Number(review.rating || 0),
+                            0
+                        ) / total
+                    ).toFixed(1)
+                )
+                : 0;
+
+        return res.json({
+            success: true,
+            reviews,
+            summary: {
+                averageRating,
+                reviewCount: total
+            }
+        });
+
+    } catch (error) {
+        console.error(
+            "GET ALL REVIEWS ERROR:",
+            error
+        );
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to load reviews"
+        });
+    }
+});
+
+
+/**
+ * GET PRODUCTS THE CUSTOMER CAN REVIEW
+ *
+ * Customer authentication required.
+ *
+ * Only products appearing in a customer's paid or
+ * delivered orders are returned.
+ */
+router.get(
+    "/my-products",
+    requireCustomerAuth,
+    async (req, res) => {
+        try {
+            const customerId =
+                Number(req.customer.customerId || req.customer.id);
+
+            if (!Number.isInteger(customerId) || customerId <= 0) {
+                return res.status(401).json({
+                    success: false,
+                    message: "Invalid customer session"
+                });
+            }
+
+            const items = await prisma.orderitem.findMany({
+                where: {
+                    order: {
+                        customerId,
+                        OR: [
+                            {
+                                orderStatus: "DELIVERED"
+                            },
+                            {
+                                paymentStatus: "PAID"
+                            }
+                        ]
+                    }
+                },
+                select: {
+                    productId: true,
+                    product: {
+                        select: {
+                            id: true,
+                            name: true
+                        }
+                    }
+                },
+                distinct: ["productId"]
+            });
+
+            const existingReviews =
+                await prisma.productreview.findMany({
+                    where: {
+                        customerId
+                    },
+                    select: {
+                        productId: true
+                    }
+                });
+
+            const reviewedProductIds =
+                new Set(
+                    existingReviews.map(
+                        (review) => review.productId
+                    )
+                );
+
+            const products = items
+                .filter(
+                    (item) =>
+                        !reviewedProductIds.has(item.productId)
+                )
+                .map((item) => item.product);
+
+            return res.json({
+                success: true,
+                products
+            });
+
+        } catch (error) {
+            console.error(
+                "GET CUSTOMER REVIEW PRODUCTS ERROR:",
+                error
+            );
+
+            return res.status(500).json({
+                success: false,
+                message: "Unable to load products available for review"
+            });
+        }
+    }
+);
+
 // GET REVIEWS FOR A PRODUCT
 // Public
 // ======================================================
@@ -258,3 +416,4 @@ router.post("/product/:productId", requireCustomerAuth, async (req, res) => {
 });
 
 module.exports = router;
+

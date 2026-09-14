@@ -1,3 +1,4 @@
+import Reviews from "./pages/Reviews";
 import TermsOfService from "./pages/TermsOfService";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
@@ -61,6 +62,7 @@ function AppContent() {
             )}
 
             <Routes>
+        <Route path="/reviews" element={<Reviews />} />
 
                 {/* =================================================
                     CUSTOMER PAGES
@@ -252,6 +254,8 @@ function App() {
 }
 
 export default App;
+
+
 
 
 

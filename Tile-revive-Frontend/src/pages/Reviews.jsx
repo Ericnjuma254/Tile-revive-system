@@ -433,14 +433,6 @@ function Reviews() {
                         </h2>
                     </div>
 
-                    <button
-                        type="button"
-                        className="reviews-mobile-write"
-                        onClick={openReviewFlow}
-                    >
-                        Leave a Review
-                    </button>
-
                 </div>
 
 
@@ -490,13 +482,6 @@ function Reviews() {
                             Your experience could help
                             another Tile Revive customer.
                         </p>
-
-                        <button
-                            type="button"
-                            onClick={openReviewFlow}
-                        >
-                            Leave the First Review →
-                        </button>
 
                     </div>
                 )}
@@ -807,6 +792,7 @@ function Reviews() {
 
 
 export default Reviews;
+
 
 
 

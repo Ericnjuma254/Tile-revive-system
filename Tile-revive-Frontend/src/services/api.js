@@ -1171,7 +1171,7 @@ export async function getMyReviewProducts() {
     }
 
     const response = await fetch(
-        `${API_URL}/reviews/my-products`,
+        `${API_BASE_URL}/reviews/my-products`,
         {
             method: "GET",
             headers: {
@@ -1193,4 +1193,5 @@ export async function getMyReviewProducts() {
         ? data.products
         : [];
 }
+
 

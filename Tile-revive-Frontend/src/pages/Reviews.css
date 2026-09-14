@@ -658,3 +658,90 @@
         padding: 21px;
     }
 }
+
+/* =========================================================
+   PREMIUM GOLD REVIEW SUMMARY
+   ========================================================= */
+
+.reviews-summary-rating {
+    position: relative;
+    padding: 1.25rem 1.5rem;
+    border: 1px solid rgba(212, 175, 55, 0.45);
+    border-radius: 18px;
+    background:
+        linear-gradient(
+            145deg,
+            rgba(212, 175, 55, 0.10),
+            rgba(255, 255, 255, 0.025)
+        );
+    box-shadow:
+        0 0 0 1px rgba(212, 175, 55, 0.06),
+        0 12px 35px rgba(0, 0, 0, 0.30),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(12px);
+}
+
+.reviews-summary-rating strong {
+    color: #f4d06f;
+    text-shadow:
+        0 0 18px rgba(212, 175, 55, 0.35);
+}
+
+.reviews-summary-rating .reviews-stars,
+.reviews-summary-rating .review-star {
+    color: #d4af37;
+    text-shadow:
+        0 0 10px rgba(212, 175, 55, 0.30);
+}
+
+.reviews-summary-rating > span {
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.reviews-summary-rating::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(
+        120deg,
+        transparent 25%,
+        rgba(255, 255, 255, 0.08) 50%,
+        transparent 75%
+    );
+    opacity: 0.45;
+}
+
+/* =========================================================
+   PREMIUM GOLD REVIEW CTA
+   ========================================================= */
+
+.reviews-write-button {
+    border: 1px solid rgba(212, 175, 55, 0.65);
+    background: linear-gradient(
+        135deg,
+        #d4af37,
+        #f4d06f
+    );
+    color: #090909;
+    box-shadow:
+        0 10px 30px rgba(212, 175, 55, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        filter 0.2s ease;
+}
+
+.reviews-write-button:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.06);
+    box-shadow:
+        0 14px 35px rgba(212, 175, 55, 0.28),
+        inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.reviews-write-button span {
+    color: #090909;
+}

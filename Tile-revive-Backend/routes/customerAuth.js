@@ -472,8 +472,85 @@ router.put(
     }
 });
 
+router.put("/profile/phone", requireCustomerAuth, async (req, res) => {
+    try {
+        const customerId = Number(req.customer?.customerId);
+
+        if (!Number.isInteger(customerId)) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid customer session"
+            });
+        }
+
+        const phoneNumber = normalizePhone(req.body.phoneNumber);
+
+        if (!phoneNumber) {
+            return res.status(400).json({
+                success: false,
+                message: "Phone number is required"
+            });
+        }
+
+        if (!/^2547\d{8}$/.test(phoneNumber)) {
+            return res.status(400).json({
+                success: false,
+                message: "Enter a valid Kenyan mobile number"
+            });
+        }
+
+        const existingCustomer = await prisma.customer.findFirst({
+            where: {
+                phoneNumber,
+                NOT: {
+                    id: customerId
+                }
+            },
+            select: {
+                id: true
+            }
+        });
+
+        if (existingCustomer) {
+            return res.status(409).json({
+                success: false,
+                message: "Another customer already uses this phone number"
+            });
+        }
+
+        const customer = await prisma.customer.update({
+            where: {
+                id: customerId
+            },
+            data: {
+                phoneNumber
+            },
+            select: {
+                id: true,
+                fullName: true,
+                email: true,
+                phoneNumber: true
+            }
+        });
+
+        return res.json({
+            success: true,
+            message: "Phone number updated successfully",
+            customer
+        });
+
+    } catch (error) {
+        console.error("UPDATE CUSTOMER PHONE ERROR:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to update phone number"
+        });
+    }
+});
 module.exports = router;
 module.exports.requireCustomerAuth = requireCustomerAuth;
+
 
 
 

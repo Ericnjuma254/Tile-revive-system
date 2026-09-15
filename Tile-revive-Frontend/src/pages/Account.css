@@ -916,3 +916,87 @@
 .newsletter-option span {
     line-height: 1.3;
 }
+/* =====================================================
+   ACCOUNT PHONE SETTINGS
+   ===================================================== */
+
+.account-settings-form {
+    max-width: 620px;
+    margin-top: 32px;
+    padding: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.025);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+}
+
+.account-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.account-form-group label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.account-form-group input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 15px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.045);
+    color: #fff;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.account-form-group input:focus {
+    border-color: #d4af37;
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.12);
+}
+
+.account-form-group input::placeholder {
+    color: rgba(255, 255, 255, 0.38);
+}
+
+.account-form-group > span {
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.account-settings-submit {
+    width: 100%;
+    margin-top: 24px;
+    padding: 15px 20px;
+    border: 0;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #d4af37, #f1d77a);
+    color: #090909;
+    font-size: 0.95rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.account-settings-submit:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(212, 175, 55, 0.2);
+}
+
+.account-settings-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+    .account-settings-form {
+        padding: 22px;
+    }
+}
+

@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Account.css";
 
 const API_URL = "http://localhost:5000";
 
 function Account() {
+    const navigate = useNavigate();
     const [mode, setMode] = useState("welcome");
     const [step, setStep] = useState("details");
 
@@ -109,6 +111,84 @@ function Account() {
         return data;
     };
 
+
+    // =====================================================
+    // UPDATE CUSTOMER PHONE
+    // =====================================================
+
+    const handleUpdatePhone = async (event) => {
+        event.preventDefault();
+
+        clearMessages();
+
+        const cleanPhone = phoneNumber.trim();
+
+        if (!cleanPhone) {
+            setError("Please enter your phone number.");
+            return;
+        }
+
+        const token =
+            localStorage.getItem("customerAccessToken");
+
+        if (!token) {
+            setError("Please sign in again to update your phone number.");
+            return;
+        }
+
+        try {
+            setLoading(true);
+
+            const response = await fetch(
+                `${API_URL}/api/customer-auth/profile/phone`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        phoneNumber: cleanPhone
+                    })
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    data.message ||
+                    "Unable to update phone number."
+                );
+            }
+
+            const updatedUser = {
+                ...user,
+                ...data.customer
+            };
+
+            setUser(updatedUser);
+
+            localStorage.setItem(
+                "customer",
+                JSON.stringify(updatedUser)
+            );
+
+            setSuccess(
+                "Phone number updated successfully."
+            );
+
+            setPhoneNumber("");
+
+        } catch (error) {
+            setError(
+                error.message ||
+                "Unable to update phone number."
+            );
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // =====================================================
     // CREATE ACCOUNT
@@ -501,6 +581,113 @@ function Account() {
 
 
     // =====================================================
+    // UPDATE PHONE
+    // =====================================================
+
+    if (mode === "update-phone") {
+        return (
+            <main className="account-page">
+
+                <div className="account-shell">
+
+                    <section className="account-dashboard">
+
+                        <div className="account-dashboard-top">
+
+                            <div>
+                                <span className="account-eyebrow">
+                                    ACCOUNT SETTINGS
+                                </span>
+
+                                <h1>
+                                    Update your phone
+                                </h1>
+
+                                <p>
+                                    Keep your Tile Revive contact number up to date.
+                                </p>
+                            </div>
+
+                            <button
+                                type="button"
+                                className="account-logout"
+                                onClick={() => {
+                                    clearMessages();
+                                    setPhoneNumber("");
+                                    setMode("account");
+                                }}
+                            >
+                                Back to Account
+                            </button>
+
+                        </div>
+
+
+                        <form
+                            className="account-settings-form"
+                            onSubmit={handleUpdatePhone}
+                        >
+
+                            <div className="account-form-group">
+
+                                <label htmlFor="account-phone">
+                                    Phone number
+                                </label>
+
+                                <input
+                                    id="account-phone"
+                                    type="tel"
+                                    value={phoneNumber}
+                                    onChange={(event) =>
+                                        setPhoneNumber(event.target.value)
+                                    }
+                                    placeholder="07XXXXXXXX"
+                                    autoComplete="tel"
+                                    disabled={loading}
+                                />
+
+                                <span>
+                                    Enter your Kenyan mobile number.
+                                </span>
+
+                            </div>
+
+
+                            {error && (
+                                <div className="account-message account-message-error">
+                                    {error}
+                                </div>
+                            )}
+
+
+                            {success && (
+                                <div className="account-message account-message-success">
+                                    {success}
+                                </div>
+                            )}
+
+
+                            <button
+                                type="submit"
+                                className="account-settings-submit"
+                                disabled={loading}
+                            >
+                                {loading
+                                    ? "Updating..."
+                                    : "Save Phone Number"}
+                            </button>
+
+                        </form>
+
+                    </section>
+
+                </div>
+
+            </main>
+        );
+    }
+
+    // =====================================================
     // ACCOUNT DASHBOARD
     // =====================================================
 
@@ -574,7 +761,7 @@ function Account() {
                             </div>
 
 
-                            <div className="account-info-card">
+                            <div className="account-info-card account-action-card">
 
                                 <span className="account-card-icon">
                                     📱
@@ -594,6 +781,14 @@ function Account() {
                                     <span>
                                         Your customer contact number
                                     </span>
+
+                                    <button
+                                        type="button"
+                                        className="account-card-action"
+                                        onClick={() => setMode("update-phone")}
+                                    >
+                                        Update Phone
+                                    </button>
 
                                 </div>
 
@@ -641,9 +836,9 @@ function Account() {
                                         Continue Shopping
                                     </strong>
 
-                                    <a href="/shop">
+                                    <button type="button" className="account-card-action" onClick={() => navigate("/shop")}>
                                         Browse products →
-                                    </a>
+                                    </button>
 
                                 </div>
 
@@ -657,6 +852,39 @@ function Account() {
                                 </span>
 
                                 <div>
+
+                            <div className="account-info-card account-action-card">
+
+                                <span className="account-card-icon">
+                                    ⭐
+                                </span>
+
+                                <div>
+
+                                    <small>
+                                        REVIEWS
+                                    </small>
+
+                                    <strong>
+                                        Leave a Review
+                                    </strong>
+
+                                    <span>
+                                        Share your experience with Tile Revive
+                                    </span>
+
+                                    <button
+                                        type="button"
+                                        className="account-card-action"
+                                        onClick={() => navigate("/reviews")}
+                                    >
+                                        Review Products →
+                                    </button>
+
+                                </div>
+
+                            </div>
+
 
                                     <small>
                                         NEWSLETTER
@@ -1159,3 +1387,12 @@ function Account() {
 }
 
 export default Account;
+
+
+
+
+
+
+
+
+

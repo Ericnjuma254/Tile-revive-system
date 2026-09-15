@@ -1,10 +1,35 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
 
 function Header() {
     const [search, setSearch] = useState("");
     const [mobileNavOpen, setMobileNavOpen] = useState(false);
+    const [customer, setCustomer] = useState(null);
+
+    useEffect(() => {
+        const loadCustomer = () => {
+            try {
+                const storedCustomer = localStorage.getItem("customer");
+
+                if (storedCustomer) {
+                    setCustomer(JSON.parse(storedCustomer));
+                } else {
+                    setCustomer(null);
+                }
+            } catch {
+                setCustomer(null);
+            }
+        };
+
+        loadCustomer();
+
+        window.addEventListener("storage", loadCustomer);
+
+        return () => {
+            window.removeEventListener("storage", loadCustomer);
+        };
+    }, []);
 
     const { cartCount } = useCart();
 
@@ -145,14 +170,24 @@ function Header() {
                         onClick={closeMobileNavigation}
                     >
                         <span
-                            className="action-icon"
+                            className={`action-icon ${customer ? "customer-avatar" : ""}`}
                             aria-hidden="true"
                         >
-                            👤
+                            {customer?.fullName
+                                ? customer.fullName
+                                      .split(" ")
+                                      .filter(Boolean)
+                                      .slice(0, 2)
+                                      .map((name) => name[0])
+                                      .join("")
+                                      .toUpperCase()
+                                : "👤"}
                         </span>
 
                         <span className="action-label">
-                            Account
+                            {customer?.fullName
+                                ? customer.fullName.split(" ")[0]
+                                : "Account"}
                         </span>
                     </NavLink>
 
@@ -302,3 +337,5 @@ function Header() {
 }
 
 export default Header;
+
+

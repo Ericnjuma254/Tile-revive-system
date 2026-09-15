@@ -544,3 +544,21 @@
     }
 
 }
+/* CUSTOMER PROFILE AVATAR */
+.customer-avatar {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #8b5cf6, #d4af37);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    border: 2px solid rgba(212, 175, 55, 0.55);
+    box-shadow: 0 4px 14px rgba(139, 92, 246, 0.25);
+    overflow: hidden;
+}

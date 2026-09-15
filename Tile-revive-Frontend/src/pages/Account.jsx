@@ -875,8 +875,8 @@ function Account() {
 
                                     <button
                                         type="button"
-                                        className="account-card-action"
-                                        onClick={() => navigate("/reviews")}
+                                        className="account-card-action account-review-action"
+                            onClick={() => navigate("/reviews")}
                                     >
                                         Review Products →
                                     </button>
@@ -1387,6 +1387,8 @@ function Account() {
 }
 
 export default Account;
+
+
 
 
 

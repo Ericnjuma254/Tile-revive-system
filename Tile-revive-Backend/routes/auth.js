@@ -15,6 +15,7 @@ const {
 } = require("../utils/tokens");
 
 const prisma = require("../db");
+const { generateCustomerAccessToken } = require("../utils/customerTokens");
 
 const {
     sendVerificationEmail
@@ -636,6 +637,10 @@ router.post("/login", loginLimiter, async (req, res) => {
 
         const refreshToken =
             generateRefreshToken(user);
+        const customerAccessToken =
+            customer
+                ? generateCustomerAccessToken(customer)
+                : null;
 
 
         // ==================================================
@@ -647,6 +652,7 @@ router.post("/login", loginLimiter, async (req, res) => {
             message: "Login successful.",
 
             accessToken,
+            customerAccessToken,
             refreshToken,
 
             user: {
@@ -771,3 +777,10 @@ router.post("/refresh", refreshLimiter, async (req, res) => {
 
 
 module.exports = router;
+
+
+
+
+
+
+

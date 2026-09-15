@@ -399,10 +399,10 @@ function Account() {
                 );
 
 
-            if (result.accessToken) {
+            if (result.customerAccessToken) {
                 localStorage.setItem(
                     "customerAccessToken",
-                    result.accessToken
+                    result.customerAccessToken
                 );
             }
 
@@ -1387,6 +1387,7 @@ function Account() {
 }
 
 export default Account;
+
 
 
 

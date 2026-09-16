@@ -586,6 +586,145 @@ function AdminOrderDetails() {
         };
 
     // ==================================================
+    // MARK PAID + DELIVERED
+    // ==================================================
+
+    const markPaidAndDelivered =
+        async () => {
+
+            const validOrderId =
+                getValidOrderId();
+
+            if (!validOrderId) {
+
+                setError(
+                    "Invalid order ID."
+                );
+
+                return;
+            }
+
+            const token =
+                getToken();
+
+            if (!token) {
+
+                redirectToLogin();
+
+                return;
+            }
+
+            try {
+
+                setSaving(true);
+                setError("");
+
+                const requestUrl =
+                    `${API_BASE_URL}/api/admin/orders/${encodeURIComponent(
+                        validOrderId
+                    )}/paid-delivered`;
+
+                console.log(
+                    "MARKING ORDER PAID & DELIVERED:",
+                    requestUrl
+                );
+
+                const response =
+                    await fetch(
+                        requestUrl,
+                        {
+                            method: "PATCH",
+
+                            headers: {
+                                Authorization:
+                                    `Bearer ${token}`,
+
+                                "Content-Type":
+                                    "application/json",
+
+                                Accept:
+                                    "application/json",
+                            },
+                        }
+                    );
+
+                const data =
+                    await parseResponse(
+                        response
+                    );
+
+                if (
+                    response.status ===
+                        401 ||
+                    response.status ===
+                        403
+                ) {
+
+                    redirectToLogin();
+
+                    return;
+                }
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data?.message ||
+                        data?.error ||
+                        "Failed to mark order Paid & Delivered."
+                    );
+                }
+
+                const updatedOrder =
+                    data?.order ??
+                    data?.data;
+
+                if (updatedOrder) {
+
+                    setOrder(
+                        updatedOrder
+                    );
+
+                } else {
+
+                    await loadOrder();
+
+                }
+
+                if (data?.emailSent) {
+
+                    console.log(
+                        "Payment confirmation and receipt email sent successfully."
+                    );
+
+                } else if (
+                    data?.emailSkipped
+                ) {
+
+                    console.log(
+                        "Receipt email was already sent for this order."
+                    );
+                }
+
+            } catch (err) {
+
+                console.error(
+                    "MARK PAID & DELIVERED ERROR:",
+                    err
+                );
+
+                setError(
+                    err?.message ||
+                    "Unable to mark order Paid & Delivered."
+                );
+
+            } finally {
+
+                setSaving(false);
+
+            }
+        };
+
+    // ==================================================
     // FORMAT CURRENCY
     // ==================================================
 
@@ -1032,6 +1171,38 @@ function AdminOrderDetails() {
                     </div>
 
                     <div className="order-details-header-status">
+
+                        {/* PAID + DELIVERED ACTION */}
+
+                        <div className="paid-delivered-action">
+
+                            <button
+                                type="button"
+                                className="paid-delivered-button"
+                                onClick={
+                                    markPaidAndDelivered
+                                }
+                                disabled={
+                                    saving ||
+                                    (
+                                        order.paymentStatus ===
+                                            "SUCCESS" &&
+                                        order.orderStatus ===
+                                            "DELIVERED"
+                                    )
+                                }
+                            >
+                                {saving
+                                    ? "Updating..."
+                                    : "Paid & Delivered"}
+                            </button>
+
+                            <small>
+                                Marks payment as paid, delivers the order,
+                                and sends the receipt email.
+                            </small>
+
+                        </div>
 
                         {/* ORDER STATUS */}
 
@@ -1814,3 +1985,5 @@ function AdminOrderDetails() {
 }
 
 export default AdminOrderDetails;
+
+

@@ -728,3 +728,30 @@
         padding: 22px 18px;
     }
 }
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 12px 0 18px;
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 0.88rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+.remember-me input {
+    width: 17px;
+    height: 17px;
+    margin: 0;
+    accent-color: #c9a227;
+    cursor: pointer;
+}
+
+.remember-me span {
+    cursor: pointer;
+}
+
+.remember-me:hover {
+    color: #ffffff;
+}

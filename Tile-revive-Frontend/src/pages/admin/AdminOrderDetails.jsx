@@ -7,14 +7,11 @@ import {
     useNavigate,
     useParams,
 } from "react-router-dom";
+import { getAdminOrder } from "../../services/api";
 import "./AdminOrderDetails.css";
 
-// ======================================================
-// API CONFIG
-// ======================================================
-
 const API_BASE_URL =
-    "http://192.168.0.100:5000";
+    (import.meta.env.VITE_API_URL || "").replace(/\/api\/?$/, "");
 
 // ======================================================
 // COMPONENT
@@ -209,123 +206,20 @@ function AdminOrderDetails() {
                 return;
             }
 
-            // ------------------------------------------
-            // TOKEN
-            // ------------------------------------------
-
-            const token =
-                getToken();
-
-            if (!token) {
-
-                console.error(
-                    "❌ NO ADMIN ACCESS TOKEN"
-                );
-
-                redirectToLogin();
-
-                return;
-            }
-
-            // ------------------------------------------
-            // URL
-            // ------------------------------------------
-
-            const requestUrl =
-                `${API_BASE_URL}/api/admin/orders/${encodeURIComponent(
-                    validOrderId
-                )}`;
-
-            console.log(
-                "========================================"
-            );
-
-            console.log(
-                "ADMIN ORDER REQUEST"
-            );
-
-            console.log(
-                "Order ID:",
-                validOrderId
-            );
-
-            console.log(
-                "Request URL:",
-                requestUrl
-            );
-
-            console.log(
-                "========================================"
-            );
-
             try {
 
                 setLoading(true);
                 setError("");
 
-                const response =
-                    await fetch(
-                        requestUrl,
-                        {
-                            method: "GET",
-
-                            headers: {
-                                Authorization:
-                                    `Bearer ${token}`,
-
-                                Accept:
-                                    "application/json",
-                            },
-                        }
-                    );
-
-                console.log(
-                    "ADMIN ORDER RESPONSE:",
-                    response.status
-                );
-
                 const data =
-                    await parseResponse(
-                        response
+                    await getAdminOrder(
+                        validOrderId
                     );
 
                 console.log(
                     "ADMIN ORDER DATA:",
                     data
                 );
-
-                // --------------------------------------
-                // AUTH ERROR
-                // --------------------------------------
-
-                if (
-                    response.status ===
-                        401 ||
-                    response.status ===
-                        403
-                ) {
-
-                    console.error(
-                        "❌ ADMIN AUTH FAILED"
-                    );
-
-                    redirectToLogin();
-
-                    return;
-                }
-
-                // --------------------------------------
-                // API ERROR
-                // --------------------------------------
-
-                if (!response.ok) {
-
-                    throw new Error(
-                        data?.message ||
-                        data?.error ||
-                        `Failed to load order (${response.status}).`
-                    );
-                }
 
                 // --------------------------------------
                 // NORMALIZE RESPONSE
@@ -397,7 +291,6 @@ function AdminOrderDetails() {
             getValidOrderId,
             params,
             orderId,
-            redirectToLogin,
         ]);
 
     // ==================================================

@@ -12,7 +12,9 @@ const {
 
 const {
     generateCustomerAccessToken,
-    verifyCustomerAccessToken
+    verifyCustomerAccessToken,
+    generateCustomerRefreshToken,
+    verifyCustomerRefreshToken
 } = require("../utils/customerTokens");
 
 const router = express.Router();
@@ -321,11 +323,15 @@ router.post("/verify-email-otp", otpLimiter, async (req, res) => {
         const accessToken =
               generateCustomerAccessToken(customer);
 
+        const refreshToken =
+              generateCustomerRefreshToken(customer);
+
           return res.json({
               success: true,
               message: "Account verified successfully",
 
               accessToken,
+              refreshToken,
 
               customer: {
                   id: customer.id,
@@ -350,6 +356,75 @@ router.post("/verify-email-otp", otpLimiter, async (req, res) => {
 });
 
 // ======================================================
+// ======================================================
+// REFRESH CUSTOMER SESSION
+// ======================================================
+
+router.post("/refresh", async (req, res) => {
+    try {
+        const refreshToken =
+            String(req.body.refreshToken || "").trim();
+
+        if (!refreshToken) {
+            return res.status(401).json({
+                success: false,
+                message: "Refresh token is required"
+            });
+        }
+
+        let decoded;
+
+        try {
+            decoded =
+                verifyCustomerRefreshToken(refreshToken);
+        } catch {
+            return res.status(401).json({
+                success: false,
+                message: "Refresh token expired or invalid"
+            });
+        }
+
+        const customer =
+            await prisma.customer.findUnique({
+                where: {
+                    id: decoded.customerId
+                },
+                select: {
+                    id: true,
+                    fullName: true,
+                    email: true,
+                    phoneNumber: true
+                }
+            });
+
+        if (!customer) {
+            return res.status(401).json({
+                success: false,
+                message: "Customer account no longer exists"
+            });
+        }
+
+        const accessToken =
+            generateCustomerAccessToken(customer);
+
+        return res.json({
+            success: true,
+            accessToken,
+            customer
+        });
+
+    } catch (error) {
+        console.error(
+            "CUSTOMER REFRESH ERROR:",
+            error.message
+        );
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to refresh customer session"
+        });
+    }
+});
 // GET MARKETING PREFERENCES
 // ======================================================
 
@@ -550,6 +625,11 @@ router.put("/profile/phone", requireCustomerAuth, async (req, res) => {
 });
 module.exports = router;
 module.exports.requireCustomerAuth = requireCustomerAuth;
+
+
+
+
+
 
 
 

@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Account.css";
 
-const API_URL = "http://localhost:5000";
+const API_URL = (import.meta.env.VITE_API_URL || "").replace(/\/api\/?$/, "");
 
 function Account() {
     const navigate = useNavigate();
@@ -13,6 +13,7 @@ function Account() {
     const [phoneNumber, setPhoneNumber] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [rememberMe, setRememberMe] = useState(false);
     const [code, setCode] = useState("");
 
     const [newsletter, setNewsletter] = useState({
@@ -408,10 +409,23 @@ function Account() {
 
 
             if (result.refreshToken) {
-                localStorage.setItem(
-                    "customerRefreshToken",
-                    result.refreshToken
-                );
+                if (rememberMe) {
+                    localStorage.setItem(
+                        "customerRefreshToken",
+                        result.refreshToken
+                    );
+                    sessionStorage.removeItem(
+                        "customerRefreshToken"
+                    );
+                } else {
+                    sessionStorage.setItem(
+                        "customerRefreshToken",
+                        result.refreshToken
+                    );
+                    localStorage.removeItem(
+                        "customerRefreshToken"
+                    );
+                }
             }
 
 
@@ -1286,6 +1300,20 @@ function Account() {
                                     </div>
 
 
+                                    <label className="remember-me">
+                                        <input
+                                            type="checkbox"
+                                            checked={rememberMe}
+                                            onChange={(event) =>
+                                                setRememberMe(
+                                                    event.target.checked
+                                                )
+                                            }
+                                            disabled={loading}
+                                        />
+                                        <span>Remember me</span>
+                                    </label>
+
                                     <button
                                         type="submit"
                                         className="account-submit"
@@ -1345,6 +1373,20 @@ function Account() {
                                     />
 
 
+                                    <label className="remember-me">
+                                        <input
+                                            type="checkbox"
+                                            checked={rememberMe}
+                                            onChange={(event) =>
+                                                setRememberMe(
+                                                    event.target.checked
+                                                )
+                                            }
+                                            disabled={loading}
+                                        />
+                                        <span>Remember me</span>
+                                    </label>
+
                                     <button
                                         type="submit"
                                         className="account-submit"
@@ -1387,6 +1429,11 @@ function Account() {
 }
 
 export default Account;
+
+
+
+
+
 
 
 

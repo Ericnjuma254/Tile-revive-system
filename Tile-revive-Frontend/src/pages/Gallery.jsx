@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import "./Gallery.css";
 
-const API_URL = "http://192.168.0.100:5000";
+const API_URL =
+    (import.meta.env.VITE_API_URL || "").replace(/\/api\/?$/, "");
 
 function Gallery() {
     const [gallery, setGallery] = useState([]);

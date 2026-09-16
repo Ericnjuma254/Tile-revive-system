@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 const mobileGalleryUrl =
-    `${window.location.protocol}//${window.location.hostname}:5173/admin/gallery/mobile`;
+    `${window.location.origin}/admin/gallery/mobile`;
 import { QRCodeSVG } from "qrcode.react";
 import "./AdminGallery.css";
 
-const API_URL = "http://localhost:5000";
+const API_URL =
+    (import.meta.env.VITE_API_URL || "").replace(/\/api\/?$/, "");
 
 function AdminGallery() {
     const navigate = useNavigate();

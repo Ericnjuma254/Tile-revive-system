@@ -132,6 +132,24 @@ useEffect(() => {
             .slice(0, 4);
     }, [products, product]);
 
+    const ratingBreakdown = useMemo(() => {
+        const total = reviews.length;
+
+        return [5, 4, 3, 2, 1].map((stars) => {
+            const count = reviews.filter(
+                (review) => Number(review.rating) === stars
+            ).length;
+
+            return {
+                stars,
+                count,
+                percentage: total
+                    ? Math.round((count / total) * 100)
+                    : 0
+            };
+        });
+    }, [reviews]);
+
     useEffect(() => {
         if (product) {
             setSelectedImage(
@@ -390,24 +408,6 @@ useEffect(() => {
     const stock = Number(product.stock || 0);
     const rating = Number(reviewSummary.averageRating || 0);
     const reviewCount = Number(reviewSummary.reviewCount || 0);
-
-    const ratingBreakdown = useMemo(() => {
-        const total = reviews.length;
-
-        return [5, 4, 3, 2, 1].map((stars) => {
-            const count = reviews.filter(
-                (review) => Number(review.rating) === stars
-            ).length;
-
-            return {
-                stars,
-                count,
-                percentage: total
-                    ? Math.round((count / total) * 100)
-                    : 0
-            };
-        });
-    }, [reviews]);
 
     const productImage =
         selectedImage ||

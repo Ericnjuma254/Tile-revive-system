@@ -9,6 +9,7 @@ import {
 } from "../../services/api";
 
 import "./AdminDashboard.css";
+import AdminSidebar from "./components/AdminSidebar";
 
 function AdminDashboard() {
     const navigate = useNavigate();
@@ -374,174 +375,7 @@ const getFinancialPeriodDates = (period) => {
                 SIDEBAR
             ================================================== */}
 
-            <aside className="admin-sidebar">
-
-                <div className="admin-sidebar-brand">
-
-                    <div className="admin-sidebar-logo">
-                        TR
-                    </div>
-
-                    <div>
-                        <strong>
-                            TILE REVIVE
-                        </strong>
-
-                        <span>
-                            ADMIN PANEL
-                        </span>
-                    </div>
-
-                </div>
-
-                <nav className="admin-sidebar-nav">
-
-                    <button
-                        className="active"
-                        type="button"
-                    >
-                        <span>◉</span>
-                        Dashboard
-                    </button>
-
-                    <button
-                        type="button"
-                        onClick={goToOrders}
-                    >
-                        <span>▤</span>
-                        Orders
-
-                        {pendingOrders > 0 && (
-                            <small>
-                                {pendingOrders}
-                            </small>
-                        )}
-                    </button>
-
-                    <button
-                        type="button"
-                        onClick={() =>
-                            navigate(
-                                "/admin/products"
-                            )
-                        }
-                    >
-                        <span>□</span>
-                        Products
-                    </button>
-
-                    <button
-                        type="button"
-                        onClick={() =>
-                            navigate(
-                                "/admin/reports"
-                            )
-                        }
-                    >
-                        <span>◔</span>
-                        Reports
-                    </button>
-
-                    <button
-                        type="button"
-                        onClick={() =>
-                            navigate(
-                                "/admin/expenditure"
-                            )
-                        }
-                    >
-                        <span>₵</span>
-                        Expenditure
-                    </button>
-
-                    <button
-                        type="button"
-                        onClick={() =>
-                            navigate(
-                                "/admin/inventory"
-                            )
-                        }
-                    >
-                        <span>◫</span>
-                        Inventory
-
-                        {outOfStockCount > 0 && (
-                            <small>
-                                {outOfStockCount}
-                            </small>
-                        )}
-                    </button>
-
-                    <button
-                        type="button"
-                        onClick={() =>
-                            navigate(
-                                "/admin/customers"
-                            )
-                        }
-                    >
-                        <span>◎</span>
-                        Customers
-
-                        {pendingUsers.length > 0 && (
-                            <small>
-                                {pendingUsers.length}
-                            </small>
-                        )}
-                    </button>
-
-                    <button
-                        type="button"
-                        onClick={() =>
-                            navigate(
-                                "/admin/promotions"
-                            )
-                        }
-                    >
-                        <span>%</span>
-                        Promotions
-                    </button>
-
-                    <button
-                        type="button"
-                        onClick={() =>
-                            navigate(
-                                "/admin/gallery"
-                            )
-                        }
-                    >
-                        <span>▧</span>
-                        Gallery
-                    </button>
-
-                </nav>
-
-                <div className="admin-sidebar-bottom">
-
-                    <button
-                        type="button"
-                        onClick={() =>
-                            navigate(
-                                "/admin/settings"
-                            )
-                        }
-                    >
-                        <span>⚙</span>
-                        Settings
-                    </button>
-
-                    <button
-                        type="button"
-                        onClick={logout}
-                        className="logout-button"
-                    >
-                        <span>↪</span>
-                        Logout
-                    </button>
-
-                </div>
-
-            </aside>
+            <AdminSidebar pendingUsersCount={pendingUsers.length} onLogout={logout} />
 
             {/* ==================================================
                 MAIN
@@ -1512,6 +1346,8 @@ const getFinancialPeriodDates = (period) => {
 }
 
 export default AdminDashboard;
+
+
 
 
 

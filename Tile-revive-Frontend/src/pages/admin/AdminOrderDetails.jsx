@@ -822,25 +822,6 @@ function AdminOrderDetails() {
     // LOGOUT
     // ==================================================
 
-    const handleLogout =
-        () => {
-
-            localStorage.removeItem(
-                "accessToken"
-            );
-
-            localStorage.removeItem(
-                "refreshToken"
-            );
-
-            navigate(
-                "/admin/login",
-                {
-                    replace: true,
-                }
-            );
-        };
-
     // ==================================================
     // LOADING
     // ==================================================
@@ -1004,135 +985,7 @@ function AdminOrderDetails() {
         <div className="admin-order-details-page">
 
             {/* SIDEBAR */}
-
-            <aside className="admin-order-details-sidebar">
-
-                <div className="admin-order-details-brand">
-
-                    <div className="admin-order-details-logo">
-                        TR
-                    </div>
-
-                    <div>
-                        <strong>
-                            TILE REVIVE
-                        </strong>
-
-                        <span>
-                            ADMIN PANEL
-                        </span>
-                    </div>
-
-                </div>
-
-                <nav className="admin-order-details-nav">
-
-                    <button
-                        type="button"
-                        onClick={() =>
-                            navigate(
-                                "/admin/dashboard"
-                            )
-                        }
-                    >
-                        Dashboard
-                    </button>
-
-                    <button
-                        type="button"
-                        className="active"
-                        onClick={
-                            goBackToOrders
-                        }
-                    >
-                        Orders
-                    </button>
-
-                    <button
-                        type="button"
-                        onClick={() =>
-                            navigate(
-                                "/admin/products"
-                            )
-                        }
-                    >
-                        Products
-                    </button>
-
-                    <button
-                        type="button"
-                        onClick={() =>
-                            navigate(
-                                "/admin/inventory"
-                            )
-                        }
-                    >
-                        Inventory
-                    </button>
-
-                    <button
-                        type="button"
-                        onClick={() =>
-                            navigate(
-                                "/admin/customers"
-                            )
-                        }
-                    >
-                        Customers
-                    </button>
-
-                    <button
-                        type="button"
-                        onClick={() =>
-                            navigate(
-                                "/admin/promotions"
-                            )
-                        }
-                    >
-                        Promotions
-                    </button>
-
-                    <button
-                        type="button"
-                        onClick={() =>
-                            navigate(
-                                "/admin/gallery"
-                            )
-                        }
-                    >
-                        Gallery
-                    </button>
-
-                </nav>
-
-                <div className="admin-order-details-sidebar-bottom">
-
-                    <button
-                        type="button"
-                        onClick={() =>
-                            navigate(
-                                "/admin/settings"
-                            )
-                        }
-                    >
-                        Settings
-                    </button>
-
-                    <button
-                        type="button"
-                        className="logout-button"
-                        onClick={
-                            handleLogout
-                        }
-                    >
-                        Logout
-                    </button>
-
-                </div>
-
-            </aside>
-
-            {/* MAIN */}
+{/* MAIN */}
 
             <main className="admin-order-details-main">
 
@@ -1985,5 +1838,4 @@ function AdminOrderDetails() {
 }
 
 export default AdminOrderDetails;
-
 

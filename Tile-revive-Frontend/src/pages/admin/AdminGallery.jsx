@@ -339,30 +339,9 @@ function AdminGallery() {
     // LOGOUT
     // =========================================================
 
-    const handleLogout = () => {
-        localStorage.removeItem(
-            "accessToken"
-        );
-
-        localStorage.removeItem(
-            "refreshToken"
-        );
-
-        navigate(
-            "/admin/login",
-            {
-                replace: true,
-            }
-        );
-    };
-
     // =========================================================
     // NAVIGATION
     // =========================================================
-
-    const goTo = (path) => {
-        navigate(path);
-    };
 
     // =========================================================
     // PAGE
@@ -374,106 +353,7 @@ function AdminGallery() {
             {/* =====================================================
                 SIDEBAR
             ===================================================== */}
-
-            <aside className="admin-gallery-sidebar">
-
-                <div className="admin-gallery-brand">
-
-                    <div className="admin-gallery-logo">
-                        TR
-                    </div>
-
-                    <div>
-                        <strong>
-                            TILE REVIVE
-                        </strong>
-
-                        <span>
-                            ADMIN PANEL
-                        </span>
-                    </div>
-
-                </div>
-
-
-                <nav className="admin-gallery-nav">
-
-                    <button
-                        onClick={() =>
-                            goTo(
-                                "/admin/dashboard"
-                            )
-                        }
-                    >
-                        <span>Dashboard</span>
-                    </button>
-
-
-                    <button
-                        onClick={() =>
-                            goTo(
-                                "/admin/orders"
-                            )
-                        }
-                    >
-                        <span>Orders</span>
-                    </button>
-
-
-                    <button>
-                        <span>Products</span>
-                    </button>
-
-
-                    <button>
-                        <span>Inventory</span>
-                    </button>
-
-
-                    <button>
-                        <span>Customers</span>
-                    </button>
-
-
-                    <button>
-                        <span>Promotions</span>
-                    </button>
-
-
-                    <button>
-                        <span>Carousel</span>
-                    </button>
-
-
-                    <button
-                        className="active"
-                    >
-                        <span>Gallery</span>
-                    </button>
-
-                </nav>
-
-
-                <div className="admin-gallery-sidebar-bottom">
-
-                    <button>
-                        Settings
-                    </button>
-
-
-                    <button
-                        className="logout-button"
-                        onClick={handleLogout}
-                    >
-                        Logout
-                    </button>
-
-                </div>
-
-            </aside>
-
-
-            {/* =====================================================
+{/* =====================================================
                 MAIN
             ===================================================== */}
 

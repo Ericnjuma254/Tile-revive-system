@@ -637,3 +637,32 @@
 .admin-create-order-btn:active {
     transform: translateY(0);
 }
+
+ /* =========================================================
+    GLOBAL ADMIN SIDEBAR LAYOUT OVERRIDE
+    This page now renders inside AdminLayout.
+    ========================================================= */
+
+.admin-orders-page {
+    width: 100%;
+    min-width: 0;
+    min-height: 100%;
+    display: block;
+    background: transparent;
+    box-sizing: border-box;
+}
+
+.admin-orders-main {
+    width: 100%;
+    min-width: 0;
+    flex: none;
+    margin: 0;
+    padding: 35px 40px;
+    box-sizing: border-box;
+}
+
+@media (max-width: 700px) {
+    .admin-orders-main {
+        padding: 25px 18px;
+    }
+}

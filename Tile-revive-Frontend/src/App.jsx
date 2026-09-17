@@ -18,6 +18,7 @@ import Checkout from "./pages/Checkout";
 import Gallery from "./pages/Gallery";
 
 import AdminLogin from "./pages/admin/AdminLogin";
+import AdminLayout from "./pages/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProducts from "./pages/admin/AdminProducts";
 import AdminOrders from "./pages/admin/AdminOrders";
@@ -114,7 +115,7 @@ function AppContent() {
 
 
                 {/* =================================================
-                    ADMIN ROOT
+                    ADMIN ROUTES
                    ================================================= */}
 
                 <Route
@@ -127,92 +128,67 @@ function AppContent() {
                     }
                 />
 
-
-                {/* =================================================
-                    ADMIN LOGIN
-                   ================================================= */}
-
                 <Route
                     path="/admin/login"
                     element={<AdminLogin />}
                 />
 
+                <Route element={<AdminLayout />}>
+                    <Route
+                        path="/admin/dashboard"
+                        element={<AdminDashboard />}
+                    />
 
-                {/* =================================================
-                    ADMIN DASHBOARD
-                   ================================================= */}
+                    <Route
+                        path="/admin/products"
+                        element={<AdminProducts />}
+                    />
 
-                <Route
-                    path="/admin/dashboard"
-                    element={<AdminDashboard />}
-                />
+                    <Route
+                        path="/admin/reports"
+                        element={<AdminReports />}
+                    />
 
+                    <Route
+                        path="/admin/expenditure"
+                        element={<AdminExpenditure />}
+                    />
 
-                {/* =================================================
-                    ADMIN REPORTS
-                   ================================================= */}
+                    <Route
+                        path="/admin/customers"
+                        element={<AdminCustomers />}
+                    />
 
-                <Route
-                    path="/admin/products"
-                    element={<AdminProducts />}
-                />
-                <Route
-                    path="/admin/reports"
-                    element={<AdminReports />}
-                />
-                <Route
-                    path="/admin/expenditure"
-                    element={<AdminExpenditure />}
-                />
+                    <Route
+                        path="/admin/offers"
+                        element={<AdminOffers />}
+                    />
 
+                    <Route
+                        path="/admin/orders"
+                        element={<AdminOrders />}
+                    />
 
-                {/* =================================================
-                    ADMIN ORDERS
-                   ================================================= */}
-                <Route
-                    path="/admin/customers"
-                    element={<AdminCustomers />}
-                />
+                    <Route
+                        path="/admin/orders/create"
+                        element={<AdminCreateOrder />}
+                    />
 
-                <Route
-                    path="/admin/offers"
-                    element={<AdminOffers />}
-                />
+                    <Route
+                        path="/admin/orders/:id"
+                        element={<AdminOrderDetails />}
+                    />
 
-                <Route
-                    path="/admin/orders"
-                    element={<AdminOrders />}
-                />
+                    <Route
+                        path="/admin/gallery"
+                        element={<AdminGallery />}
+                    />
 
-                  <Route
-                      path="/admin/orders/create"
-                      element={<AdminCreateOrder />}
-                  />
-
-                  <Route
-                      path="/admin/orders/:id"
-                      element={<AdminOrderDetails />}
-                  />
-
-
-                {/* =================================================
-                    ADMIN GALLERY
-                   ================================================= */}
-
-                <Route
-                    path="/admin/gallery"
-                    element={<AdminGallery />}
-                />
-
-
-                {/* =================================================
-                    ADMIN MOBILE GALLERY
-                   ================================================= */}
-
-                <Route
-                    path="/admin/gallery/mobile"
-                    element={<MobileGallery />}
-                />
+                    <Route
+                        path="/admin/gallery/mobile"
+                        element={<MobileGallery />}
+                    />
+                </Route>
                 {/* Privacy Policy */}
                 <Route
                     path="/privacy-policy"
@@ -254,6 +230,8 @@ function App() {
 }
 
 export default App;
+
+
 
 
 

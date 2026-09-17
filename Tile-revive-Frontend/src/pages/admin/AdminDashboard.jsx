@@ -28,7 +28,6 @@ import {
 } from "../../services/api";
 
 import "./AdminDashboard.css";
-import AdminSidebar from "./components/AdminSidebar";
 
 function AdminDashboard() {
     const navigate = useNavigate();
@@ -474,18 +473,6 @@ const financialProfitMargin =
 
     return (
         <div className="admin-dashboard">
-
-            {/* ==================================================
-                SIDEBAR
-            ================================================== */}
-
-            <AdminSidebar pendingUsersCount={pendingUsers.length} onLogout={logout} />
-
-            {/* ==================================================
-                MAIN
-            ================================================== */}
-
-            <main className="admin-main">
 
                 <header className="admin-dashboard-header">
 
@@ -2082,13 +2069,12 @@ const financialProfitMargin =
 
                 </section>
 
-            </main>
-
         </div>
     );
 }
 
 export default AdminDashboard;
+
 
 
 

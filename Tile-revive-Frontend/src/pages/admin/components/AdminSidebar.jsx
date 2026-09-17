@@ -3,28 +3,20 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 const sections = [
     {
-        key: "orders",
-        label: "Orders",
-        icon: "ORD",
+        key: "sales",
+        label: "Sales",
+        icon: "SAL",
         items: [
             { label: "All Orders", path: "/admin/orders" },
             { label: "Create Order", path: "/admin/orders/create" },
         ],
     },
     {
-        key: "products",
-        label: "Products",
-        icon: "PRD",
+        key: "catalog",
+        label: "Catalog",
+        icon: "CAT",
         items: [
-            { label: "All Products", path: "/admin/products" },
-        ],
-    },
-    {
-        key: "inventory",
-        label: "Inventory",
-        icon: "INV",
-        items: [
-            { label: "Stock Overview", path: "/admin/products" },
+            { label: "Products", path: "/admin/products" },
         ],
     },
     {
@@ -36,28 +28,28 @@ const sections = [
         ],
     },
     {
-        key: "reports",
-        label: "Reports",
-        icon: "RPT",
+        key: "finance",
+        label: "Finance",
+        icon: "FIN",
         items: [
-            { label: "Financial Reports", path: "/admin/reports" },
+            { label: "Reports", path: "/admin/reports" },
             { label: "Expenditure", path: "/admin/expenditure" },
         ],
     },
     {
-        key: "promotions",
-        label: "Promotions",
-        icon: "OFF",
+        key: "marketing",
+        label: "Marketing",
+        icon: "MKT",
         items: [
             { label: "Offers", path: "/admin/offers" },
         ],
     },
     {
-        key: "gallery",
-        label: "Gallery",
-        icon: "GAL",
+        key: "media",
+        label: "Media",
+        icon: "MED",
         items: [
-            { label: "Manage Gallery", path: "/admin/gallery" },
+            { label: "Gallery", path: "/admin/gallery" },
             { label: "Mobile Gallery", path: "/admin/gallery/mobile" },
         ],
     },
@@ -70,20 +62,20 @@ function AdminSidebar({ pendingUsersCount = 0, onLogout }) {
     const [collapsed, setCollapsed] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
     const [openSections, setOpenSections] = useState({
-        orders: true,
-        products: false,
-        inventory: false,
+        sales: true,
+        catalog: false,
         customers: false,
-        reports: false,
-        promotions: false,
-        gallery: false,
+        finance: false,
+        marketing: false,
+        media: false,
     });
 
     useEffect(() => {
         const activeSection = sections.find((section) =>
-            section.items.some((item) =>
-                location.pathname === item.path ||
-                location.pathname.startsWith(`${item.path}/`)
+            section.items.some(
+                (item) =>
+                    location.pathname === item.path ||
+                    location.pathname.startsWith(`${item.path}/`)
             )
         );
 
@@ -264,8 +256,8 @@ function AdminSidebar({ pendingUsersCount = 0, onLogout }) {
                         type="button"
                         onClick={() => goTo("/admin/dashboard")}
                     >
-                        <span>SET</span>
-                        {!collapsed && <strong>Settings</strong>}
+                        <span>HOME</span>
+                        {!collapsed && <strong>Dashboard</strong>}
                     </button>
 
                     <button
@@ -283,4 +275,3 @@ function AdminSidebar({ pendingUsersCount = 0, onLogout }) {
 }
 
 export default AdminSidebar;
-

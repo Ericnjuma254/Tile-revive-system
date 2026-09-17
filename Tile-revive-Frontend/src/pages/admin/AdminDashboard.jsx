@@ -24,6 +24,7 @@ import {
     getAdminOrders,
     getPendingUsers,
     getFinancialSummary,
+    getAdminReports,
 } from "../../services/api";
 
 import "./AdminDashboard.css";
@@ -34,6 +35,7 @@ function AdminDashboard() {
 
     const [dashboard, setDashboard] = useState(null);
     const [financial, setFinancial] = useState(null);
+    const [reports, setReports] = useState(null);
     const [financialPeriod, setFinancialPeriod] = useState("this_month");
 const getFinancialPeriodDates = (period) => {
     const now = new Date();
@@ -163,16 +165,22 @@ const getFinancialPeriodDates = (period) => {
                 dashboardData,
                 ordersData,
                 usersData,
+                reportsData,
                 financialData,
             ] = await Promise.all([
                 getAdminDashboard(),
                 getAdminOrders(),
                 getPendingUsers(),
+                getAdminReports("30D"),
                 (console.log("DASHBOARD: calling getFinancialSummary", financialPeriod), getFinancialSummary(getFinancialPeriodDates(financialPeriod))),
             ]);
 
             setDashboard(
                 dashboardData || {}
+            );
+
+            setReports(
+                reportsData || {}
             );
 
             setFinancial(
@@ -362,29 +370,29 @@ const getFinancialPeriodDates = (period) => {
     const financialCashFlow =
         Number(financial?.cashFlow || 0);
 
-    const salesTrend = Array.isArray(financial?.salesTrend)
-    ? financial.salesTrend
+    const salesTrend = Array.isArray(reports?.salesTrend)
+    ? reports.salesTrend
     : [];
 
 const orderStatusBreakdown = Array.isArray(
-    financial?.orderStatusBreakdown
+    reports?.orderStatusBreakdown
 )
-    ? financial.orderStatusBreakdown
+    ? reports.orderStatusBreakdown
     : [];
 
 const paymentStatusBreakdown = Array.isArray(
-    financial?.paymentStatusBreakdown
+    reports?.paymentStatusBreakdown
 )
-    ? financial.paymentStatusBreakdown
+    ? reports.paymentStatusBreakdown
     : [];
 
 const productPerformance = Array.isArray(
-    financial?.productPerformance
+    reports?.productPerformance
 )
-    ? financial.productPerformance
+    ? reports.productPerformance
     : [];
 
-const customerJourney = financial?.customerJourney || {};
+const customerJourney = reports?.customerJourney || {};
 
 const financialChartData = [
     {
@@ -2081,6 +2089,12 @@ const financialProfitMargin =
 }
 
 export default AdminDashboard;
+
+
+
+
+
+
 
 
 

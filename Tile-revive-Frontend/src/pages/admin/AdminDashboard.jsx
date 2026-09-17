@@ -2,6 +2,24 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
+    ResponsiveContainer,
+    AreaChart,
+    Area,
+    BarChart,
+    Bar,
+    LineChart,
+    Line,
+    PieChart,
+    Pie,
+    Cell,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    Legend,
+} from "recharts";
+
+import {
     getAdminDashboard,
     getAdminOrders,
     getPendingUsers,
@@ -344,7 +362,85 @@ const getFinancialPeriodDates = (period) => {
     const financialCashFlow =
         Number(financial?.cashFlow || 0);
 
-    const financialProfitMargin =
+    const salesTrend = Array.isArray(financial?.salesTrend)
+    ? financial.salesTrend
+    : [];
+
+const orderStatusBreakdown = Array.isArray(
+    financial?.orderStatusBreakdown
+)
+    ? financial.orderStatusBreakdown
+    : [];
+
+const paymentStatusBreakdown = Array.isArray(
+    financial?.paymentStatusBreakdown
+)
+    ? financial.paymentStatusBreakdown
+    : [];
+
+const productPerformance = Array.isArray(
+    financial?.productPerformance
+)
+    ? financial.productPerformance
+    : [];
+
+const customerJourney = financial?.customerJourney || {};
+
+const financialChartData = [
+    {
+        name: "Revenue",
+        value: financialRevenue,
+    },
+    {
+        name: "COGS",
+        value: financialCOGS,
+    },
+    {
+        name: "Expenses",
+        value: financialExpenses,
+    },
+    {
+        name: "Net Profit",
+        value: financialNetProfit,
+    },
+];
+
+const topProducts = [...productPerformance]
+    .sort(
+        (a, b) =>
+            Number(b.revenue || 0) -
+            Number(a.revenue || 0)
+    )
+    .slice(0, 8);
+
+const customerJourneyData = [
+    {
+        name: "Page Views",
+        value: Number(customerJourney.pageViews || 0),
+    },
+    {
+        name: "Product Views",
+        value: Number(customerJourney.productViews || 0),
+    },
+    {
+        name: "Add to Cart",
+        value: Number(customerJourney.addToCart || 0),
+    },
+    {
+        name: "Checkout",
+        value: Number(customerJourney.checkoutStarted || 0),
+    },
+    {
+        name: "Orders",
+        value: Number(customerJourney.ordersPlaced || 0),
+    },
+    {
+        name: "Payments",
+        value: Number(customerJourney.paymentsCompleted || 0),
+    },
+];
+
+const financialProfitMargin =
         Number(financial?.profitMargin || 0);
 
     const financialMissingCosts =
@@ -773,6 +869,645 @@ const getFinancialPeriodDates = (period) => {
                                       } missing`
                                     : "Cost data complete"}
                             </strong>
+                        </div>
+
+                    </div>
+
+                </section>
+
+                {/* ==================================================
+                    ANALYTICS & GRAPHS
+                ================================================== */}
+
+                <section className="admin-analytics-section">
+
+                    <div className="admin-section-heading">
+                        <div>
+                            <span className="admin-section-kicker">
+                                PERFORMANCE
+                            </span>
+
+                            <h2>
+                                Business Analytics
+                            </h2>
+
+                            <p>
+                                Real sales, order, product and customer activity
+                                from your store data.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="admin-chart-grid admin-chart-grid-primary">
+
+                        {/* SALES & ORDERS TREND */}
+
+                        <div className="admin-chart-card admin-chart-card-wide">
+
+                            <div className="admin-chart-header">
+                                <div>
+                                    <h3>
+                                        Sales &amp; Orders Trend
+                                    </h3>
+
+                                    <p>
+                                        Revenue and order activity for the selected
+                                        reporting period.
+                                    </p>
+                                </div>
+                            </div>
+
+                            {salesTrend.length > 0 ? (
+
+                                <div className="admin-chart-container">
+
+                                    <ResponsiveContainer
+                                        width="100%"
+                                        height={330}
+                                    >
+
+                                        <AreaChart data={salesTrend}>
+
+                                            <defs>
+
+                                                <linearGradient
+                                                    id="adminRevenueGradient"
+                                                    x1="0"
+                                                    y1="0"
+                                                    x2="0"
+                                                    y2="1"
+                                                >
+
+                                                    <stop
+                                                        offset="5%"
+                                                        stopColor="#d4a017"
+                                                        stopOpacity={0.35}
+                                                    />
+
+                                                    <stop
+                                                        offset="95%"
+                                                        stopColor="#d4a017"
+                                                        stopOpacity={0}
+                                                    />
+
+                                                </linearGradient>
+
+                                            </defs>
+
+                                            <CartesianGrid
+                                                strokeDasharray="3 3"
+                                                stroke="rgba(255,255,255,0.08)"
+                                            />
+
+                                            <XAxis
+                                                dataKey="name"
+                                                stroke="#929292"
+                                                tick={{
+                                                    fill: "#929292",
+                                                    fontSize: 12
+                                                }}
+                                                axisLine={false}
+                                                tickLine={false}
+                                            />
+
+                                            <YAxis
+                                                yAxisId="revenue"
+                                                stroke="#929292"
+                                                tick={{
+                                                    fill: "#929292",
+                                                    fontSize: 12
+                                                }}
+                                                axisLine={false}
+                                                tickLine={false}
+                                                tickFormatter={value =>
+                                                    `KSh ${Number(value || 0).toLocaleString()}`
+                                                }
+                                            />
+
+                                            <YAxis
+                                                yAxisId="orders"
+                                                orientation="right"
+                                                stroke="#929292"
+                                                tick={{
+                                                    fill: "#929292",
+                                                    fontSize: 12
+                                                }}
+                                                axisLine={false}
+                                                tickLine={false}
+                                                allowDecimals={false}
+                                            />
+
+                                            <Tooltip
+                                                contentStyle={{
+                                                    background: "#111111",
+                                                    border: "1px solid rgba(212,160,23,0.35)",
+                                                    borderRadius: "10px",
+                                                    color: "#f5f5f5"
+                                                }}
+                                                formatter={(value, name) => {
+
+                                                    if (name === "Revenue") {
+                                                        return [
+                                                            `KSh ${Number(value || 0).toLocaleString()}`,
+                                                            name
+                                                        ];
+                                                    }
+
+                                                    return [
+                                                        value,
+                                                        name
+                                                    ];
+                                                }}
+                                            />
+
+                                            <Legend />
+
+                                            <Area
+                                                yAxisId="revenue"
+                                                type="monotone"
+                                                dataKey="revenue"
+                                                name="Revenue"
+                                                stroke="#d4a017"
+                                                strokeWidth={2.5}
+                                                fill="url(#adminRevenueGradient)"
+                                                activeDot={{
+                                                    r: 5
+                                                }}
+                                            />
+
+                                            <Line
+                                                yAxisId="orders"
+                                                type="monotone"
+                                                dataKey="orders"
+                                                name="Orders"
+                                                stroke="#f1c75b"
+                                                strokeWidth={2}
+                                                dot={{
+                                                    r: 3
+                                                }}
+                                                activeDot={{
+                                                    r: 5
+                                                }}
+                                            />
+
+                                        </AreaChart>
+
+                                    </ResponsiveContainer>
+
+                                </div>
+
+                            ) : (
+
+                                <div className="admin-chart-empty">
+
+                                    <strong>
+                                        No sales trend data
+                                    </strong>
+
+                                    <span>
+                                        There are no orders in the selected
+                                        reporting period yet.
+                                    </span>
+
+                                </div>
+
+                            )}
+
+                        </div>
+
+
+                        {/* ORDER STATUS */}
+
+                        <div className="admin-chart-card">
+
+                            <div className="admin-chart-header">
+
+                                <div>
+
+                                    <h3>
+                                        Order Status
+                                    </h3>
+
+                                    <p>
+                                        Current order distribution.
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                            {orderStatusBreakdown.length > 0 ? (
+
+                                <div className="admin-chart-container admin-chart-container-donut">
+
+                                    <ResponsiveContainer
+                                        width="100%"
+                                        height={330}
+                                    >
+
+                                        <PieChart>
+
+                                            <Pie
+                                                data={orderStatusBreakdown}
+                                                dataKey="count"
+                                                nameKey="status"
+                                                cx="50%"
+                                                cy="48%"
+                                                innerRadius={75}
+                                                outerRadius={115}
+                                                paddingAngle={3}
+                                            >
+
+                                                {orderStatusBreakdown.map(
+                                                    (entry, index) => (
+
+                                                        <Cell
+                                                            key={`order-status-${entry.status}-${index}`}
+                                                            fill={[
+                                                                "#d4a017",
+                                                                "#31d17c",
+                                                                "#f0b429",
+                                                                "#5b8def",
+                                                                "#a855f7",
+                                                                "#ef5350",
+                                                                "#929292"
+                                                            ][index % 7]}
+                                                        />
+
+                                                    )
+                                                )}
+
+                                            </Pie>
+
+                                            <Tooltip
+                                                contentStyle={{
+                                                    background: "#111111",
+                                                    border: "1px solid rgba(212,160,23,0.35)",
+                                                    borderRadius: "10px",
+                                                    color: "#f5f5f5"
+                                                }}
+                                            />
+
+                                            <Legend
+                                                formatter={value =>
+                                                    String(value)
+                                                        .replaceAll(
+                                                            "_",
+                                                            " "
+                                                        )
+                                                        .replace(
+                                                            /\b\w/g,
+                                                            letter =>
+                                                                letter.toUpperCase()
+                                                        )
+                                                }
+                                            />
+
+                                        </PieChart>
+
+                                    </ResponsiveContainer>
+
+                                </div>
+
+                            ) : (
+
+                                <div className="admin-chart-empty">
+
+                                    <strong>
+                                        No order status data
+                                    </strong>
+
+                                    <span>
+                                        Order status analytics will appear
+                                        once orders are available.
+                                    </span>
+
+                                </div>
+
+                            )}
+
+                        </div>
+
+                    </div>
+
+
+                    <div className="admin-chart-grid admin-chart-grid-secondary">
+
+                        {/* FINANCIAL BREAKDOWN */}
+
+                        <div className="admin-chart-card">
+
+                            <div className="admin-chart-header">
+
+                                <div>
+
+                                    <h3>
+                                        Financial Breakdown
+                                    </h3>
+
+                                    <p>
+                                        Revenue, COGS, expenses and net profit.
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                            <div className="admin-chart-container">
+
+                                <ResponsiveContainer
+                                    width="100%"
+                                    height={300}
+                                >
+
+                                    <BarChart
+                                        data={financialChartData}
+                                    >
+
+                                        <CartesianGrid
+                                            strokeDasharray="3 3"
+                                            stroke="rgba(255,255,255,0.08)"
+                                        />
+
+                                        <XAxis
+                                            dataKey="name"
+                                            stroke="#929292"
+                                            tick={{
+                                                fill: "#929292",
+                                                fontSize: 12
+                                            }}
+                                            axisLine={false}
+                                            tickLine={false}
+                                        />
+
+                                        <YAxis
+                                            stroke="#929292"
+                                            tick={{
+                                                fill: "#929292",
+                                                fontSize: 12
+                                            }}
+                                            axisLine={false}
+                                            tickLine={false}
+                                            tickFormatter={value =>
+                                                `KSh ${Number(value || 0).toLocaleString()}`
+                                            }
+                                        />
+
+                                        <Tooltip
+                                            contentStyle={{
+                                                background: "#111111",
+                                                border: "1px solid rgba(212,160,23,0.35)",
+                                                borderRadius: "10px",
+                                                color: "#f5f5f5"
+                                            }}
+                                            formatter={value =>
+                                                `KSh ${Number(value || 0).toLocaleString()}`
+                                            }
+                                        />
+
+                                        <Bar
+                                            dataKey="value"
+                                            name="Amount"
+                                            fill="#d4a017"
+                                            radius={[
+                                                6,
+                                                6,
+                                                0,
+                                                0
+                                            ]}
+                                        />
+
+                                    </BarChart>
+
+                                </ResponsiveContainer>
+
+                            </div>
+
+                        </div>
+
+
+                        {/* TOP PRODUCTS */}
+
+                        <div className="admin-chart-card">
+
+                            <div className="admin-chart-header">
+
+                                <div>
+
+                                    <h3>
+                                        Top Products
+                                    </h3>
+
+                                    <p>
+                                        Products ranked by actual recorded
+                                        revenue.
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                            {topProducts.length > 0 ? (
+
+                                <div className="admin-chart-container">
+
+                                    <ResponsiveContainer
+                                        width="100%"
+                                        height={300}
+                                    >
+
+                                        <BarChart
+                                            data={topProducts}
+                                            layout="vertical"
+                                            margin={{
+                                                top: 5,
+                                                right: 20,
+                                                left: 20,
+                                                bottom: 5
+                                            }}
+                                        >
+
+                                            <CartesianGrid
+                                                strokeDasharray="3 3"
+                                                stroke="rgba(255,255,255,0.08)"
+                                            />
+
+                                            <XAxis
+                                                type="number"
+                                                stroke="#929292"
+                                                tick={{
+                                                    fill: "#929292",
+                                                    fontSize: 11
+                                                }}
+                                                axisLine={false}
+                                                tickLine={false}
+                                                tickFormatter={value =>
+                                                    `KSh ${Number(value || 0).toLocaleString()}`
+                                                }
+                                            />
+
+                                            <YAxis
+                                                type="category"
+                                                dataKey="name"
+                                                width={120}
+                                                stroke="#929292"
+                                                tick={{
+                                                    fill: "#929292",
+                                                    fontSize: 11
+                                                }}
+                                                axisLine={false}
+                                                tickLine={false}
+                                            />
+
+                                            <Tooltip
+                                                contentStyle={{
+                                                    background: "#111111",
+                                                    border: "1px solid rgba(212,160,23,0.35)",
+                                                    borderRadius: "10px",
+                                                    color: "#f5f5f5"
+                                                }}
+                                                formatter={(value, name) => {
+
+                                                    if (name === "Revenue") {
+                                                        return [
+                                                            `KSh ${Number(value || 0).toLocaleString()}`,
+                                                            name
+                                                        ];
+                                                    }
+
+                                                    return [
+                                                        value,
+                                                        name
+                                                    ];
+                                                }}
+                                            />
+
+                                            <Bar
+                                                dataKey="revenue"
+                                                name="Revenue"
+                                                fill="#d4a017"
+                                                radius={[
+                                                    0,
+                                                    6,
+                                                    6,
+                                                    0
+                                                ]}
+                                            />
+
+                                        </BarChart>
+
+                                    </ResponsiveContainer>
+
+                                </div>
+
+                            ) : (
+
+                                <div className="admin-chart-empty">
+
+                                    <strong>
+                                        No product sales data
+                                    </strong>
+
+                                    <span>
+                                        Product performance will appear
+                                        once sales have been recorded.
+                                    </span>
+
+                                </div>
+
+                            )}
+
+                        </div>
+
+
+                        {/* CUSTOMER JOURNEY */}
+
+                        <div className="admin-chart-card admin-chart-card-wide">
+
+                            <div className="admin-chart-header">
+
+                                <div>
+
+                                    <h3>
+                                        Customer Journey
+                                    </h3>
+
+                                    <p>
+                                        Actual customer activity through the
+                                        shopping funnel.
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                            <div className="admin-chart-container">
+
+                                <ResponsiveContainer
+                                    width="100%"
+                                    height={300}
+                                >
+
+                                    <LineChart
+                                        data={customerJourneyData}
+                                    >
+
+                                        <CartesianGrid
+                                            strokeDasharray="3 3"
+                                            stroke="rgba(255,255,255,0.08)"
+                                        />
+
+                                        <XAxis
+                                            dataKey="name"
+                                            stroke="#929292"
+                                            tick={{
+                                                fill: "#929292",
+                                                fontSize: 11
+                                            }}
+                                            axisLine={false}
+                                            tickLine={false}
+                                        />
+
+                                        <YAxis
+                                            stroke="#929292"
+                                            tick={{
+                                                fill: "#929292",
+                                                fontSize: 11
+                                            }}
+                                            axisLine={false}
+                                            tickLine={false}
+                                            allowDecimals={false}
+                                        />
+
+                                        <Tooltip
+                                            contentStyle={{
+                                                background: "#111111",
+                                                border: "1px solid rgba(212,160,23,0.35)",
+                                                borderRadius: "10px",
+                                                color: "#f5f5f5"
+                                            }}
+                                        />
+
+                                        <Line
+                                            type="monotone"
+                                            dataKey="value"
+                                            name="Events"
+                                            stroke="#d4a017"
+                                            strokeWidth={3}
+                                            dot={{
+                                                r: 4
+                                            }}
+                                            activeDot={{
+                                                r: 6
+                                            }}
+                                        />
+
+                                    </LineChart>
+
+                                </ResponsiveContainer>
+
+                            </div>
+
                         </div>
 
                     </div>

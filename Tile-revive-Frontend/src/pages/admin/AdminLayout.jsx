@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
+
+import "./AdminTheme.css";
 
 import AdminSidebar from "./components/AdminSidebar";
 import { getPendingUsers } from "../../services/api";
 
 function AdminLayout() {
     const navigate = useNavigate();
-    const location = useLocation();
     const [pendingUsersCount, setPendingUsersCount] = useState(0);
 
     useEffect(() => {
@@ -47,8 +48,6 @@ function AdminLayout() {
         navigate("/admin/dashboard");
     };
 
-    const isDashboard = location.pathname === "/admin/dashboard";
-
     return (
         <div className="admin-app-shell">
             <AdminSidebar
@@ -57,18 +56,16 @@ function AdminLayout() {
             />
 
             <main className="admin-main">
-                {!isDashboard && (
-                    <div className="admin-page-navigation">
-                        <button
-                            type="button"
-                            className="admin-back-button"
-                            onClick={handleBack}
-                        >
-                            <span aria-hidden="true">←</span>
-                            <span>Back</span>
-                        </button>
-                    </div>
-                )}
+                <div className="admin-page-navigation">
+                    <button
+                        type="button"
+                        className="admin-back-button"
+                        onClick={handleBack}
+                    >
+                        <span aria-hidden="true">←</span>
+                        <span>Back</span>
+                    </button>
+                </div>
 
                 <div className="admin-page-content">
                     <Outlet />
@@ -79,5 +76,7 @@ function AdminLayout() {
 }
 
 export default AdminLayout;
+
+
 
 

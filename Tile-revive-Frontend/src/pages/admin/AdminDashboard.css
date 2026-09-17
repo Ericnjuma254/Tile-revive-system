@@ -1252,3 +1252,580 @@
 .orders-table tbody tr {
   transition: background var(--admin-transition);
 }
+
+/* ============================================================
+   TILE REVIVE — DASHBOARD PAGE REFINEMENT
+   CSS ONLY — DO NOT MODIFY COMPONENTS
+   ============================================================ */
+
+/* Main dashboard content */
+
+.admin-dashboard {
+  min-width: 0;
+}
+
+.admin-dashboard > * {
+  min-width: 0;
+}
+
+/* Dashboard header */
+
+.admin-dashboard-header {
+  width: 100%;
+  padding: 8px 0 28px;
+  align-items: flex-end;
+}
+
+.admin-dashboard-header > div {
+  min-width: 0;
+}
+
+.admin-dashboard-header h1 {
+  margin: 4px 0 6px;
+  line-height: 1.1;
+}
+
+.admin-dashboard-header p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.dashboard-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* Top statistics */
+
+.dashboard-stats {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.stat-card {
+  min-width: 0;
+  min-height: 112px;
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  overflow: hidden;
+}
+
+.stat-card-content {
+  min-width: 0;
+  flex: 1;
+}
+
+.stat-card-content h3,
+.stat-card-content p,
+.stat-card-content span {
+  min-width: 0;
+}
+
+/* Main sections */
+
+.dashboard-section {
+  width: 100%;
+  min-width: 0;
+  margin-bottom: 20px;
+  padding: 22px;
+  overflow: hidden;
+}
+
+.section-heading {
+  width: 100%;
+  min-width: 0;
+  margin-bottom: 18px;
+  gap: 18px;
+}
+
+.section-heading > div {
+  min-width: 0;
+}
+
+.section-heading h2 {
+  margin-bottom: 5px;
+}
+
+.section-heading p {
+  margin: 0;
+}
+
+/* Financial snapshot */
+
+.financial-dashboard-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.financial-dashboard-card {
+  min-width: 0;
+  min-height: 116px;
+  padding: 18px;
+  overflow: hidden;
+}
+
+.financial-dashboard-card > * {
+  min-width: 0;
+}
+
+.financial-dashboard-footer {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.financial-dashboard-footer > * {
+  min-width: 0;
+}
+
+/* Order overview */
+
+.order-overview {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.overview-item {
+  min-width: 0;
+  min-height: 94px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 5px;
+  overflow: hidden;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+.overview-item strong {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.overview-item span {
+  line-height: 1.3;
+}
+
+/* Inventory */
+
+.inventory-overview {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.inventory-card {
+  min-width: 0;
+  min-height: 96px;
+  padding: 17px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.inventory-card > div {
+  min-width: 0;
+}
+
+.inventory-card strong {
+  display: block;
+  margin-top: 5px;
+  font-size: 25px;
+  line-height: 1;
+}
+
+.inventory-label {
+  flex-shrink: 0;
+}
+
+/* Inventory alerts */
+
+.inventory-alert-list {
+  width: 100%;
+  margin-top: 14px;
+}
+
+.inventory-alert {
+  min-width: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+
+.inventory-alert > div {
+  min-width: 0;
+}
+
+.inventory-alert strong,
+.inventory-alert span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Analytics */
+
+.admin-analytics-section {
+  width: 100%;
+  min-width: 0;
+  margin-top: 22px;
+}
+
+.admin-section-heading {
+  width: 100%;
+  margin-bottom: 18px;
+}
+
+.admin-chart-grid {
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.admin-chart-grid-primary {
+  grid-template-columns: minmax(0, 1.65fr) minmax(320px, 0.9fr);
+}
+
+.admin-chart-grid-secondary {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-chart-card {
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 14px;
+}
+
+.admin-chart-card-wide {
+  grid-column: 1 / -1;
+}
+
+.admin-chart-header {
+  min-width: 0;
+  padding: 18px 19px 0;
+}
+
+.admin-chart-header > div {
+  min-width: 0;
+}
+
+.admin-chart-header h3 {
+  margin: 0 0 5px;
+}
+
+.admin-chart-header p {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.admin-chart-container {
+  width: 100%;
+  min-width: 0;
+  height: 330px;
+  padding: 6px 8px 10px;
+}
+
+.admin-chart-container-donut {
+  height: 350px;
+}
+
+.admin-chart-container .recharts-responsive-container {
+  max-width: 100%;
+}
+
+/* Keep chart SVGs inside their cards */
+
+.admin-chart-container svg {
+  max-width: 100%;
+}
+
+/* Recent orders */
+
+.orders-table-wrapper {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-radius: 10px;
+  scrollbar-width: thin;
+}
+
+.orders-table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+}
+
+.orders-table th,
+.orders-table td {
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.orders-table tbody tr {
+  transition: background 0.15s ease;
+}
+
+/* Empty states */
+
+.empty-dashboard,
+.admin-chart-empty {
+  width: 100%;
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  flex-direction: column;
+  gap: 7px;
+}
+
+/* User approvals */
+
+.pending-users-list {
+  width: 100%;
+  display: grid;
+  gap: 10px;
+}
+
+.pending-user {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.pending-user > div {
+  min-width: 0;
+}
+
+.pending-user span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Gallery */
+
+.gallery-management-content {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.gallery-management-text {
+  min-width: 0;
+  flex: 1;
+}
+
+.gallery-management-text h3,
+.gallery-management-text p {
+  margin-top: 0;
+}
+
+/* Quick management */
+
+.quick-management {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.quick-management button {
+  min-width: 0;
+  min-height: 52px;
+}
+
+/* ============================================================
+   TABLET
+   ============================================================ */
+
+@media (max-width: 1200px) {
+  .dashboard-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .financial-dashboard-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .order-overview {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .admin-chart-grid-primary {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-management {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ============================================================
+   SMALL TABLET
+   ============================================================ */
+
+@media (max-width: 900px) {
+  .admin-dashboard-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .dashboard-header-actions {
+    width: 100%;
+  }
+
+  .financial-dashboard-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .order-overview {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .inventory-overview {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-chart-grid-secondary {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-chart-card-wide {
+    grid-column: auto;
+  }
+}
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 650px) {
+  .admin-dashboard-header {
+    padding-bottom: 20px;
+  }
+
+  .dashboard-header-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-header-actions > * {
+    width: 100%;
+  }
+
+  .dashboard-stats {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .stat-card {
+    min-height: 92px;
+  }
+
+  .dashboard-section {
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+
+  .section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .section-action,
+  .gallery-add-button {
+    width: 100%;
+  }
+
+  .financial-dashboard-grid,
+  .financial-dashboard-footer {
+    grid-template-columns: 1fr;
+  }
+
+  .order-overview {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .inventory-overview {
+    grid-template-columns: 1fr;
+  }
+
+  .inventory-card {
+    min-height: 84px;
+  }
+
+  .admin-chart-grid {
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .admin-chart-container {
+    height: 300px;
+    padding-left: 2px;
+    padding-right: 2px;
+  }
+
+  .admin-chart-container-donut {
+    height: 320px;
+  }
+
+  .gallery-management-content {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .quick-management {
+    grid-template-columns: 1fr;
+  }
+
+  .pending-user {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .orders-table {
+    min-width: 720px;
+  }
+}
+
+/* ============================================================
+   VERY SMALL MOBILE
+   ============================================================ */
+
+@media (max-width: 400px) {
+  .order-overview {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-section {
+    padding: 14px;
+  }
+
+  .admin-chart-container {
+    height: 280px;
+  }
+}

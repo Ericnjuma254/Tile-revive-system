@@ -22,6 +22,7 @@ function Checkout() {
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState("");
     const [mpesaPayment, setMpesaPayment] = useState(null);
+    const [orderSuccess, setOrderSuccess] = useState(null);
 
     const handleChange = (event) => {
         const { name, value } = event.target;
@@ -38,6 +39,7 @@ function Checkout() {
         setError("");
         setSuccess("");
         setMpesaPayment(null);
+        setOrderSuccess(null);
 
         if (cartItems.length === 0) {
             setError("Your cart is empty.");
@@ -103,6 +105,16 @@ function Checkout() {
                     "Order was created but no order ID was returned."
                 );
             }
+
+            // ==================================================
+            // ORDER CREATED SUCCESS POPUP
+            // ==================================================
+
+            setOrderSuccess({
+                orderNumber: result.order.orderNumber,
+                amount: Number(result.order.totalAmount),
+                paymentMethod
+            });
 
             const paymentResult = await initiateMpesaPayment({
                 orderId: result.order.id,
@@ -575,6 +587,83 @@ function Checkout() {
                     </div>
 
 {/* ==========================================================
+    ORDER CREATED SUCCESS POPUP
+========================================================== */}
+
+{orderSuccess && (
+    <div className="order-success-overlay">
+
+        <div className="order-success-popup">
+
+            <button
+                type="button"
+                className="order-success-close"
+                onClick={() => setOrderSuccess(null)}
+                aria-label="Close"
+            >
+                ×
+            </button>
+
+            <div className="order-success-check">
+                ✓
+            </div>
+
+            <span className="order-success-eyebrow">
+                ORDER CREATED
+            </span>
+
+            <h2>
+                Order Created Successfully
+            </h2>
+
+            <p>
+                Your order has been received by Tile Revive Solutions.
+            </p>
+
+            <div className="order-success-details">
+
+                <div>
+                    <span>Order Number</span>
+                    <strong>
+                        {orderSuccess.orderNumber}
+                    </strong>
+                </div>
+
+                <div>
+                    <span>Total</span>
+                    <strong>
+                        KES{" "}
+                        {orderSuccess.amount.toLocaleString()}
+                    </strong>
+                </div>
+
+            </div>
+
+            {orderSuccess.paymentMethod === "MPESA" ? (
+                <p className="order-success-payment-message">
+                    Your M-Pesa payment request is being prepared.
+                    Check your phone for the payment prompt.
+                </p>
+            ) : (
+                <p className="order-success-payment-message">
+                    Your order is confirmed for Cash on Delivery.
+                </p>
+            )}
+
+            <button
+                type="button"
+                className="order-success-continue"
+                onClick={() => setOrderSuccess(null)}
+            >
+                Continue
+            </button>
+
+        </div>
+
+    </div>
+)}
+
+{/* ==========================================================
     M-PESA PAYMENT INSTRUCTIONS
 ========================================================== */}
 
@@ -1036,3 +1125,4 @@ function Checkout() {
 }
 
 export default Checkout;
+

@@ -2856,14 +2856,13 @@ router.patch(
 // PATCH /api/admin/orders/:id/paid-delivered
 // ADMIN ONLY
 //
-// One action:
+// ADMIN CONFIRMATION:
 // - Payment -> SUCCESS
 // - Order -> DELIVERED
-// - Creates payment/order audit history
-// - Sends ONE payment confirmation + receipt
-// - Prevents duplicate receipt emails
+// - No M-Pesa app verification
+// - No M-Pesa callback dependency
+// - Sends one dedicated Paid & Delivered email
 // ======================================================
-
 router.patch(
     "/orders/:id/paid-delivered",
     authenticateToken,
@@ -2909,8 +2908,7 @@ router.patch(
             if (!payment) {
                 return res.status(400).json({
                     success: false,
-                    message:
-                        "This order does not have a payment record.",
+                    message: "This order does not have a payment record.",
                 });
             }
 
@@ -2926,11 +2924,31 @@ router.patch(
             const orderNeedsUpdate =
                 previousOrderStatus !== "DELIVERED";
 
-            // Fully completed orders are idempotent.
-            // Never send another receipt.
+            const customerEmail =
+                order.customer?.email?.trim();
+
+            // Check ONLY for the dedicated Paid & Delivered email.
+            // A previous M-Pesa PAYMENT_CONFIRMATION must NOT block this email.
+            const existingPaidDeliveredEmail =
+                customerEmail
+                    ? await prisma.communicationlog.findFirst({
+                          where: {
+                              orderId,
+                              type: "PAID_AND_DELIVERED_CONFIRMATION",
+                              status: "SENT",
+                          },
+                          orderBy: {
+                              createdAt: "desc",
+                          },
+                      })
+                    : null;
+
+            // If everything is already completed and the dedicated email
+            // was already sent, do nothing.
             if (
                 !paymentNeedsUpdate &&
-                !orderNeedsUpdate
+                !orderNeedsUpdate &&
+                existingPaidDeliveredEmail
             ) {
                 return res.json({
                     success: true,
@@ -2942,12 +2960,13 @@ router.patch(
                 });
             }
 
-            const amountPaid = Number(
-                order.totalAmount || 0
-            );
+            const amountPaid = Number(order.totalAmount || 0);
 
-            const updatedOrder =
-                await prisma.$transaction(async (tx) => {
+            let updatedOrder = order;
+
+            // Only update the database if the order is not already complete.
+            if (paymentNeedsUpdate || orderNeedsUpdate) {
+                updatedOrder = await prisma.$transaction(async (tx) => {
                     const updated = await tx.order.update({
                         where: {
                             id: orderId,
@@ -2981,19 +3000,16 @@ router.patch(
                     if (paymentNeedsUpdate) {
                         await tx.auditlog.create({
                             data: {
-                                userId:
-                                    req.user?.id || null,
+                                userId: req.user?.id || null,
                                 action:
                                     "ORDER_PAYMENT_STATUS_CHANGED",
                                 entity: "order",
                                 entityId: orderId,
                                 method: req.method,
                                 route: req.originalUrl,
-                                ipAddress:
-                                    req.ip || null,
+                                ipAddress: req.ip || null,
                                 userAgent:
-                                    req.get("user-agent") ||
-                                    null,
+                                    req.get("user-agent") || null,
                                 metadata: JSON.stringify({
                                     orderNumber:
                                         order.orderNumber,
@@ -3002,8 +3018,7 @@ router.patch(
                                     paymentId:
                                         payment.id,
                                     previousPaymentStatus,
-                                    newPaymentStatus:
-                                        "SUCCESS",
+                                    newPaymentStatus: "SUCCESS",
                                     amountPaid,
                                     changedAt:
                                         new Date().toISOString(),
@@ -3016,27 +3031,23 @@ router.patch(
                         await tx.orderstatushistory.create({
                             data: {
                                 orderId,
-                                fromStatus:
-                                    previousOrderStatus,
+                                fromStatus: previousOrderStatus,
                                 toStatus: "DELIVERED",
                             },
                         });
 
                         await tx.auditlog.create({
                             data: {
-                                userId:
-                                    req.user?.id || null,
+                                userId: req.user?.id || null,
                                 action:
                                     "ORDER_STATUS_CHANGED",
                                 entity: "order",
                                 entityId: orderId,
                                 method: req.method,
                                 route: req.originalUrl,
-                                ipAddress:
-                                    req.ip || null,
+                                ipAddress: req.ip || null,
                                 userAgent:
-                                    req.get("user-agent") ||
-                                    null,
+                                    req.get("user-agent") || null,
                                 metadata: JSON.stringify({
                                     orderNumber:
                                         order.orderNumber,
@@ -3054,165 +3065,49 @@ router.patch(
 
                     return updated;
                 });
+            }
 
             let emailSent = false;
             let emailSkipped = false;
 
-            const customerEmail =
-                updatedOrder.customer?.email?.trim();
-
             if (customerEmail) {
-                const existingReceipt =
-                    await prisma.communicationlog.findFirst({
-                        where: {
-                            orderId,
-                            type: "PAYMENT_CONFIRMATION",
-                            status: "SENT",
-                        },
-                        orderBy: {
-                            createdAt: "desc",
-                        },
-                    });
-
-                if (!existingReceipt) {
+                if (!existingPaidDeliveredEmail) {
                     try {
-                        const receiptData = {
-                            customerName:
-                                updatedOrder.customer
-                                    ?.fullName ||
-                                "Customer",
-
-                            phoneNumber:
-                                payment.phoneNumber ||
-                                updatedOrder.customer
-                                    ?.phoneNumber ||
-                                "N/A",
-
-                            email: customerEmail,
-
-                            orderNumber:
-                                updatedOrder.orderNumber,
-
-                            receiptNumber:
-                                updatedOrder.orderNumber,
-
-                            orderItems:
-                                updatedOrder.orderitem.map(
-                                    (item) => ({
-                                        productName:
-                                            item.product
-                                                ?.name ||
-                                            "Product",
-
-                                        quantity:
-                                            item.quantity,
-
-                                        unitPrice:
-                                            item.unitPrice,
-
-                                        totalPrice:
-                                            item.totalPrice,
-                                    })
-                                ),
-
-                            amountPaid,
-
-                            paymentMethod:
-                                payment.paymentMethod ||
-                                "MPESA",
-
-                            status: "SUCCESS",
-
-                            mpesaReceiptNumber:
-                                payment.mpesaReceiptNumber ||
-                                "N/A",
-
-                            checkoutRequestId:
-                                payment.checkoutRequestId ||
-                                "N/A",
-
-                            merchantRequestId:
-                                payment.merchantRequestId ||
-                                "N/A",
-
-                            location:
-                                updatedOrder.resolvedAddress ||
-                                updatedOrder.location ||
-                                updatedOrder.county ||
-                                "N/A",
-                        };
-
-                        const receiptPath =
-                            await generatePdfReceipt(
-                                receiptData
-                            );
-
-                        const firstItem =
-                            updatedOrder.orderitem?.[0];
-
                         const emailInfo =
-                            await sendPaymentConfirmation({
+                            await sendPaidAndDeliveredEmail({
                                 customerEmail,
-
                                 customerName:
                                     updatedOrder.customer
-                                        ?.fullName ||
-                                    "Customer",
-
+                                        ?.fullName || "Customer",
                                 orderNumber:
                                     updatedOrder.orderNumber,
-
                                 amount: amountPaid,
-
-                                mpesaReceiptNumber:
-                                    payment.mpesaReceiptNumber ||
-                                    "N/A",
-
-                                phoneNumber:
-                                    payment.phoneNumber ||
-                                    updatedOrder.customer
-                                        ?.phoneNumber ||
-                                    "N/A",
-
-                                productName:
-                                    firstItem?.product?.name ||
-                                    "Order",
-
-                                quantity:
-                                    firstItem?.quantity || 1,
-
-                                receiptPath,
+                                paymentMethod:
+                                    payment.paymentMethod ||
+                                    "MANUAL CONFIRMATION",
+                                items:
+                                    updatedOrder.orderitem || [],
                             });
 
                         await logCommunication({
                             customerId:
                                 updatedOrder.customerId,
-
                             orderId,
-
                             userId:
                                 req.user?.id || null,
-
                             type:
-                                "PAYMENT_CONFIRMATION",
-
+                                "PAID_AND_DELIVERED_CONFIRMATION",
                             channel: "EMAIL",
-
-                            recipient:
-                                customerEmail,
-
+                            recipient: customerEmail,
                             subject:
-                                `Payment confirmed - ${updatedOrder.orderNumber}`,
-
+                                "Payment confirmed & order delivered - " +
+                                updatedOrder.orderNumber,
                             status:
                                 emailInfo?.messageId
                                     ? "SENT"
                                     : "FAILED",
-
                             messageId:
-                                emailInfo?.messageId ||
-                                null,
-
+                                emailInfo?.messageId || null,
                             errorMessage:
                                 emailInfo?.messageId
                                     ? null
@@ -3220,60 +3115,42 @@ router.patch(
                         });
 
                         emailSent =
-                            Boolean(
-                                emailInfo?.messageId
-                            );
+                            Boolean(emailInfo?.messageId);
                     } catch (emailError) {
                         console.error(
-                            "PAID & DELIVERED RECEIPT EMAIL ERROR:",
+                            "PAID & DELIVERED EMAIL ERROR:",
                             emailError
                         );
 
                         await logCommunication({
                             customerId:
                                 updatedOrder.customerId,
-
                             orderId,
-
                             userId:
                                 req.user?.id || null,
-
                             type:
-                                "PAYMENT_CONFIRMATION",
-
+                                "PAID_AND_DELIVERED_CONFIRMATION",
                             channel: "EMAIL",
-
-                            recipient:
-                                customerEmail,
-
+                            recipient: customerEmail,
                             subject:
-                                `Payment confirmed - ${updatedOrder.orderNumber}`,
-
+                                "Payment confirmed & order delivered - " +
+                                updatedOrder.orderNumber,
                             status: "FAILED",
-
                             errorMessage:
                                 emailError.message,
                         });
                     }
                 } else {
                     emailSkipped = true;
-
-                    console.log(
-                        `Receipt email already sent for order ${orderId}.`
-                    );
                 }
             }
 
             return res.json({
                 success: true,
-
                 message:
                     "Order marked Paid & Delivered successfully.",
-
                 order: updatedOrder,
-
                 emailSent,
-
                 emailSkipped,
             });
         } catch (error) {
@@ -3284,16 +3161,16 @@ router.patch(
 
             return res.status(500).json({
                 success: false,
-
                 message:
                     "Failed to mark order Paid & Delivered.",
-
-                error:
-                    error.message,
+                error: error.message,
             });
         }
     }
 );
+
+// ======================================================
+
 
 // ======================================================
 // EXPORT ROUTER
@@ -3994,6 +3871,7 @@ router.delete(
 
 
 module.exports = router;
+
 
 
 

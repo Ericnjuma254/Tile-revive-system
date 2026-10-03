@@ -7980,3 +7980,169 @@ a {
     font-size: 13px;
     line-height: 1.5;
 }
+
+/* ==========================================================
+   ORDER CREATED SUCCESS POPUP
+========================================================== */
+
+.order-success-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(8px);
+}
+
+.order-success-popup {
+    position: relative;
+    width: min(460px, 100%);
+    padding: 38px 32px 32px;
+    border: 1px solid rgba(212, 160, 23, 0.35);
+    border-radius: 22px;
+    background: #0b0b0b;
+    color: #ffffff;
+    text-align: center;
+    box-shadow:
+        0 25px 80px rgba(0, 0, 0, 0.55),
+        0 0 40px rgba(212, 160, 23, 0.12);
+    animation: orderSuccessPopupIn 0.25s ease-out;
+}
+
+.order-success-close {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.order-success-close:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.order-success-check {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #d4a017;
+    color: #050505;
+    font-size: 38px;
+    font-weight: 800;
+}
+
+.order-success-eyebrow {
+    display: block;
+    margin-bottom: 8px;
+    color: #d4a017;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+}
+
+.order-success-popup h2 {
+    margin: 0 0 10px;
+    font-size: 28px;
+    font-weight: 800;
+}
+
+.order-success-popup > p {
+    margin: 0 auto 24px;
+    max-width: 360px;
+    color: #bdbdbd;
+    line-height: 1.6;
+}
+
+.order-success-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.order-success-details > div {
+    padding: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.order-success-details span {
+    display: block;
+    margin-bottom: 6px;
+    color: #888888;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.order-success-details strong {
+    color: #ffffff;
+    font-size: 15px;
+}
+
+.order-success-payment-message {
+    color: #d0d0d0 !important;
+    font-size: 14px;
+}
+
+.order-success-continue {
+    width: 100%;
+    min-height: 48px;
+    border: 0;
+    border-radius: 12px;
+    background: #d4a017;
+    color: #050505;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.order-success-continue:hover {
+    background: #f1c75b;
+}
+
+@keyframes orderSuccessPopupIn {
+    from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (max-width: 520px) {
+    .order-success-overlay {
+        padding: 16px;
+    }
+
+    .order-success-popup {
+        padding: 34px 20px 24px;
+    }
+
+    .order-success-popup h2 {
+        font-size: 23px;
+    }
+
+    .order-success-details {
+        grid-template-columns: 1fr;
+    }
+}
+

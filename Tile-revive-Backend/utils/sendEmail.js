@@ -2000,10 +2000,325 @@ ${title}
 }
 
 // ======================================================
+
+// ======================================================
+// PAID & DELIVERED CONFIRMATION
+// CUSTOMER EMAIL
+//
+// This email is triggered by the admin's manual
+// "Paid & Deliver" action.
+//
+// IMPORTANT:
+// - Does NOT check M-Pesa
+// - Does NOT require an M-Pesa callback
+// - Does NOT claim an M-Pesa receipt number
+// ======================================================
+
+async function sendPaidAndDeliveredEmail({
+    customerEmail,
+    customerName,
+    orderNumber,
+    amount,
+    paymentMethod,
+    items
+}) {
+    if (!customerEmail) {
+        console.log(
+            "⚠️ No customer email. Skipping Paid & Delivered confirmation."
+        );
+
+        return null;
+    }
+
+    const productRows =
+        Array.isArray(items)
+            ? items.map(item => {
+                const productName =
+                    item.product?.name ||
+                    item.productName ||
+                    "Product";
+
+                const quantity =
+                    Number(item.quantity || 0);
+
+                const unitPrice =
+                    Number(item.unitPrice || 0);
+
+                const itemTotal =
+                    quantity * unitPrice;
+
+                return `
+                    <tr>
+                        <td style="
+                            padding:10px;
+                            border-bottom:1px solid #ddd;
+                        ">
+                            ${productName}
+                        </td>
+
+                        <td style="
+                            padding:10px;
+                            text-align:center;
+                            border-bottom:1px solid #ddd;
+                        ">
+                            ${quantity}
+                        </td>
+
+                        <td style="
+                            padding:10px;
+                            text-align:right;
+                            border-bottom:1px solid #ddd;
+                        ">
+                            KES ${unitPrice.toLocaleString()}
+                        </td>
+
+                        <td style="
+                            padding:10px;
+                            text-align:right;
+                            border-bottom:1px solid #ddd;
+                        ">
+                            KES ${itemTotal.toLocaleString()}
+                        </td>
+                    </tr>
+                `;
+            }).join("")
+            : "";
+
+    const mailOptions = {
+        from:
+            process.env.EMAIL_FROM ||
+            `"Tile Revive Solutions" <${process.env.EMAIL_USER}>`,
+
+        to: customerEmail,
+
+        subject:
+            `Payment Confirmed & Order Delivered - ${orderNumber}`,
+
+        html: `
+            <div style="
+                font-family: Arial, Helvetica, sans-serif;
+                background:#f5f5f5;
+                padding:30px 15px;
+            ">
+
+                <div style="
+                    max-width:650px;
+                    margin:auto;
+                    background:#ffffff;
+                    border-radius:12px;
+                    overflow:hidden;
+                    box-shadow:0 4px 20px rgba(0,0,0,0.08);
+                ">
+
+                    <div style="
+                        background:#111111;
+                        color:#ffffff;
+                        padding:28px;
+                        text-align:center;
+                    ">
+                        <h1 style="
+                            margin:0;
+                            color:#d4a017;
+                            font-size:26px;
+                        ">
+                            Tile Revive Solutions
+                        </h1>
+
+                        <p style="
+                            margin:8px 0 0;
+                            color:#ffffff;
+                            font-size:15px;
+                        ">
+                            Payment Confirmed & Order Delivered
+                        </p>
+                    </div>
+
+                    <div style="padding:30px;">
+
+                        <h2 style="
+                            margin-top:0;
+                            color:#222222;
+                        ">
+                            Hello ${customerName || "Customer"},
+                        </h2>
+
+                        <p style="
+                            color:#444444;
+                            line-height:1.6;
+                        ">
+                            Your order has been successfully marked as
+                            <strong>PAID & DELIVERED</strong> by Tile Revive
+                            Solutions.
+                        </p>
+
+                        <div style="
+                            background:#f8f8f8;
+                            border-left:4px solid #d4a017;
+                            padding:16px;
+                            margin:20px 0;
+                        ">
+                            <p style="margin:5px 0;">
+                                <strong>Order Number:</strong>
+                                ${orderNumber}
+                            </p>
+
+                            <p style="margin:5px 0;">
+                                <strong>Amount Confirmed:</strong>
+                                KES ${Number(amount || 0).toLocaleString()}
+                            </p>
+
+                            <p style="margin:5px 0;">
+                                <strong>Payment Method:</strong>
+                                ${paymentMethod || "Manual Confirmation"}
+                            </p>
+
+                            <p style="margin:5px 0;">
+                                <strong>Order Status:</strong>
+                                Delivered
+                            </p>
+                        </div>
+
+                        <h3 style="
+                            color:#222222;
+                            margin-top:28px;
+                        ">
+                            Order Items
+                        </h3>
+
+                        <table style="
+                            width:100%;
+                            border-collapse:collapse;
+                            font-size:14px;
+                        ">
+                            <thead>
+                                <tr style="
+                                    background:#111111;
+                                    color:#ffffff;
+                                ">
+                                    <th style="
+                                        padding:10px;
+                                        text-align:left;
+                                    ">
+                                        Product
+                                    </th>
+
+                                    <th style="
+                                        padding:10px;
+                                        text-align:center;
+                                    ">
+                                        Qty
+                                    </th>
+
+                                    <th style="
+                                        padding:10px;
+                                        text-align:right;
+                                    ">
+                                        Unit Price
+                                    </th>
+
+                                    <th style="
+                                        padding:10px;
+                                        text-align:right;
+                                    ">
+                                        Total
+                                    </th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                ${productRows}
+                            </tbody>
+                        </table>
+
+                        <div style="
+                            margin-top:25px;
+                            padding:18px;
+                            background:#111111;
+                            color:#ffffff;
+                            border-radius:8px;
+                            text-align:right;
+                        ">
+                            <strong style="font-size:18px;">
+                                Total: KES ${Number(amount || 0).toLocaleString()}
+                            </strong>
+                        </div>
+
+                        <p style="
+                            color:#555555;
+                            line-height:1.6;
+                            margin-top:28px;
+                        ">
+                            Thank you for choosing Tile Revive Solutions.
+                            We appreciate your business.
+                        </p>
+
+                        <p style="
+                            color:#777777;
+                            font-size:13px;
+                            margin-top:25px;
+                        ">
+                            This email confirms that your order was manually
+                            recorded by Tile Revive Solutions as paid and
+                            delivered.
+                        </p>
+
+                    </div>
+
+                    <div style="
+                        background:#111111;
+                        color:#aaaaaa;
+                        text-align:center;
+                        padding:18px;
+                        font-size:12px;
+                    ">
+                        Tile Revive Solutions<br>
+                        Integrity Over Shortcuts
+                    </div>
+
+                </div>
+            </div>
+        `
+    };
+
+    const info =
+        await transporter.sendMail(mailOptions);
+
+    console.log(
+        "======================================"
+    );
+
+    console.log(
+        "✅ PAID & DELIVERED EMAIL SENT"
+    );
+
+    console.log(
+        "Customer:",
+        customerEmail
+    );
+
+    console.log(
+        "Order:",
+        orderNumber
+    );
+
+    console.log(
+        "Message ID:",
+        info.messageId
+    );
+
+    console.log(
+        "======================================"
+    );
+
+    return info;
+}
+
 // EXPORTS
 // ======================================================
 
 module.exports = {
+
+    sendPaidAndDeliveredEmail,
 
     sendPaymentConfirmation,
 
@@ -2018,3 +2333,4 @@ module.exports = {
     sendPaymentStatusUpdate
 
 };
+

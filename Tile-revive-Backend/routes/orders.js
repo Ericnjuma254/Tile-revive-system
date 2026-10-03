@@ -247,308 +247,220 @@ router.post("/", async (req, res) => {
         });
 
         // ======================================================
-        // SEND ORDER PLACED EMAIL
+        // RESPOND IMMEDIATELY
+        // ======================================================
+        //
+        // Email delivery runs in the background so SMTP delays
+        // cannot make checkout wait.
         // ======================================================
 
-        try {
-            console.log(
-                "======================================"
-            );
-
-            console.log(
-                "📧 SENDING ORDER PLACED EMAIL"
-            );
-
-            console.log(
-                "Internal Email:",
-                process.env.EMAIL_USER
-            );
-
-            console.log(
-                "Customer Email:",
-                order.customer?.email || "N/A"
-            );
-
-            console.log(
-                "Order:",
-                order.orderNumber
-            );
-
-            console.log(
-                "County:",
-                order.county || "N/A"
-            );
-
-            console.log(
-                "Location:",
-                order.location || "N/A"
-            );
-
-            console.log(
-                "======================================"
-            );
-
-            await sendNewOrderNotification({
-
-                orderNumber:
-                    order.orderNumber,
-
-                customerName:
-                    order.customer?.fullName,
-
-                customerPhone:
-                    order.customer?.phoneNumber,
-
-                customerEmail:
-                    order.customer?.email,
-
-                county:
-                    order.county || "N/A",
-
-                location:
-                    order.location || "N/A",
-
-                items:
-                    order.orderitem,
-
-                totalAmount:
-                    Number(order.totalAmount || 0),
-
-                paymentMethod:
-                    payment.paymentMethod,
-
-                paymentStatus:
-                    payment.status,
-
-                orderStatus:
-                    order.orderStatus
-            });
-
-            // ======================================================
-// SEND CUSTOMER ORDER CONFIRMATION
-// ======================================================
-
-try {
-
-    console.log(
-        "======================================"
-    );
-
-    console.log(
-        "📧 SENDING CUSTOMER ORDER CONFIRMATION"
-    );
-
-    console.log(
-        "Customer Email:",
-        order.customer?.email || "N/A"
-    );
-
-    console.log(
-        "Order:",
-        order.orderNumber
-    );
-
-    console.log(
-        "======================================"
-    );
-
-    const emailInfo =
-        await sendOrderConfirmation({
-
-            customerEmail:
-                order.customer?.email,
-
-            customerName:
-                order.customer?.fullName,
-
-            orderNumber:
-                order.orderNumber,
-
-            customerPhone:
-                order.customer?.phoneNumber,
-
-            county:
-                order.county || "N/A",
-
-            location:
-                order.location || "N/A",
-
-            items:
-                order.orderitem,
-
-            totalAmount:
-                Number(order.totalAmount || 0),
-
-            paymentMethod:
-                payment.paymentMethod,
-
-            paymentStatus:
-                payment.status,
-
-            orderStatus:
-                order.orderStatus
-        });
-
-    // ==================================================
-    // CUSTOMER 360 COMMUNICATION LOG
-    // WEBSITE ORDER CONFIRMATION
-    // ==================================================
-
-    if (
-        emailInfo &&
-        order.customer?.id &&
-        order.customer?.email
-    ) {
-        await logCommunication({
-            customerId:
-                order.customer.id,
-
-            orderId:
-                order.id,
-
-            userId:
-                null,
-
-            type:
-                "ORDER_CONFIRMATION",
-
-            recipient:
-                order.customer.email,
-
-            subject:
-                "Your Tile Revive order confirmation",
-
-            status:
-                "SENT",
-
-            messageId:
-                emailInfo.messageId || null,
-        });
-    }
-
-    console.log(
-        "✅ CUSTOMER ORDER CONFIRMATION SENT"
-    );
-
-} catch (customerEmailError) {
-
-    console.error(
-        "❌ CUSTOMER ORDER CONFIRMATION FAILED"
-    );
-
-    console.error(
-        customerEmailError.message
-    );
-
-    // ==================================================
-    // CUSTOMER 360 COMMUNICATION LOG
-    // FAILED WEBSITE ORDER CONFIRMATION
-    // ==================================================
-
-    if (
-        order?.customer?.id &&
-        order?.customer?.email
-    ) {
-        await logCommunication({
-            customerId:
-                order.customer.id,
-
-            orderId:
-                order.id,
-
-            userId:
-                null,
-
-            type:
-                "ORDER_CONFIRMATION",
-
-            recipient:
-                order.customer.email,
-
-            subject:
-                "Your Tile Revive order confirmation",
-
-            status:
-                "FAILED",
-
-            errorMessage:
-                customerEmailError.message,
-        });
-    }
-
-    // Email failure must NOT cancel the order.
-}
-
-            console.log(
-                "✅ ORDER PLACED EMAIL SENT"
-            );
-
-        } catch (emailError) {
-
-            console.error(
-                "❌ ORDER PLACED EMAIL FAILED"
-            );
-
-            console.error(
-                emailError.message
-            );
-
-            // Email failure must NOT cancel the order.
-        }
-
-        // ------------------------------------------------
-        // Response
-        // ------------------------------------------------
-
-        return res.status(201).json({
-
+        const orderResponse = {
             success: true,
-
             message: "Order created successfully.",
-
             order: {
+                id: order.id,
+                orderNumber: order.orderNumber,
+                customer: order.customer,
+                county: order.county,
+                location: order.location,
+                totalAmount: order.totalAmount,
+                paymentMethod: payment.paymentMethod,
+                paymentStatus: payment.status,
+                orderStatus: order.orderStatus,
+                items: order.orderitem
+            }
+        };
 
-                id:
-                    order.id,
+        setImmediate(async () => {
 
-                orderNumber:
-                    order.orderNumber,
+            // ==================================================
+            // INTERNAL ORDER NOTIFICATION
+            // ==================================================
 
-                customer:
-                    order.customer,
+            try {
 
-                county:
-                    order.county,
+                await sendNewOrderNotification({
+                    orderNumber:
+                        order.orderNumber,
 
-                location:
-                    order.location,
+                    customerName:
+                        order.customer?.fullName,
 
-                totalAmount:
-                    order.totalAmount,
+                    customerPhone:
+                        order.customer?.phoneNumber,
 
-                paymentStatus:
-                    order.paymentStatus,
+                    customerEmail:
+                        order.customer?.email,
 
-                orderStatus:
-                    order.orderStatus,
+                    county:
+                        order.county || "N/A",
 
-                items:
-                    order.orderitem
-            },
+                    location:
+                        order.location || "N/A",
 
-            payment: {
+                    items:
+                        order.orderitem,
 
-                id:
-                    payment.id,
+                    totalAmount:
+                        Number(order.totalAmount || 0),
 
-                status:
-                    payment.status,
+                    paymentMethod:
+                        payment.paymentMethod,
 
-                amountPaid:
-                    payment.amountPaid
+                    paymentStatus:
+                        payment.status,
+
+                    orderStatus:
+                        order.orderStatus
+                });
+
+                console.log(
+                    "✅ ORDER PLACED EMAIL SENT"
+                );
+
+            } catch (emailError) {
+
+                console.error(
+                    "❌ ORDER PLACED EMAIL FAILED"
+                );
+
+                console.error(
+                    emailError.message
+                );
+            }
+
+            // ==================================================
+            // CUSTOMER ORDER CONFIRMATION
+            // ==================================================
+
+            try {
+
+                const emailInfo =
+                    await sendOrderConfirmation({
+
+                        customerEmail:
+                            order.customer?.email,
+
+                        customerName:
+                            order.customer?.fullName,
+
+                        orderNumber:
+                            order.orderNumber,
+
+                        customerPhone:
+                            order.customer?.phoneNumber,
+
+                        county:
+                            order.county || "N/A",
+
+                        location:
+                            order.location || "N/A",
+
+                        items:
+                            order.orderitem,
+
+                        totalAmount:
+                            Number(order.totalAmount || 0),
+
+                        paymentMethod:
+                            payment.paymentMethod,
+
+                        paymentStatus:
+                            payment.status,
+
+                        orderStatus:
+                            order.orderStatus
+                    });
+
+                if (
+                    emailInfo &&
+                    order.customer?.id &&
+                    order.customer?.email
+                ) {
+                    await logCommunication({
+
+                        customerId:
+                            order.customer.id,
+
+                        orderId:
+                            order.id,
+
+                        userId:
+                            null,
+
+                        type:
+                            "ORDER_CONFIRMATION",
+
+                        recipient:
+                            order.customer.email,
+
+                        subject:
+                            "Your Tile Revive order confirmation",
+
+                        status:
+                            "SENT",
+
+                        messageId:
+                            emailInfo.messageId || null
+                    });
+                }
+
+                console.log(
+                    "✅ CUSTOMER ORDER CONFIRMATION SENT"
+                );
+
+            } catch (customerEmailError) {
+
+                console.error(
+                    "❌ CUSTOMER ORDER CONFIRMATION FAILED"
+                );
+
+                console.error(
+                    customerEmailError.message
+                );
+
+                if (
+                    order?.customer?.id &&
+                    order?.customer?.email
+                ) {
+                    try {
+                        await logCommunication({
+
+                            customerId:
+                                order.customer.id,
+
+                            orderId:
+                                order.id,
+
+                            userId:
+                                null,
+
+                            type:
+                                "ORDER_CONFIRMATION",
+
+                            recipient:
+                                order.customer.email,
+
+                            subject:
+                                "Your Tile Revive order confirmation",
+
+                            status:
+                                "FAILED",
+
+                            errorMessage:
+                                customerEmailError.message
+                        });
+                    } catch (logError) {
+                        console.error(
+                            "❌ CUSTOMER ORDER COMMUNICATION LOG FAILED:",
+                            logError.message
+                        );
+                    }
+                }
             }
         });
 
+        return res.status(201).json(orderResponse);
     } catch (error) {
 
         console.error(
@@ -896,4 +808,6 @@ router.get("/status/:status", authenticateToken, requireAdmin, async (req, res) 
 
 
 module.exports = router;
+
+
 
